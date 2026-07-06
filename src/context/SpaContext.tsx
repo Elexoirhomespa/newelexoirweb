@@ -24,6 +24,8 @@ export type Treatment = {
     updated_at?: string;
 };
 
+export type Therapist = { id: string; name: string; bio: string; image_url: string; rating: number; is_active: boolean; brand: string; };
+
 export type SelectedCampaignTreatment = {
     treatmentId: string;
     durations: string[]; // which durations are discounted
@@ -87,6 +89,10 @@ type SpaContextType = {
     savedProducts: string[];
     toggleSavedProduct: (productId: string) => void;
     isLoading: boolean;
+    siteBrandFilter: string;
+    setSiteBrandFilter: (brand: string) => void;
+    therapists: Therapist[];
+    setTherapists: React.Dispatch<React.SetStateAction<Therapist[]>>;
 };
 
 
@@ -100,16 +106,16 @@ export function SpaProvider({ children }: { children: ReactNode }) {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [siteBrandFilter, setSiteBrandFilter] = useState<string>(process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
+    const [therapists, setTherapists] = useState<Therapist[]>([]);
 
     useEffect(() => {
         async function loadData() {
-            // Optimistically load from localStorage
+            let hasCache = false;
             try {
                 const cachedTreatments = localStorage.getItem('spa_treatments');
                 const cachedProducts = localStorage.getItem('spa_products');
                 const cachedCampaign = localStorage.getItem('spa_campaign');
-
-                let hasCache = false;
 
                 if (cachedTreatments) {
                     setTreatments(JSON.parse(cachedTreatments));
@@ -132,10 +138,12 @@ export function SpaProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                const [treatmentsRes, productsRes, campaignsRes] = await Promise.all([
-                    supabase.from('treatments').select('*').eq('is_published', true).order('created_at', { ascending: false }),
-                    supabase.from('products').select('*').eq('is_published', true).order('created_at', { ascending: false }),
-                    supabase.from('campaigns').select('*').eq('is_published', true).order('created_at', { ascending: false })
+                const siteBrand = siteBrandFilter;
+                const [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
+                    supabase.from('treatments').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('products').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('campaigns').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('therapists').select('*').eq('is_active', true).eq('brand', siteBrand).order('created_at', { ascending: false })
                 ]);
 
                 let fetchedTreatments = treatmentsRes.data;
@@ -181,8 +189,16 @@ export function SpaProvider({ children }: { children: ReactNode }) {
                     try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch(e) { console.warn("Cache full"); }
                 }
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
-                    setCampaign(campaignsRes.data[0]);
-                    try { localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0])); } catch(e) { console.warn("Cache full"); }
+                    setCampaign(campaignsRes.data[0] as Campaign);
+                    localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0]));
+                }
+                
+                if (therapistsRes.data) {
+                    setTherapists(therapistsRes.data);
+                }
+
+                if (hasCache) {
+                    setIsLoading(false);
                 }
             } catch (error) {
                 console.error("Error fetching data from Supabase:", error);
@@ -221,8 +237,9 @@ export function SpaProvider({ children }: { children: ReactNode }) {
                 setIsLoading(false);
             }
         }
+
         loadData();
-    }, []);
+    }, [siteBrandFilter]);
 
     const toggleSavedProduct = (productId: string) => {
         setSavedProducts(prev => 
@@ -257,7 +274,10 @@ export function SpaProvider({ children }: { children: ReactNode }) {
             treatments, setTreatments, campaign, setCampaign, products, setProducts,
             cartItems, addToCart, updateCartQuantity, removeFromCart, clearCart,
             savedProducts, toggleSavedProduct,
-            isLoading
+            isLoading,
+            siteBrandFilter,
+            setSiteBrandFilter,
+            therapists, setTherapists
         }}>
             {children}
         </SpaContext.Provider>

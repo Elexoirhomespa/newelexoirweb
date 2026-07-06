@@ -6,9 +6,11 @@ import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle
 import Link from 'next/link';
 import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
+import TherapistManager from './TherapistManager';
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees'>('treatment');
+    const [selectedAdminBrand, setSelectedAdminBrand] = useState<'elexoir' | 'therapick' | null>(null);
+    const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees' | 'therapists'>('treatment');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     
@@ -16,20 +18,21 @@ export default function AdminDashboard() {
     const pinImageInputRef = useRef<HTMLInputElement>(null);
     const [pendingPinId, setPendingPinId] = useState<string | null>(null);
 
-    const { treatments, setTreatments, campaign, setCampaign, products, setProducts } = useSpa();
+    const { treatments, setTreatments, campaign, setCampaign, products, setProducts, siteBrandFilter, setSiteBrandFilter, therapists, setTherapists } = useSpa();
 
     // Local state for Therapist Fees (private to admin dashboard)
     const [therapistFees, setTherapistFees] = useState<TherapistFee[]>([]);
 
     useEffect(() => {
         async function fetchFees() {
-            const { data } = await supabase.from('therapist_fees').select('*').order('created_at', { ascending: false });
+            if (!selectedAdminBrand) return;
+            const { data } = await supabase.from('therapist_fees').select('*').eq('brand', selectedAdminBrand).order('created_at', { ascending: false });
             if (data) {
                 setTherapistFees(data);
             }
         }
         fetchFees();
-    }, []);
+    }, [selectedAdminBrand]);
 
     // Campaign specific fields
     const [campaignTitle, setCampaignTitle] = useState(campaign?.title || '');
@@ -128,6 +131,7 @@ export default function AdminDashboard() {
         try {
             if (activeTab === 'campaign') {
                 const campaignData = {
+                brand: selectedAdminBrand,
                     title: campaignTitle,
                     label: campaignLabel,
                     description: campaignDesc,
@@ -151,6 +155,7 @@ export default function AdminDashboard() {
                 setEditingCampaignId(null);
             } else if (activeTab === 'treatment') {
                 const treatmentData = {
+                brand: selectedAdminBrand,
                     title: treatmentTitle,
                     category: treatmentCategory,
                     desc: treatmentDesc,
@@ -176,6 +181,7 @@ export default function AdminDashboard() {
                 setPricingOptions([{ duration: '', price: '' }]);
             } else if (activeTab === 'store') {
                 const productData = {
+                brand: selectedAdminBrand,
                     title: productTitle,
                     category: productCategory || 'Accessories',
                     price: productPrice,
@@ -298,7 +304,7 @@ export default function AdminDashboard() {
                     await supabase.from('therapist_fees').update({ fee: feeValue }).eq('id', existing.id);
                     setTherapistFees(prev => prev.map(f => f.id === existing.id ? { ...f, fee: feeValue } : f));
                 } else {
-                    const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration: opt.duration, fee: feeValue }]).select();
+                    const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration: opt.duration, fee: feeValue, brand: selectedAdminBrand }]).select();
                     if (data && data.length > 0) {
                         setTherapistFees(prev => [...prev, data[0] as TherapistFee]);
                     }
@@ -374,12 +380,12 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] flex overflow-hidden font-sans text-text">
+        <div className="min-h-screen bg-black flex overflow-hidden font-sans text-white/90">
             
             {/* Sidebar */}
-            <aside className="hidden md:flex flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-border/50 shadow-soft z-20">
+            <aside className="hidden md:flex flex-col w-64 bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] border-r border-white/20/50 shadow-soft z-20">
                 <div className="p-8">
-                    <Link href="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
+                    <Link href="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
                         <Store size={20} strokeWidth={2.5} />
                         <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Elexoir Admin</span>
                     </Link>
@@ -388,46 +394,59 @@ export default function AdminDashboard() {
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     <button 
                         onClick={() => setActiveTab('treatment')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'treatment' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'treatment' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
                     >
                         <PlusCircle size={18} />
                         Create Treatment
                     </button>
                     <button 
                         onClick={() => setActiveTab('campaign')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'campaign' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'campaign' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
                     >
                         <Megaphone size={18} />
                         Create Campaign
                     </button>
                     <button 
                         onClick={() => setActiveTab('store')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'store' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'store' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
                     >
                         <Store size={18} />
                         Store Product
                     </button>
+                    {selectedAdminBrand === 'therapick' && (
+                        <button 
+                            onClick={() => setActiveTab('therapists')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'therapists' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
+                        >
+                            <Store size={18} />
+                            Therapists
+                        </button>
+                    )}
                     <button 
                         onClick={() => setActiveTab('fees')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
                     >
                         <Settings size={18} />
                         Therapist Fees
                     </button>
                     <button 
                         onClick={() => setActiveTab('list')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'list' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'list' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
                     >
                         <LayoutDashboard size={18} />
                         Overview
                     </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-text-muted hover:bg-surface/50 hover:text-primary rounded-xl text-sm font-semibold transition-colors">
+                    <button className="w-full flex items-center gap-3 px-4 py-3 text-white/90-muted hover:bg-surface/50 hover:text-white rounded-xl text-sm font-semibold transition-colors">
                         <Settings size={18} />
                         Settings
                     </button>
                 </nav>
 
-                <div className="p-4">
+                <div className="p-4 space-y-2">
+                    <button onClick={() => setSelectedAdminBrand(null)} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-text hover:bg-surface/50 rounded-xl text-sm font-semibold transition-colors border border-white/10">
+                        <Store size={18} />
+                        Switch Brand
+                    </button>
                     <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors">
                         <LogOut size={18} />
                         Logout
@@ -445,7 +464,7 @@ export default function AdminDashboard() {
                     
                     {/* Mobile Header (Hidden on Desktop) */}
                     <div className="md:hidden flex items-center justify-between mb-8">
-                        <Link href="/" className="flex items-center gap-2 text-primary">
+                        <Link href="/" className="flex items-center gap-2 text-white">
                             <Store size={20} strokeWidth={2.5} />
                             <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Elexoir</span>
                         </Link>
@@ -453,14 +472,14 @@ export default function AdminDashboard() {
                     </div>
 
                     <header className="mb-10">
-                        <h1 className="font-serif text-3xl md:text-4xl text-primary font-medium mb-2">
+                        <h1 className="font-serif text-3xl md:text-4xl text-white font-medium mb-2">
                             {activeTab === 'treatment' ? (editingTreatmentId ? 'Edit Treatment' : 'Create New Treatment') : 
                              activeTab === 'campaign' ? 'Create Campaign Card' : 
                              activeTab === 'store' ? (editingProductId ? 'Edit Product' : 'Add New Product') : 
                              activeTab === 'fees' ? 'Set Therapist Fee' :
                              activeTab === 'list' ? 'Menu & Offers Management' : 'Settings'}
                         </h1>
-                        <p className="text-text-muted text-sm">
+                        <p className="text-white/90-muted text-sm">
                             {activeTab === 'treatment' ? 'Add or edit a massage or ritual to your spa menu.' : 
                              activeTab === 'campaign' ? 'Design a stunning new promotional banner for the homepage.' :
                              activeTab === 'store' ? 'Add physical products like oils or candles to the Elexoir Boutique.' :
@@ -485,18 +504,18 @@ export default function AdminDashboard() {
                                         {/* Title & Category */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Treatment Title</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Treatment Title</label>
                                                 <input 
                                                     type="text" required placeholder="e.g. Deep Tissue Flow" 
                                                     value={treatmentTitle} onChange={e => setTreatmentTitle(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Category</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Category</label>
                                                 <select 
                                                     value={treatmentCategory} onChange={e => setTreatmentCategory(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm appearance-none"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm appearance-none"
                                                 >
                                                     <option value="Massage">Massage</option>
                                                     <option value="Facial">Facial</option>
@@ -509,8 +528,8 @@ export default function AdminDashboard() {
                                         {/* Dynamic Duration & Pricing */}
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Duration & Pricing</label>
-                                                <button type="button" onClick={handleAddPricing} className="text-xs font-bold text-primary flex items-center gap-1 hover:opacity-70 transition-opacity">
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Duration & Pricing</label>
+                                                <button type="button" onClick={handleAddPricing} className="text-xs font-bold text-white flex items-center gap-1 hover:opacity-70 transition-opacity">
                                                     <Plus size={14} /> Add Option
                                                 </button>
                                             </div>
@@ -519,15 +538,15 @@ export default function AdminDashboard() {
                                                     <div className="flex-1 relative">
                                                         <input 
                                                             type="number" required placeholder="60" value={option.duration} onChange={(e) => handlePricingChange(idx, 'duration', e.target.value)}
-                                                            className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 pr-16 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                            className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 pr-16 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                         />
-                                                        <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-semibold text-text-muted">MINS</span>
+                                                        <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-semibold text-white/90-muted">MINS</span>
                                                     </div>
                                                     <div className="flex-[2] relative">
-                                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-text-muted">Rp</span>
+                                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-white/90-muted">Rp</span>
                                                         <input 
                                                             type="text" required placeholder="450,000" value={option.price} onChange={(e) => handlePricingChange(idx, 'price', e.target.value)}
-                                                            className="w-full bg-white/50 border border-border/50 rounded-2xl px-12 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                            className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-12 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                         />
                                                     </div>
                                                     {pricingOptions.length > 1 && (
@@ -541,19 +560,19 @@ export default function AdminDashboard() {
 
                                         {/* Description */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Description</label>
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Description</label>
                                             <textarea 
                                                 required rows={3} placeholder="Write a captivating description about the treatment..." 
                                                 value={treatmentDesc} onChange={e => setTreatmentDesc(e.target.value)}
-                                                className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
                                         {/* Dynamic Benefits */}
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Key Benefits</label>
-                                                <button type="button" onClick={handleAddBenefit} className="text-xs font-bold text-primary flex items-center gap-1 hover:opacity-70 transition-opacity">
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Key Benefits</label>
+                                                <button type="button" onClick={handleAddBenefit} className="text-xs font-bold text-white flex items-center gap-1 hover:opacity-70 transition-opacity">
                                                     <Plus size={14} /> Add Benefit
                                                 </button>
                                             </div>
@@ -561,7 +580,7 @@ export default function AdminDashboard() {
                                                 <div key={idx} className="flex items-center gap-4">
                                                     <input 
                                                         type="text" required placeholder="e.g. Relieves deep muscle tension" value={benefit} onChange={(e) => handleBenefitChange(idx, e.target.value)}
-                                                        className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                        className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                     />
                                                     {benefits.length > 1 && (
                                                         <button type="button" onClick={() => handleRemoveBenefit(idx)} className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-100 transition-colors">
@@ -579,27 +598,27 @@ export default function AdminDashboard() {
                                         {/* Campaign Title & Label */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Campaign Title</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Campaign Title</label>
                                                 <input 
                                                     type="text" required placeholder="e.g. Summer Retreat" 
                                                     value={campaignTitle} onChange={e => setCampaignTitle(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Offer Label</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Offer Label</label>
                                                 <input 
                                                     type="text" required placeholder="e.g. Limited Offer" 
                                                     value={campaignLabel} onChange={e => setCampaignLabel(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Image Upload Area for Campaign */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Cinematic Background Image</label>
-                                            <label className="w-full border-2 border-dashed border-border/50 rounded-[24px] bg-white/30 hover:bg-white/50 transition-colors flex flex-col items-center justify-center py-12 cursor-pointer group relative overflow-hidden">
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Cinematic Background Image</label>
+                                            <label className="w-full border-2 border-dashed border-white/20/50 rounded-[24px] bg-white/30 hover:bg-white/50 transition-colors flex flex-col items-center justify-center py-12 cursor-pointer group relative overflow-hidden">
                                                 <input 
                                                     type="file" 
                                                     accept="image/*" 
@@ -610,11 +629,11 @@ export default function AdminDashboard() {
                                                     <img src={campaignImage} alt="Campaign Background" className="absolute inset-0 w-full h-full object-contain bg-black/5 opacity-90" />
                                                 ) : (
                                                     <>
-                                                        <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+                                                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
                                                             <UploadCloud size={24} />
                                                         </div>
-                                                        <p className="text-sm font-medium text-primary mb-1">Click to upload landscape image</p>
-                                                        <p className="text-xs text-text-muted">High resolution JPG or PNG</p>
+                                                        <p className="text-sm font-medium text-white mb-1">Click to upload landscape image</p>
+                                                        <p className="text-xs text-white/90-muted">High resolution JPG or PNG</p>
                                                     </>
                                                 )}
                                             </label>
@@ -622,21 +641,21 @@ export default function AdminDashboard() {
 
                                         {/* Description */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Subtext / Description</label>
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Subtext / Description</label>
                                             <textarea 
                                                 required rows={3} placeholder="Enjoy up to 20% off all signature treatments this month..." 
                                                 value={campaignDesc} onChange={e => setCampaignDesc(e.target.value)}
-                                                className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
                                         {/* Campaign Duration */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Campaign Duration</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Campaign Duration</label>
                                                 <div className="relative">
                                                     <select 
-                                                        className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm appearance-none"
+                                                        className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm appearance-none"
                                                         value={campaignDuration}
                                                         onChange={(e) => setCampaignDuration(e.target.value)}
                                                     >
@@ -646,24 +665,24 @@ export default function AdminDashboard() {
                                                         <option value="1_month">1 Month</option>
                                                         <option value="custom">Custom Date Range</option>
                                                     </select>
-                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/90-muted">
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Discount Percentage (%)</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Discount Percentage (%)</label>
                                                 <input 
                                                     type="number" required min="1" max="100" placeholder="20" 
                                                     value={discountPercentage} onChange={e => setDiscountPercentage(Number(e.target.value))}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Treatments Selection for Campaign */}
                                         <div className="space-y-3 pt-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Select Treatments & Durations for Offer</label>
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Select Treatments & Durations for Offer</label>
                                             <div className="grid grid-cols-1 gap-3">
                                                 {treatments.map((t) => {
                                                     const selectedT = campaignTreatments.find(ct => ct.treatmentId === t.id);
@@ -673,14 +692,14 @@ export default function AdminDashboard() {
                                                             key={t.id} 
                                                             className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col gap-3 ${
                                                                 isSelectedAny 
-                                                                ? 'bg-primary/5 border-primary shadow-sm' 
-                                                                : 'bg-white/50 border-border/50'
+                                                                ? 'bg-white/5 border-primary shadow-sm' 
+                                                                : 'bg-white/50 border-white/20/50'
                                                             }`}
                                                         >
                                                             <div className="flex items-center justify-between">
                                                                 <div>
-                                                                    <h4 className={`text-sm font-bold ${isSelectedAny ? 'text-primary' : 'text-text-muted'}`}>{t.title}</h4>
-                                                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-text-muted/70">{t.category}</p>
+                                                                    <h4 className={`text-sm font-bold ${isSelectedAny ? 'text-white' : 'text-white/90-muted'}`}>{t.title}</h4>
+                                                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-white/90-muted/70">{t.category}</p>
                                                                 </div>
                                                             </div>
                                                             <div className="flex flex-wrap gap-2 mt-1">
@@ -693,8 +712,8 @@ export default function AdminDashboard() {
                                                                             onClick={() => toggleCampaignTreatmentDuration(t.id, opt.duration)}
                                                                             className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
                                                                                 isDurationSelected 
-                                                                                ? 'bg-primary border-primary text-white shadow-sm scale-105' 
-                                                                                : 'bg-white border-border/60 text-text-muted hover:bg-surface'
+                                                                                ? 'bg-white border-primary text-white shadow-sm scale-105' 
+                                                                                : 'bg-white border-white/20/60 text-white/90-muted hover:bg-surface'
                                                                             }`}
                                                                         >
                                                                             {opt.duration} - Rp {opt.price}
@@ -715,19 +734,19 @@ export default function AdminDashboard() {
                                         {/* Product Title & Category */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Product Title</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Product Title</label>
                                                 <input 
                                                     type="text" required placeholder="e.g. Signature Massage Oil" 
                                                     value={productTitle} onChange={e => setProductTitle(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Category</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Category</label>
                                                 <input 
                                                     type="text" required placeholder="e.g. Oils" 
                                                     value={productCategory} onChange={e => setProductCategory(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
@@ -735,27 +754,27 @@ export default function AdminDashboard() {
                                         {/* Product Price & Stock */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Price (Rp)</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Price (Rp)</label>
                                                 <input 
                                                     type="text" required placeholder="e.g. 350,000" 
                                                     value={productPrice} onChange={e => setProductPrice(e.target.value)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Stock Quantity</label>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Stock Quantity</label>
                                                 <input 
                                                     type="number" required min="0" placeholder="e.g. 10" 
                                                     value={productStock} onChange={e => setProductStock(parseInt(e.target.value) || 0)}
-                                                    className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Product Image */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Upload Image</label>
-                                            <div className="relative w-full h-48 bg-white/50 border-2 border-dashed border-border/50 rounded-2xl overflow-hidden hover:bg-white/80 transition-all flex flex-col items-center justify-center group cursor-pointer">
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Upload Image</label>
+                                            <div className="relative w-full h-48 bg-white/50 border-2 border-dashed border-white/20/50 rounded-2xl overflow-hidden hover:bg-white/80 transition-all flex flex-col items-center justify-center group cursor-pointer">
                                                 <input 
                                                     type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setProductImage)}
                                                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
@@ -764,11 +783,11 @@ export default function AdminDashboard() {
                                                     <>
                                                         <img src={productImage} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity" />
                                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                                            <span className="bg-primary/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase">Change Image</span>
+                                                            <span className="bg-white/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase">Change Image</span>
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <div className="text-center text-text-muted group-hover:text-primary transition-colors">
+                                                    <div className="text-center text-white/90-muted group-hover:text-white transition-colors">
                                                         <UploadCloud className="mx-auto mb-2 opacity-50 group-hover:opacity-100" size={24} />
                                                         <p className="text-sm font-semibold">Click or drag image to upload</p>
                                                         <p className="text-xs opacity-70 mt-1">PNG, JPG up to 5MB</p>
@@ -779,40 +798,47 @@ export default function AdminDashboard() {
 
                                         {/* Description */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Description</label>
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Description</label>
                                             <textarea 
                                                 required rows={4} placeholder="Write a captivating description about the product..." 
                                                 value={productDesc} onChange={e => setProductDesc(e.target.value)}
-                                                className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
                                         {/* How to Use */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">How to Use</label>
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">How to Use</label>
                                             <textarea 
                                                 rows={4} placeholder="Instructions on how to use..." 
                                                 value={productHowToUse} onChange={e => setProductHowToUse(e.target.value)}
-                                                className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
                                         {/* Ingredients */}
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-text-muted ml-1">Ingredients</label>
+                                            <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Ingredients</label>
                                             <textarea 
                                                 rows={3} placeholder="Comma-separated ingredients..." 
                                                 value={productIngredients} onChange={e => setProductIngredients(e.target.value)}
-                                                className="w-full bg-white/50 border border-border/50 rounded-2xl px-5 py-4 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
                                             />
                                         </div>
                                     </>
                                 )}
 
-                                {activeTab === 'fees' && (
+                                
+                        {activeTab === 'therapists' && selectedAdminBrand === 'therapick' && (
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                                <TherapistManager therapists={therapists} setTherapists={setTherapists} brand={selectedAdminBrand} />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'fees' && (
                                     <div className="space-y-6">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                                            <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                                            <h2 className="text-lg font-bold text-white flex items-center gap-2">
                                                 <Store size={20} className="text-secondary" /> Therapist Fees Setup
                                             </h2>
                                             <div className="flex items-center gap-4">
@@ -821,9 +847,9 @@ export default function AdminDashboard() {
                                                     placeholder="Search treatments..."
                                                     value={feeSearch}
                                                     onChange={(e) => setFeeSearch(e.target.value)}
-                                                    className="w-full md:w-64 bg-white/50 border border-border/50 rounded-xl px-4 py-2 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                                                    className="w-full md:w-64 bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                                                 />
-                                                <span className="text-xs font-semibold text-text-muted bg-surface px-3 py-1 rounded-full whitespace-nowrap">
+                                                <span className="text-xs font-semibold text-white/90-muted bg-surface px-3 py-1 rounded-full whitespace-nowrap">
                                                     {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase()) || t.category.toLowerCase().includes(feeSearch.toLowerCase())).length} Treatments
                                                 </span>
                                             </div>
@@ -833,7 +859,7 @@ export default function AdminDashboard() {
                                             {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase()) || t.category.toLowerCase().includes(feeSearch.toLowerCase())).map((t) => {
                                                 const isExpanded = expandedFees[t.id] || false;
                                                 return (
-                                                <div key={t.id} className="bg-white/60 border border-border/50 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:border-primary/20">
+                                                <div key={t.id} className="bg-white/60 border border-white/20/50 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:border-primary/20">
                                                     {/* Header Section (Always Visible) */}
                                                     <div 
                                                         className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-white/40 transition-colors"
@@ -841,13 +867,13 @@ export default function AdminDashboard() {
                                                     >
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-3 mb-1">
-                                                                <h3 className="font-bold text-primary text-base">{t.title}</h3>
-                                                                <span className="text-[10px] font-bold text-text-muted bg-surface px-2 py-0.5 rounded-md uppercase tracking-widest">{t.category}</span>
+                                                                <h3 className="font-bold text-white text-base">{t.title}</h3>
+                                                                <span className="text-[10px] font-bold text-white/90-muted bg-surface px-2 py-0.5 rounded-md uppercase tracking-widest">{t.category}</span>
                                                             </div>
-                                                            <p className="text-xs text-text-muted">{t.options.length} duration options</p>
+                                                            <p className="text-xs text-white/90-muted">{t.options.length} duration options</p>
                                                         </div>
                                                         <div className="flex items-center justify-between md:justify-end gap-6">
-                                                            {isExpanded ? <ChevronUp className="text-text-muted" size={20}/> : <ChevronDown className="text-text-muted" size={20}/>}
+                                                            {isExpanded ? <ChevronUp className="text-white/90-muted" size={20}/> : <ChevronDown className="text-white/90-muted" size={20}/>}
                                                         </div>
                                                     </div>
 
@@ -861,24 +887,24 @@ export default function AdminDashboard() {
                                                                 transition={{ duration: 0.3, ease: "easeInOut" }}
                                                                 className="overflow-hidden"
                                                             >
-                                                                <div className="p-5 pt-0 border-t border-border/20 mt-2 space-y-4">
+                                                                <div className="p-5 pt-0 border-t border-white/20/20 mt-2 space-y-4">
                                                                     <div className="space-y-3">
                                                                         {t.options.map(opt => (
-                                                                            <div key={opt.duration} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-border/50 rounded-xl gap-4 hover:border-primary/20 transition-colors">
+                                                                            <div key={opt.duration} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-xl gap-4 hover:border-primary/20 transition-colors">
                                                                                 <div className="flex items-center justify-between sm:justify-start gap-4">
-                                                                                    <span className="text-sm font-bold text-primary bg-primary/5 px-3 py-1.5 rounded-md">{opt.duration}</span>
-                                                                                    <span className="text-xs font-semibold text-text-muted">Cust. Price: Rp {opt.price}</span>
+                                                                                    <span className="text-sm font-bold text-white bg-white/5 px-3 py-1.5 rounded-md">{opt.duration}</span>
+                                                                                    <span className="text-xs font-semibold text-white/90-muted">Cust. Price: Rp {opt.price}</span>
                                                                                 </div>
-                                                                                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-border/30 pt-3 sm:border-0 sm:pt-0">
-                                                                                    <label className="text-xs font-bold text-text-muted">Therapist Fee:</label>
+                                                                                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-white/20/30 pt-3 sm:border-0 sm:pt-0">
+                                                                                    <label className="text-xs font-bold text-white/90-muted">Therapist Fee:</label>
                                                                                     <div className="relative">
-                                                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-xs font-bold">Rp.</span>
+                                                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/90-muted text-xs font-bold">Rp.</span>
                                                                                         <input 
                                                                                             type="text"
                                                                                             placeholder="0"
                                                                                             value={feeInputs[`${t.id}-${opt.duration}`] || ''}
                                                                                             onChange={(e) => handleFeeChange(t.id, opt.duration, e.target.value)}
-                                                                                            className="w-32 bg-surface border border-border/50 rounded-lg pl-9 pr-3 py-2 text-sm font-bold text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-right"
+                                                                                            className="w-32 bg-surface border border-white/20/50 rounded-lg pl-9 pr-3 py-2 text-sm font-bold text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-right"
                                                                                         />
                                                                                     </div>
                                                                                 </div>
@@ -889,7 +915,7 @@ export default function AdminDashboard() {
                                                                         <button 
                                                                             type="button"
                                                                             onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleSaveFees(t.id, t.options); }}
-                                                                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                            className="flex items-center gap-2 px-6 py-2.5 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                                             disabled={isSubmitting}
                                                                         >
                                                                             <CheckCircle size={14} /> Save {t.title} Fees
@@ -908,13 +934,13 @@ export default function AdminDashboard() {
                                 {activeTab === 'list' && (
                                     <div className="space-y-8">
                                         {/* Segmented Control for View Selection */}
-                                        <div className="flex bg-white/50 border border-border/50 p-1.5 rounded-2xl w-full max-w-xl shadow-sm mb-6">
+                                        <div className="flex bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] p-1.5 rounded-2xl w-full max-w-xl shadow-sm mb-6">
                                             {['campaign', 'treatments', 'store'].map((view) => (
                                                 <button
                                                     key={view}
                                                     onClick={() => setListView(view as 'campaign' | 'treatments' | 'store')}
                                                     type="button"
-                                                    className={`flex-1 py-3 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${listView === view ? 'bg-primary text-white shadow-md' : 'text-text-muted hover:text-primary hover:bg-white/40'}`}
+                                                    className={`flex-1 py-3 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${listView === view ? 'bg-white text-black shadow-md' : 'text-white/90-muted hover:text-white hover:bg-white/40'}`}
                                                 >
                                                     {view === 'campaign' ? 'Active Campaign' : view === 'treatments' ? 'Treatments' : 'Elexoir Boutique'}
                                                 </button>
@@ -925,7 +951,7 @@ export default function AdminDashboard() {
                                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                                 {/* Campaigns Section */}
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                                                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
                                                         <Megaphone size={20} className="text-accent" /> Active Campaign
                                                     </h2>
                                                     {campaign && (
@@ -936,39 +962,39 @@ export default function AdminDashboard() {
                                                     <div className="p-5 bg-gradient-to-br from-primary/5 to-white/60 border border-primary/20 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                         <div>
                                                             <div className="flex items-center gap-2 mb-1">
-                                                                <h3 className="font-bold text-primary text-base">{campaign.title}</h3>
-                                                                <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">{campaign.label}</span>
+                                                                <h3 className="font-bold text-white text-base">{campaign.title}</h3>
+                                                                <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-white/10 px-2 py-0.5 rounded">{campaign.label}</span>
                                                             </div>
-                                                            <p className="text-xs text-text-muted mb-3 max-w-sm">{campaign.description}</p>
+                                                            <p className="text-xs text-white/90-muted mb-3 max-w-sm">{campaign.description}</p>
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-[11px] font-bold text-accent">-{campaign.discountPercentage}% Discount</span>
-                                                                <span className="text-[11px] text-text-muted">{campaign.selectedTreatments.length} Treatments included</span>
+                                                                <span className="text-[11px] text-white/90-muted">{campaign.selectedTreatments.length} Treatments included</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-2 self-start md:self-center">
                                                             <button 
                                                                 onClick={handleEditCampaign}
                                                                 type="button"
-                                                                className="w-10 h-10 rounded-full bg-white border border-border/50 text-text-muted hover:text-primary hover:bg-surface flex items-center justify-center transition-colors"
+                                                                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-surface flex items-center justify-center transition-colors"
                                                             >
                                                                 <Edit3 size={16} />
                                                             </button>
                                                             <button 
                                                                 onClick={handleRemoveCampaign}
                                                                 type="button"
-                                                                className="w-10 h-10 rounded-full bg-white border border-border/50 text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                                                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="p-8 text-center border-2 border-dashed border-border/50 rounded-2xl">
-                                                        <p className="text-sm text-text-muted mb-4">No active campaign running.</p>
+                                                    <div className="p-8 text-center border-2 border-dashed border-white/20/50 rounded-2xl">
+                                                        <p className="text-sm text-white/90-muted mb-4">No active campaign running.</p>
                                                         <button 
                                                             onClick={() => setActiveTab('campaign')}
                                                             type="button"
-                                                            className="text-xs font-bold text-primary bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors"
+                                                            className="text-xs font-bold text-white bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors"
                                                         >
                                                             Create Campaign
                                                         </button>
@@ -981,24 +1007,24 @@ export default function AdminDashboard() {
                                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                                 {/* Treatments Section */}
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                                                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
                                                         <Store size={20} className="text-secondary" /> Published Treatments
                                                     </h2>
-                                                    <span className="text-xs font-semibold text-text-muted bg-surface px-3 py-1 rounded-full">{treatments.length} Active</span>
+                                                    <span className="text-xs font-semibold text-white/90-muted bg-surface px-3 py-1 rounded-full">{treatments.length} Active</span>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-1 gap-4">
                                                     {treatments.map((t) => (
-                                                        <div key={t.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white/60 border border-border/50 rounded-2xl shadow-sm gap-4">
+                                                        <div key={t.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white/60 border border-white/20/50 rounded-2xl shadow-sm gap-4">
                                                             <div className="flex-1">
-                                                                <h3 className="font-bold text-primary text-sm mb-1">{t.title}</h3>
-                                                                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-widest mb-2">{t.category}</p>
-                                                                <p className="text-xs text-text-muted/80 line-clamp-1">{t.desc}</p>
+                                                                <h3 className="font-bold text-white text-sm mb-1">{t.title}</h3>
+                                                                <p className="text-[11px] font-semibold text-white/90-muted uppercase tracking-widest mb-2">{t.category}</p>
+                                                                <p className="text-xs text-white/90-muted/80 line-clamp-1">{t.desc}</p>
                                                             </div>
                                                             <div className="flex items-center justify-between md:justify-end gap-6 md:w-[250px]">
                                                                 <div className="flex flex-col items-start md:items-end gap-1">
                                                                     {t.options.map(opt => (
-                                                                        <span key={opt.duration} className="text-[11px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-md">
+                                                                        <span key={opt.duration} className="text-[11px] font-bold text-white bg-white/5 px-2 py-0.5 rounded-md">
                                                                             {opt.duration} • Rp {opt.price}
                                                                         </span>
                                                                     ))}
@@ -1031,21 +1057,21 @@ export default function AdminDashboard() {
                                                                             }
                                                                         }}
                                                                         title={t.is_pinned ? "Unpin Treatment" : "Pin Treatment (Requires Cover Image)"}
-                                                                        className={`w-10 h-10 rounded-full border border-border/50 flex items-center justify-center transition-colors relative z-10 cursor-pointer ${t.is_pinned ? 'bg-primary text-white border-primary' : 'bg-white text-text-muted hover:text-primary hover:bg-surface'}`}
+                                                                        className={`w-10 h-10 rounded-full border border-white/20/50 flex items-center justify-center transition-colors relative z-10 cursor-pointer ${t.is_pinned ? 'bg-white text-black border-primary' : 'bg-white text-white/90-muted hover:text-white hover:bg-surface'}`}
                                                                     >
                                                                         <Pin size={16} className={t.is_pinned ? 'fill-current' : ''} />
                                                                     </button>
                                                                     <button 
                                                                         type="button"
                                                                         onClick={() => handleEditTreatment(t)}
-                                                                        className="w-10 h-10 rounded-full bg-white border border-border/50 text-text-muted hover:text-primary hover:bg-surface flex items-center justify-center transition-colors"
+                                                                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-surface flex items-center justify-center transition-colors"
                                                                     >
                                                                         <Edit3 size={16} />
                                                                     </button>
                                                                     <button 
                                                                         type="button"
                                                                         onClick={() => handleRemoveTreatment(t.id)}
-                                                                        className="w-10 h-10 rounded-full bg-white border border-border/50 text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                                                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
                                                                     >
                                                                         <Trash2 size={16} />
                                                                     </button>
@@ -1054,12 +1080,12 @@ export default function AdminDashboard() {
                                                         </div>
                                                     ))}
                                                     {treatments.length === 0 && (
-                                                        <div className="p-8 text-center border-2 border-dashed border-border/50 rounded-2xl">
-                                                            <p className="text-sm text-text-muted mb-4">No treatments added yet.</p>
+                                                        <div className="p-8 text-center border-2 border-dashed border-white/20/50 rounded-2xl">
+                                                            <p className="text-sm text-white/90-muted mb-4">No treatments added yet.</p>
                                                             <button 
                                                                 onClick={() => setActiveTab('treatment')}
                                                                 type="button"
-                                                                className="text-xs font-bold text-primary bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors"
+                                                                className="text-xs font-bold text-white bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors"
                                                             >
                                                                 Create Treatment
                                                             </button>
@@ -1073,41 +1099,41 @@ export default function AdminDashboard() {
                                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                                 {/* Store Section */}
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <h2 className="text-lg font-bold text-primary flex items-center gap-2">
-                                                        <Store size={20} className="text-primary" /> Elexoir Boutique
+                                                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                                                        <Store size={20} className="text-white" /> Elexoir Boutique
                                                     </h2>
-                                                    <span className="text-xs font-semibold text-text-muted bg-surface px-3 py-1 rounded-full">{products.length} Products</span>
+                                                    <span className="text-xs font-semibold text-white/90-muted bg-surface px-3 py-1 rounded-full">{products.length} Products</span>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     {products.map((p) => (
-                                                        <div key={p.id} className="flex flex-col p-5 bg-white/60 border border-border/50 rounded-2xl shadow-sm gap-4">
+                                                        <div key={p.id} className="flex flex-col p-5 bg-white/60 border border-white/20/50 rounded-2xl shadow-sm gap-4">
                                                             <div className="flex items-start gap-4">
-                                                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-border/50 bg-surface">
+                                                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/20/50 bg-surface">
                                                                     <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
                                                                 </div>
                                                                 <div className="flex-1">
                                                                     <div className="flex justify-between items-start">
-                                                                        <h3 className="font-bold text-primary text-sm mb-1 line-clamp-1">{p.title}</h3>
-                                                                        <span className="text-[10px] font-bold text-text-muted bg-surface px-2 py-0.5 rounded-full whitespace-nowrap">Stock: {p.stock || 0}</span>
+                                                                        <h3 className="font-bold text-white text-sm mb-1 line-clamp-1">{p.title}</h3>
+                                                                        <span className="text-[10px] font-bold text-white/90-muted bg-surface px-2 py-0.5 rounded-full whitespace-nowrap">Stock: {p.stock || 0}</span>
                                                                     </div>
-                                                                    <p className="text-[10px] font-semibold text-text-muted uppercase tracking-widest mb-1">{p.category}</p>
+                                                                    <p className="text-[10px] font-semibold text-white/90-muted uppercase tracking-widest mb-1">{p.category}</p>
                                                                     <span className="text-xs font-bold text-accent">Rp {p.price}</span>
                                                                 </div>
                                                             </div>
-                                                            <p className="text-xs text-text-muted/80 line-clamp-2 mb-2">{p.description}</p>
-                                                            <div className="mt-auto flex items-center justify-end gap-2 pt-2 border-t border-border/30">
+                                                            <p className="text-xs text-white/90-muted/80 line-clamp-2 mb-2">{p.description}</p>
+                                                            <div className="mt-auto flex items-center justify-end gap-2 pt-2 border-t border-white/20/30">
                                                                 <button 
                                                                     type="button"
                                                                     onClick={() => handleEditProduct(p)}
-                                                                    className="w-8 h-8 rounded-full bg-white border border-border/50 text-text-muted hover:text-primary hover:bg-surface flex items-center justify-center transition-colors"
+                                                                    className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-surface flex items-center justify-center transition-colors"
                                                                 >
                                                                     <Edit3 size={14} />
                                                                 </button>
                                                                 <button 
                                                                     type="button"
                                                                     onClick={() => handleRemoveProduct(p.id)}
-                                                                    className="w-8 h-8 rounded-full bg-white border border-border/50 text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                                                    className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
                                                                 >
                                                                     <Trash2 size={14} />
                                                                 </button>
@@ -1115,12 +1141,12 @@ export default function AdminDashboard() {
                                                         </div>
                                                     ))}
                                                     {products.length === 0 && (
-                                                        <div className="col-span-1 md:col-span-2 p-8 text-center border-2 border-dashed border-border/50 rounded-2xl">
-                                                            <p className="text-sm text-text-muted mb-4">No products in store.</p>
+                                                        <div className="col-span-1 md:col-span-2 p-8 text-center border-2 border-dashed border-white/20/50 rounded-2xl">
+                                                            <p className="text-sm text-white/90-muted mb-4">No products in store.</p>
                                                             <button 
                                                                 onClick={() => setActiveTab('store')}
                                                                 type="button"
-                                                                className="text-xs font-bold text-primary bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors"
+                                                                className="text-xs font-bold text-white bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors"
                                                             >
                                                                 Add Product
                                                             </button>
@@ -1133,7 +1159,7 @@ export default function AdminDashboard() {
                                 )}
 
                                 {activeTab === 'settings' && (
-                                    <div className="flex flex-col items-center justify-center py-20 text-text-muted">
+                                    <div className="flex flex-col items-center justify-center py-20 text-white/90-muted">
                                         <Sparkles className="mb-4 opacity-50" size={32} />
                                         <p className="text-sm font-medium">This section is coming soon.</p>
                                     </div>
@@ -1141,7 +1167,7 @@ export default function AdminDashboard() {
 
                                 {/* Submit Area */}
                                 {activeTab !== 'fees' && (
-                                    <div className="pt-6 border-t border-border/30 flex items-center justify-end gap-4">
+                                    <div className="pt-6 border-t border-white/20/30 flex items-center justify-end gap-4">
                                         {success && (
                                         <motion.span 
                                             initial={{ opacity: 0, x: -10 }}
@@ -1154,7 +1180,7 @@ export default function AdminDashboard() {
                                     <button 
                                         type="submit" 
                                         disabled={isSubmitting}
-                                        className="bg-primary text-white px-8 py-4 rounded-2xl text-sm font-bold uppercase tracking-wider hover:bg-primary/90 hover:scale-[1.02] transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-2 disabled:opacity-70 disabled:hover:scale-100"
+                                        className="bg-white text-black px-8 py-4 rounded-2xl text-sm font-bold uppercase tracking-wider hover:bg-white/90 hover:scale-[1.02] transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-2 disabled:opacity-70 disabled:hover:scale-100"
                                     >
                                         {isSubmitting ? (
                                             <span className="flex items-center gap-2">
@@ -1179,7 +1205,7 @@ export default function AdminDashboard() {
             </main>
 
             {/* Mobile Bottom Navigation Bar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-2xl border-t border-border/50 z-50 px-6 pb-safe">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-2xl border-t border-white/20/50 z-50 px-6 pb-safe">
                 <div className="flex items-center justify-between h-full max-w-md mx-auto">
                     {[
                         { id: 'treatment', icon: PlusCircle, label: 'Add' },
@@ -1195,10 +1221,10 @@ export default function AdminDashboard() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${
-                                    isActive ? 'text-primary' : 'text-text-muted hover:text-primary/70'
+                                    isActive ? 'text-white' : 'text-white/90-muted hover:text-white/70'
                                 }`}
                             >
-                                <div className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isActive ? 'bg-primary/10 scale-110' : 'bg-transparent'}`}>
+                                <div className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isActive ? 'bg-white/10 scale-110' : 'bg-transparent'}`}>
                                     <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                                 </div>
                                 <span className={`text-[10px] font-bold tracking-wider ${isActive ? 'opacity-100' : 'opacity-60'}`}>
