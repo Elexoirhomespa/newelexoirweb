@@ -6,7 +6,6 @@ import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle
 import Link from 'next/link';
 import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
-import TherapistManager from './TherapistManager';
 
 export default function AdminDashboard() {
     const [selectedAdminBrand, setSelectedAdminBrand] = useState<'elexoir' | 'therapick' | null>(null);
@@ -831,7 +830,9 @@ export default function AdminDashboard() {
                                 
                         {activeTab === 'therapists' && selectedAdminBrand === 'therapick' && (
                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                                <TherapistManager therapists={therapists} setTherapists={setTherapists} brand={selectedAdminBrand} />
+                                <div className="p-8 text-center text-gray-500">
+                                    Therapist Manager component removed for original Elexoir design.
+                                </div>
                             </motion.div>
                         )}
 
