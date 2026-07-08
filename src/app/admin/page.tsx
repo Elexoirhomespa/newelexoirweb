@@ -391,47 +391,47 @@ export default function AdminDashboard() {
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     <button 
                         onClick={() => setActiveTab('treatment')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'treatment' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'treatment' ? 'bg-white/20 text-white' : 'text-white/90-muted hover:bg-white/5 hover:text-white'}`}
                     >
                         <PlusCircle size={18} />
                         Create Treatment
                     </button>
                     <button 
                         onClick={() => setActiveTab('campaign')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'campaign' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'campaign' ? 'bg-white/20 text-white' : 'text-white/90-muted hover:bg-white/5 hover:text-white'}`}
                     >
                         <Megaphone size={18} />
                         Create Campaign
                     </button>
                     <button 
                         onClick={() => setActiveTab('store')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'store' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'store' ? 'bg-white/20 text-white' : 'text-white/90-muted hover:bg-white/5 hover:text-white'}`}
                     >
                         <Store size={18} />
                         Store Product
                     </button>
                     <button 
                         onClick={() => setActiveTab('fees')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-white/20 text-white' : 'text-white/90-muted hover:bg-white/5 hover:text-white'}`}
                     >
                         <Settings size={18} />
                         Therapist Fees
                     </button>
                     <button 
                         onClick={() => setActiveTab('list')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'list' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'list' ? 'bg-white/20 text-white' : 'text-white/90-muted hover:bg-white/5 hover:text-white'}`}
                     >
                         <LayoutDashboard size={18} />
                         Overview
                     </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-white/90-muted hover:bg-surface/50 hover:text-white rounded-xl text-sm font-semibold transition-colors">
+                    <button className="w-full flex items-center gap-3 px-4 py-3 text-white/90-muted hover:bg-white/5 hover:text-white rounded-xl text-sm font-semibold transition-colors">
                         <Settings size={18} />
                         Settings
                     </button>
                 </nav>
 
                 <div className="p-4 space-y-2">
-                    <button onClick={() => setSelectedAdminBrand(null)} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-text hover:bg-surface/50 rounded-xl text-sm font-semibold transition-colors border border-white/10">
+                    <button onClick={() => setSelectedAdminBrand(null)} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-text hover:bg-white/5 rounded-xl text-sm font-semibold transition-colors border border-white/10">
                         <Store size={18} />
                         Switch Brand
                     </button>
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
-                            className="md:bg-white/60 md:backdrop-blur-2xl md:border md:border-white/60 md:shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:rounded-[32px] md:p-10"
+                            className="md:bg-white/5 md:backdrop-blur-2xl md:border md:border-white/10 md:shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:rounded-[32px] md:p-10"
                         >
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 
@@ -701,7 +701,7 @@ export default function AdminDashboard() {
                                                                             className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
                                                                                 isDurationSelected 
                                                                                 ? 'bg-white border-primary text-white shadow-sm scale-105' 
-                                                                                : 'bg-white border-white/20/60 text-white/90-muted hover:bg-surface'
+                                                                                : 'bg-white/10 border-white/20/60 text-white/90-muted hover:bg-white/20'
                                                                             }`}
                                                                         >
                                                                             {opt.duration} - Rp {opt.price}
@@ -830,7 +830,7 @@ export default function AdminDashboard() {
                                                     onChange={(e) => setFeeSearch(e.target.value)}
                                                     className="w-full md:w-64 bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                                                 />
-                                                <span className="text-xs font-semibold text-white/90-muted bg-surface px-3 py-1 rounded-full whitespace-nowrap">
+                                                <span className="text-xs font-semibold text-white/90-muted bg-white/10 px-3 py-1 rounded-full whitespace-nowrap">
                                                     {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase()) || t.category.toLowerCase().includes(feeSearch.toLowerCase())).length} Treatments
                                                 </span>
                                             </div>
@@ -840,7 +840,7 @@ export default function AdminDashboard() {
                                             {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase()) || t.category.toLowerCase().includes(feeSearch.toLowerCase())).map((t) => {
                                                 const isExpanded = expandedFees[t.id] || false;
                                                 return (
-                                                <div key={t.id} className="bg-white/60 border border-white/20/50 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:border-primary/20">
+                                                <div key={t.id} className="bg-white/5 border border-white/20/50 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:border-primary/20">
                                                     {/* Header Section (Always Visible) */}
                                                     <div 
                                                         className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-white/40 transition-colors"
@@ -849,7 +849,7 @@ export default function AdminDashboard() {
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-3 mb-1">
                                                                 <h3 className="font-bold text-white text-base">{t.title}</h3>
-                                                                <span className="text-[10px] font-bold text-white/90-muted bg-surface px-2 py-0.5 rounded-md uppercase tracking-widest">{t.category}</span>
+                                                                <span className="text-[10px] font-bold text-white/90-muted bg-white/10 px-2 py-0.5 rounded-md uppercase tracking-widest">{t.category}</span>
                                                             </div>
                                                             <p className="text-xs text-white/90-muted">{t.options.length} duration options</p>
                                                         </div>
@@ -885,7 +885,7 @@ export default function AdminDashboard() {
                                                                                             placeholder="0"
                                                                                             value={feeInputs[`${t.id}-${opt.duration}`] || ''}
                                                                                             onChange={(e) => handleFeeChange(t.id, opt.duration, e.target.value)}
-                                                                                            className="w-32 bg-surface border border-white/20/50 rounded-lg pl-9 pr-3 py-2 text-sm font-bold text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-right"
+                                                                                            className="w-32 bg-white/10 border border-white/20/50 rounded-lg pl-9 pr-3 py-2 text-sm font-bold text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-right"
                                                                                         />
                                                                                     </div>
                                                                                 </div>
@@ -956,7 +956,7 @@ export default function AdminDashboard() {
                                                             <button 
                                                                 onClick={handleEditCampaign}
                                                                 type="button"
-                                                                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-surface flex items-center justify-center transition-colors"
+                                                                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-white/20 flex items-center justify-center transition-colors"
                                                             >
                                                                 <Edit3 size={16} />
                                                             </button>
@@ -991,12 +991,12 @@ export default function AdminDashboard() {
                                                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
                                                         <Store size={20} className="text-secondary" /> Published Treatments
                                                     </h2>
-                                                    <span className="text-xs font-semibold text-white/90-muted bg-surface px-3 py-1 rounded-full">{treatments.length} Active</span>
+                                                    <span className="text-xs font-semibold text-white/90-muted bg-white/10 px-3 py-1 rounded-full">{treatments.length} Active</span>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-1 gap-4">
                                                     {treatments.map((t) => (
-                                                        <div key={t.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white/60 border border-white/20/50 rounded-2xl shadow-sm gap-4">
+                                                        <div key={t.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white/5 border border-white/20/50 rounded-2xl shadow-sm gap-4">
                                                             <div className="flex-1">
                                                                 <h3 className="font-bold text-white text-sm mb-1">{t.title}</h3>
                                                                 <p className="text-[11px] font-semibold text-white/90-muted uppercase tracking-widest mb-2">{t.category}</p>
@@ -1038,14 +1038,14 @@ export default function AdminDashboard() {
                                                                             }
                                                                         }}
                                                                         title={t.is_pinned ? "Unpin Treatment" : "Pin Treatment (Requires Cover Image)"}
-                                                                        className={`w-10 h-10 rounded-full border border-white/20/50 flex items-center justify-center transition-colors relative z-10 cursor-pointer ${t.is_pinned ? 'bg-white text-black border-primary' : 'bg-white text-white/90-muted hover:text-white hover:bg-surface'}`}
+                                                                        className={`w-10 h-10 rounded-full border border-white/20/50 flex items-center justify-center transition-colors relative z-10 cursor-pointer ${t.is_pinned ? 'bg-white text-black border-primary' : 'bg-white text-white/90-muted hover:text-white hover:bg-white/20'}`}
                                                                     >
                                                                         <Pin size={16} className={t.is_pinned ? 'fill-current' : ''} />
                                                                     </button>
                                                                     <button 
                                                                         type="button"
                                                                         onClick={() => handleEditTreatment(t)}
-                                                                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-surface flex items-center justify-center transition-colors"
+                                                                        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-white/20 flex items-center justify-center transition-colors"
                                                                     >
                                                                         <Edit3 size={16} />
                                                                     </button>
@@ -1083,20 +1083,20 @@ export default function AdminDashboard() {
                                                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
                                                         <Store size={20} className="text-white" /> Elexoir Boutique
                                                     </h2>
-                                                    <span className="text-xs font-semibold text-white/90-muted bg-surface px-3 py-1 rounded-full">{products.length} Products</span>
+                                                    <span className="text-xs font-semibold text-white/90-muted bg-white/10 px-3 py-1 rounded-full">{products.length} Products</span>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     {products.map((p) => (
-                                                        <div key={p.id} className="flex flex-col p-5 bg-white/60 border border-white/20/50 rounded-2xl shadow-sm gap-4">
+                                                        <div key={p.id} className="flex flex-col p-5 bg-white/5 border border-white/20/50 rounded-2xl shadow-sm gap-4">
                                                             <div className="flex items-start gap-4">
-                                                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/20/50 bg-surface">
+                                                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/20/50 bg-white/10">
                                                                     <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
                                                                 </div>
                                                                 <div className="flex-1">
                                                                     <div className="flex justify-between items-start">
                                                                         <h3 className="font-bold text-white text-sm mb-1 line-clamp-1">{p.title}</h3>
-                                                                        <span className="text-[10px] font-bold text-white/90-muted bg-surface px-2 py-0.5 rounded-full whitespace-nowrap">Stock: {p.stock || 0}</span>
+                                                                        <span className="text-[10px] font-bold text-white/90-muted bg-white/10 px-2 py-0.5 rounded-full whitespace-nowrap">Stock: {p.stock || 0}</span>
                                                                     </div>
                                                                     <p className="text-[10px] font-semibold text-white/90-muted uppercase tracking-widest mb-1">{p.category}</p>
                                                                     <span className="text-xs font-bold text-accent">Rp {p.price}</span>
@@ -1107,7 +1107,7 @@ export default function AdminDashboard() {
                                                                 <button 
                                                                     type="button"
                                                                     onClick={() => handleEditProduct(p)}
-                                                                    className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-surface flex items-center justify-center transition-colors"
+                                                                    className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] text-white/90-muted hover:text-white hover:bg-white/20 flex items-center justify-center transition-colors"
                                                                 >
                                                                     <Edit3 size={14} />
                                                                 </button>
