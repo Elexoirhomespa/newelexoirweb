@@ -6,14 +6,7 @@ import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle
 import Link from 'next/link';
 import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } from '@/context/SpaContext';
 
-// Mock Supabase for design-only mode
-const supabase = {
-    from: (table?: string) => ({
-        select: (query?: string) => ({ eq: (field?: string, val?: any) => ({ order: (field?: string, opts?: any) => Promise.resolve({ data: [], error: null }) }), order: (field?: string, opts?: any) => Promise.resolve({ data: [], error: null }) }),
-        update: (data?: any) => ({ eq: (field?: string, val?: any) => Promise.resolve({ data: [], error: null }) }),
-        insert: (data?: any[]) => ({ select: (query?: string) => Promise.resolve({ data: data ? [{ ...data[0], id: Math.random().toString() }] : [], error: null }) })
-    })
-};
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees'>('treatment');
@@ -24,7 +17,7 @@ export default function AdminDashboard() {
     const pinImageInputRef = useRef<HTMLInputElement>(null);
     const [pendingPinId, setPendingPinId] = useState<string | null>(null);
 
-    const { treatments, setTreatments, campaign, setCampaign, products, setProducts } = useSpa();
+    const { treatments, setTreatments, campaign, setCampaign, products, setProducts, siteBrandFilter } = useSpa();
 
     // Local state for Therapist Fees (private to admin dashboard)
     const [therapistFees, setTherapistFees] = useState<TherapistFee[]>([]);
@@ -143,7 +136,8 @@ export default function AdminDashboard() {
                     duration: campaignDuration,
                     discountPercentage,
                     selectedTreatments: campaignTreatments,
-                    is_published: true
+                    is_published: true,
+                    brand: siteBrandFilter
                 };
                 if (editingCampaignId) {
                     await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
@@ -165,7 +159,8 @@ export default function AdminDashboard() {
                     benefits: benefits.filter(b => b.trim() !== ''),
                     bgPattern: 'from-secondary/10 via-white to-white',
                     options: pricingOptions.map(o => ({ duration: o.duration, price: o.price })),
-                    is_published: true
+                    is_published: true,
+                    brand: siteBrandFilter
                 };
                 
                 if (editingTreatmentId) {
@@ -192,7 +187,8 @@ export default function AdminDashboard() {
                     stock: productStock,
                     howToUse: productHowToUse,
                     ingredients: productIngredients,
-                    is_published: true
+                    is_published: true,
+                    brand: siteBrandFilter
                 };
                 
                 if (editingProductId) {

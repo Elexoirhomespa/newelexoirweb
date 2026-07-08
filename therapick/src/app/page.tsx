@@ -65,6 +65,11 @@ export default function Home() {
 
     const filteredAndSortedTreatments = React.useMemo(() => {
         let result = treatments.filter(t => {
+            // Avoid duplicating pinned treatments in the 'All' grid below the Most Booked section
+            if (t.is_pinned && activeCategory === 'all' && !searchQuery) {
+                return false;
+            }
+
             const matchesCategory = activeCategory === 'all' || t.category.toLowerCase() === activeCategory.toLowerCase();
             const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.desc.toLowerCase().includes(searchQuery.toLowerCase());
             
