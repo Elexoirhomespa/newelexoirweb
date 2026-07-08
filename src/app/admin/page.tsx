@@ -65,6 +65,7 @@ export default function AdminDashboard() {
     // Dynamic fields for Treatment
     const [treatmentTitle, setTreatmentTitle] = useState('');
     const [treatmentCategory, setTreatmentCategory] = useState('massage');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [treatmentDesc, setTreatmentDesc] = useState('');
     const [editingTreatmentId, setEditingTreatmentId] = useState<string | null>(null);
 
@@ -130,7 +131,6 @@ export default function AdminDashboard() {
         try {
             if (activeTab === 'campaign') {
                 const campaignData = {
-                brand: selectedAdminBrand,
                     title: campaignTitle,
                     label: campaignLabel,
                     description: campaignDesc,
@@ -154,7 +154,6 @@ export default function AdminDashboard() {
                 setEditingCampaignId(null);
             } else if (activeTab === 'treatment') {
                 const treatmentData = {
-                brand: selectedAdminBrand,
                     title: treatmentTitle,
                     category: treatmentCategory,
                     desc: treatmentDesc,
@@ -180,7 +179,6 @@ export default function AdminDashboard() {
                 setPricingOptions([{ duration: '', price: '' }]);
             } else if (activeTab === 'store') {
                 const productData = {
-                brand: selectedAdminBrand,
                     title: productTitle,
                     category: productCategory || 'Accessories',
                     price: productPrice,
@@ -303,7 +301,7 @@ export default function AdminDashboard() {
                     await supabase.from('therapist_fees').update({ fee: feeValue }).eq('id', existing.id);
                     setTherapistFees(prev => prev.map(f => f.id === existing.id ? { ...f, fee: feeValue } : f));
                 } else {
-                    const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration: opt.duration, fee: feeValue, brand: selectedAdminBrand }]).select();
+                    const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration: opt.duration, fee: feeValue }]).select();
                     if (data && data.length > 0) {
                         setTherapistFees(prev => [...prev, data[0] as TherapistFee]);
                     }
@@ -378,37 +376,6 @@ export default function AdminDashboard() {
         }
     };
 
-    if (!selectedAdminBrand) {
-        return (
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 font-sans">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[100px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-highlight/20 rounded-full blur-[100px] pointer-events-none" />
-                <div className="text-center max-w-md w-full relative z-10">
-                    <h1 className="text-3xl font-serif text-white mb-2">Select Brand</h1>
-                    <p className="text-white/60 mb-10 text-sm">Choose which brand dashboard you want to manage.</p>
-                    
-                    <div className="grid gap-4">
-                        <button 
-                            onClick={() => setSelectedAdminBrand('elexoir')}
-                            className="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex flex-col items-center gap-3 group"
-                        >
-                            <Store className="text-white/60 group-hover:text-white" size={32} />
-                            <span className="font-bold text-white uppercase tracking-widest text-sm">Elexoir Home Spa</span>
-                        </button>
-                        
-                        <button 
-                            onClick={() => setSelectedAdminBrand('therapick')}
-                            className="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex flex-col items-center gap-3 group"
-                        >
-                            <Store className="text-white/60 group-hover:text-primary" size={32} />
-                            <span className="font-bold text-white uppercase tracking-widest text-sm">Therapick</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-black flex overflow-hidden font-sans text-white/90">
             
@@ -443,15 +410,6 @@ export default function AdminDashboard() {
                         <Store size={18} />
                         Store Product
                     </button>
-                    {selectedAdminBrand === 'therapick' && (
-                        <button 
-                            onClick={() => setActiveTab('therapists')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'therapists' ? 'bg-surface/80 text-primary' : 'text-text-muted hover:bg-surface/50 hover:text-primary'}`}
-                        >
-                            <Store size={18} />
-                            Therapists
-                        </button>
-                    )}
                     <button 
                         onClick={() => setActiveTab('fees')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-surface/80 text-white' : 'text-white/90-muted hover:bg-surface/50 hover:text-white'}`}
@@ -857,15 +815,6 @@ export default function AdminDashboard() {
                                         </div>
                                     </>
                                 )}
-
-                                
-                        {activeTab === 'therapists' && selectedAdminBrand === 'therapick' && (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                                <div className="p-8 text-center text-gray-500">
-                                    Therapist Manager component removed for original Elexoir design.
-                                </div>
-                            </motion.div>
-                        )}
 
                         {activeTab === 'fees' && (
                                     <div className="space-y-6">

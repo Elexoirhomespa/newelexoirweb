@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+
 
 // Define structures
 export type TreatmentOption = {
@@ -138,40 +138,13 @@ export function SpaProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                const siteBrand = siteBrandFilter;
-                const [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
-                    supabase.from('treatments').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
-                    supabase.from('products').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
-                    supabase.from('campaigns').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
-                    supabase.from('therapists').select('*').eq('is_active', true).eq('brand', siteBrand).order('created_at', { ascending: false })
-                ]);
-                let fetchedTreatments = treatmentsRes.data;
-
-                if (fetchedTreatments) {
-                    setTreatments(fetchedTreatments);
-                    try { localStorage.setItem(`spa_treatments_${siteBrandFilter}`, JSON.stringify(fetchedTreatments)); } catch(e) { console.warn("Cache full"); }
-                }
-                if (productsRes.data) {
-                    setProducts(productsRes.data);
-                    try { localStorage.setItem(`spa_products_${siteBrandFilter}`, JSON.stringify(productsRes.data)); } catch(e) { console.warn("Cache full"); }
-                }
-                if (campaignsRes.data && campaignsRes.data.length > 0) {
-                    setCampaign(campaignsRes.data[0] as Campaign);
-                    localStorage.setItem(`spa_campaign_${siteBrandFilter}`, JSON.stringify(campaignsRes.data[0]));
-                } else {
-                    setCampaign(null);
-                    localStorage.removeItem(`spa_campaign_${siteBrandFilter}`);
-                }
-                
-                if (therapistsRes.data) {
-                    setTherapists(therapistsRes.data);
-                }
-
-                if (hasCache) {
-                    setIsLoading(false);
-                }
+                // Mock Empty Data since Database is disconnected
+                setTreatments([]);
+                setProducts([]);
+                setCampaign(null);
+                setTherapists([]);
             } catch (error) {
-                console.error("Error fetching data from Supabase:", error);
+                console.error("Error setting dummy data:", error);
             } finally {
                 setIsLoading(false);
             }
