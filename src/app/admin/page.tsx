@@ -8,7 +8,7 @@ import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } f
 import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
-    const [selectedAdminBrand, setSelectedAdminBrand] = useState<'elexoir' | 'therapick' | null>(null);
+
     const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees' | 'therapists'>('treatment');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -24,14 +24,13 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         async function fetchFees() {
-            if (!selectedAdminBrand) return;
-            const { data } = await supabase.from('therapist_fees').select('*').eq('brand', selectedAdminBrand).order('created_at', { ascending: false });
+            const { data } = await supabase.from('therapist_fees').select('*').eq('brand', 'elexoir').order('created_at', { ascending: false });
             if (data) {
                 setTherapistFees(data);
             }
         }
         fetchFees();
-    }, [selectedAdminBrand]);
+    }, []);
 
     // Campaign specific fields
     const [campaignTitle, setCampaignTitle] = useState(campaign?.title || '');
