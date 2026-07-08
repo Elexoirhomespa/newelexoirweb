@@ -54,12 +54,12 @@ export default function TopNav() {
     }
 
     return (
-        <div className="fixed top-0 md:top-6 left-0 right-0 z-50 flex justify-center pointer-events-none md:px-4">
+        <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
             <header 
-                className={`pointer-events-auto flex items-center justify-between relative transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] border will-change-auto
+                className={`pointer-events-auto flex items-center justify-between relative transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] border-b will-change-auto w-full
                     ${isScrolled 
-                        ? 'translate-y-4 md:translate-y-0 w-[calc(100%-32px)] md:w-full max-w-6xl bg-[#D2F34C]/70 saturate-[1.8] backdrop-blur-xl border-transparent rounded-[32px] md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 py-2 md:py-3' 
-                        : 'translate-y-0 md:translate-y-0 w-full md:w-full max-w-7xl md:max-w-6xl bg-transparent md:bg-[#D2F34C]/70 md:saturate-[1.8] md:backdrop-blur-xl border-transparent md:border-transparent shadow-none md:shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-none md:rounded-full px-4 md:px-8 py-4 md:py-3'}
+                        ? 'bg-white/70 saturate-[1.8] backdrop-blur-xl border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 md:px-8 py-2 md:py-3' 
+                        : 'bg-transparent md:bg-white/70 md:saturate-[1.8] md:backdrop-blur-xl border-transparent md:border-white/60 shadow-none md:shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 md:px-8 py-4 md:py-3'}
                 `} 
                 ref={dropdownRef}
                 style={{ transformOrigin: 'top center' }}

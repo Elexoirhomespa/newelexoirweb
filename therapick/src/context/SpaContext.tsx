@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 
 // Define structures
 export type TreatmentOption = {
@@ -22,6 +23,8 @@ export type Treatment = {
     created_at?: string;
     updated_at?: string;
 };
+
+export type Therapist = { id: string; name: string; bio: string; image_url: string; rating: number; is_active: boolean; brand: string; };
 
 export type SelectedCampaignTreatment = {
     treatmentId: string;
@@ -86,6 +89,10 @@ type SpaContextType = {
     savedProducts: string[];
     toggleSavedProduct: (productId: string) => void;
     isLoading: boolean;
+    siteBrandFilter: string;
+    setSiteBrandFilter: (brand: string) => void;
+    therapists: Therapist[];
+    setTherapists: React.Dispatch<React.SetStateAction<Therapist[]>>;
 };
 
 
@@ -99,16 +106,16 @@ export function SpaProvider({ children }: { children: ReactNode }) {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [siteBrandFilter, setSiteBrandFilter] = useState<string>(process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
+    const [therapists, setTherapists] = useState<Therapist[]>([]);
 
     useEffect(() => {
         async function loadData() {
-            // Optimistically load from localStorage
+            let hasCache = false;
             try {
                 const cachedTreatments = localStorage.getItem('spa_treatments');
                 const cachedProducts = localStorage.getItem('spa_products');
                 const cachedCampaign = localStorage.getItem('spa_campaign');
-
-                let hasCache = false;
 
                 if (cachedTreatments) {
                     setTreatments(JSON.parse(cachedTreatments));
@@ -131,91 +138,45 @@ export function SpaProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                // Simulate network delay
-                await new Promise(resolve => setTimeout(resolve, 800));
+                const siteBrand = siteBrandFilter;
+                const [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
+                    supabase.from('treatments').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('products').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('campaigns').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('therapists').select('*').eq('is_active', true).eq('brand', siteBrand).order('created_at', { ascending: false })
+                ]);
 
-                const mockTreatments: Treatment[] = [
-                    {
-                        id: 't1',
-                        title: 'Balinese Traditional Massage',
-                        category: 'Massage',
-                        desc: 'A full-body, deep-tissue, holistic treatment using a combination of gentle stretches, acupressure, reflexology, and aromatherapy to stimulate the flow of blood, oxygen and "qi" (energy) around your body.',
-                        options: [
-                            { duration: '60 Min', price: '450,000' },
-                            { duration: '90 Min', price: '600,000' }
-                        ],
-                        benefits: ['Relieves deep muscle tension', 'Improves blood circulation', 'Reduces stress and anxiety'],
-                        bgPattern: 'from-secondary/10 via-white to-white',
-                        is_published: true,
-                        is_pinned: true,
-                        pinned_image: 'https://images.pexels.com/photos/3951375/pexels-photo-3951375.jpeg'
-                    },
-                    {
-                        id: 't2',
-                        title: 'Ubud Royal Ritual',
-                        category: 'Ritual',
-                        desc: 'Experience the ultimate pampering with our signature Ubud Royal Ritual, combining traditional massage techniques with a refreshing body scrub and a relaxing floral bath.',
-                        options: [
-                            { duration: '120 Min', price: '950,000' }
-                        ],
-                        benefits: ['Exfoliates dead skin cells', 'Deeply hydrates the skin', 'Provides complete relaxation'],
-                        bgPattern: 'from-secondary/10 via-white to-white',
-                        is_published: true
-                    }
-                ];
+                let fetchedTreatments = treatmentsRes.data;
 
-                const mockProducts: Product[] = [
-                    {
-                        id: 'p1',
-                        title: 'Signature Lemongrass Oil',
-                        category: 'Essential Oils',
-                        price: '250,000',
-                        image: 'https://images.pexels.com/photos/6724391/pexels-photo-6724391.jpeg',
-                        description: 'A soothing essential oil blend used in our signature treatments.',
-                        stock: 50,
-                        howToUse: 'Apply a few drops to pulse points or use in a diffuser.',
-                        ingredients: 'Pure Lemongrass Extract, Carrier Oil.',
-                        is_published: true
-                    }
-                ];
-
-                const mockCampaigns: Campaign[] = [
-                    {
-                        id: 'c1',
-                        title: 'Summer Wellness Retreat',
-                        label: 'Limited Offer',
-                        description: 'Enjoy up to 20% off all signature treatments this month to rejuvenate your body and soul.',
-                        image: 'https://images.pexels.com/photos/3951375/pexels-photo-3951375.jpeg',
-                        duration: '1_month',
-                        discountPercentage: 20,
-                        selectedTreatments: [
-                            { treatmentId: 't1', durations: ['60 Min', '90 Min'] },
-                            { treatmentId: 't2', durations: ['120 Min'] }
-                        ],
-                        is_published: true
-                    }
-                ];
-
-                if (mockTreatments.length > 0) {
-                    setTreatments(mockTreatments);
-                    try { localStorage.setItem('spa_treatments', JSON.stringify(mockTreatments)); } catch(e) { console.warn("Cache full"); }
+                if (fetchedTreatments && fetchedTreatments.length > 0) {
+                    setTreatments(fetchedTreatments);
+                    try { localStorage.setItem('spa_treatments', JSON.stringify(fetchedTreatments)); } catch(e) { console.warn("Cache full"); }
                 }
-                if (mockProducts.length > 0) {
-                    setProducts(mockProducts);
-                    try { localStorage.setItem('spa_products', JSON.stringify(mockProducts)); } catch(e) { console.warn("Cache full"); }
+                if (productsRes.data && productsRes.data.length > 0) {
+                    setProducts(productsRes.data);
+                    try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch(e) { console.warn("Cache full"); }
                 }
-                if (mockCampaigns.length > 0) {
-                    setCampaign(mockCampaigns[0]);
-                    try { localStorage.setItem('spa_campaign', JSON.stringify(mockCampaigns[0])); } catch(e) { console.warn("Cache full"); }
+                if (campaignsRes.data && campaignsRes.data.length > 0) {
+                    setCampaign(campaignsRes.data[0] as Campaign);
+                    localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0]));
+                }
+                
+                if (therapistsRes.data) {
+                    setTherapists(therapistsRes.data);
+                }
+
+                if (hasCache) {
+                    setIsLoading(false);
                 }
             } catch (error) {
-                console.error("Error fetching mock data:", error);
+                console.error("Error fetching data from Supabase:", error);
             } finally {
                 setIsLoading(false);
             }
         }
+
         loadData();
-    }, []);
+    }, [siteBrandFilter]);
 
     const toggleSavedProduct = (productId: string) => {
         setSavedProducts(prev => 
@@ -250,7 +211,10 @@ export function SpaProvider({ children }: { children: ReactNode }) {
             treatments, setTreatments, campaign, setCampaign, products, setProducts,
             cartItems, addToCart, updateCartQuantity, removeFromCart, clearCart,
             savedProducts, toggleSavedProduct,
-            isLoading
+            isLoading,
+            siteBrandFilter,
+            setSiteBrandFilter,
+            therapists, setTherapists
         }}>
             {children}
         </SpaContext.Provider>
