@@ -162,7 +162,7 @@ export default function Home() {
         <div className="min-h-screen bg-[#FDFBF7] relative overflow-hidden font-sans text-text">
             
             {/* Top Gradient Background */}
-            <div className="absolute top-0 left-0 right-0 h-[400px] md:h-[500px] bg-gradient-to-b from-[#D2F34C] to-[#FDFBF7] z-0 pointer-events-none"></div>
+            <div className="absolute top-0 left-0 right-0 h-[600px] md:h-[800px] bg-gradient-to-b from-[#D2F34C] via-[#D2F34C] to-[#FDFBF7] z-0 pointer-events-none"></div>
 
             {/* Luxurious Ambient Background */}
             <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[120%] md:w-[800px] h-[600px] bg-secondary/30 blur-[120px] rounded-full z-0 pointer-events-none opacity-60 mix-blend-multiply" />
@@ -289,13 +289,13 @@ export default function Home() {
                 </div>
                 )}
 
-                {/* Pinned / Most Booked Treatments (Mobile Only, Hidden until DB connected) */}
+                {/* Pinned / Most Booked Treatments */}
                 {showPinnedTreatments && (
-                    <div className="md:hidden mb-8 w-full relative z-20">
+                    <div className="mb-8 w-full relative z-20">
                         <h3 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Most Booked</h3>
-                        <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 pb-4 snap-x snap-mandatory">
+                        <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 pb-4 snap-x snap-mandatory">
                             {treatments.filter(t => t.is_pinned).map(treatment => (
-                                <a href={`/rituals/${treatment.id}`} key={treatment.id} className="w-[65vw] sm:w-[220px] shrink-0 snap-center outline-none">
+                                <a href={`/rituals/${treatment.id}`} key={treatment.id} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 snap-center md:snap-align-none outline-none">
                                     <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
                                         <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
                                             {treatment.pinned_image ? (

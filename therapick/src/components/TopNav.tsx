@@ -60,8 +60,8 @@ export default function TopNav() {
             <header 
                 className={`pointer-events-auto flex items-center justify-between relative transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] border will-change-auto
                     ${isScrolled 
-                        ? 'translate-y-4 md:translate-y-0 w-[calc(100%-32px)] md:w-full max-w-6xl bg-white/70 saturate-[1.8] backdrop-blur-xl border-white/60 rounded-[32px] md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 py-2 md:py-3' 
-                        : 'translate-y-0 md:translate-y-0 w-full md:w-full max-w-7xl md:max-w-6xl bg-transparent md:bg-white/70 md:saturate-[1.8] md:backdrop-blur-xl border-transparent md:border-white/60 shadow-none md:shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-none md:rounded-full px-4 md:px-8 py-4 md:py-3'}
+                        ? 'translate-y-4 md:translate-y-0 w-[calc(100%-32px)] md:w-full max-w-6xl bg-[#D2F34C] saturate-[1.8] backdrop-blur-xl border-white/60 rounded-[32px] md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 py-2 md:py-3' 
+                        : 'translate-y-0 md:translate-y-0 w-full md:w-full max-w-7xl md:max-w-6xl bg-transparent md:bg-[#D2F34C] md:saturate-[1.8] md:backdrop-blur-xl border-transparent md:border-white/60 shadow-none md:shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-none md:rounded-full px-4 md:px-8 py-4 md:py-3'}
                 `} 
                 ref={dropdownRef}
                 style={{ transformOrigin: 'top center' }}
