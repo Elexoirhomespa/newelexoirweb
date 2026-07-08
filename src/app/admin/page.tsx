@@ -430,10 +430,7 @@ export default function AdminDashboard() {
                 </nav>
 
                 <div className="p-4 space-y-2">
-                    <button onClick={() => setSelectedAdminBrand(null)} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-text hover:bg-white/5 rounded-xl text-sm font-semibold transition-colors border border-white/10">
-                        <Store size={18} />
-                        Switch Brand
-                    </button>
+
                     <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors">
                         <LogOut size={18} />
                         Logout
