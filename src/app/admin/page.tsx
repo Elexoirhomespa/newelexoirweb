@@ -378,6 +378,37 @@ export default function AdminDashboard() {
         }
     };
 
+    if (!selectedAdminBrand) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 font-sans">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[100px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-highlight/20 rounded-full blur-[100px] pointer-events-none" />
+                <div className="text-center max-w-md w-full relative z-10">
+                    <h1 className="text-3xl font-serif text-white mb-2">Select Brand</h1>
+                    <p className="text-white/60 mb-10 text-sm">Choose which brand dashboard you want to manage.</p>
+                    
+                    <div className="grid gap-4">
+                        <button 
+                            onClick={() => setSelectedAdminBrand('elexoir')}
+                            className="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex flex-col items-center gap-3 group"
+                        >
+                            <Store className="text-white/60 group-hover:text-white" size={32} />
+                            <span className="font-bold text-white uppercase tracking-widest text-sm">Elexoir Home Spa</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setSelectedAdminBrand('therapick')}
+                            className="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex flex-col items-center gap-3 group"
+                        >
+                            <Store className="text-white/60 group-hover:text-primary" size={32} />
+                            <span className="font-bold text-white uppercase tracking-widest text-sm">Therapick</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-black flex overflow-hidden font-sans text-white/90">
             
@@ -507,14 +538,14 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="text" required placeholder="e.g. Deep Tissue Flow" 
                                                     value={treatmentTitle} onChange={e => setTreatmentTitle(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Category</label>
                                                 <select 
                                                     value={treatmentCategory} onChange={e => setTreatmentCategory(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm appearance-none"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm appearance-none"
                                                 >
                                                     <option value="Massage">Massage</option>
                                                     <option value="Facial">Facial</option>
@@ -537,7 +568,7 @@ export default function AdminDashboard() {
                                                     <div className="flex-1 relative">
                                                         <input 
                                                             type="number" required placeholder="60" value={option.duration} onChange={(e) => handlePricingChange(idx, 'duration', e.target.value)}
-                                                            className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 pr-16 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                            className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 pr-16 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                         />
                                                         <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-semibold text-white/90-muted">MINS</span>
                                                     </div>
@@ -545,7 +576,7 @@ export default function AdminDashboard() {
                                                         <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-white/90-muted">Rp</span>
                                                         <input 
                                                             type="text" required placeholder="450,000" value={option.price} onChange={(e) => handlePricingChange(idx, 'price', e.target.value)}
-                                                            className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-12 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                            className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-12 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                         />
                                                     </div>
                                                     {pricingOptions.length > 1 && (
@@ -563,7 +594,7 @@ export default function AdminDashboard() {
                                             <textarea 
                                                 required rows={3} placeholder="Write a captivating description about the treatment..." 
                                                 value={treatmentDesc} onChange={e => setTreatmentDesc(e.target.value)}
-                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
@@ -579,7 +610,7 @@ export default function AdminDashboard() {
                                                 <div key={idx} className="flex items-center gap-4">
                                                     <input 
                                                         type="text" required placeholder="e.g. Relieves deep muscle tension" value={benefit} onChange={(e) => handleBenefitChange(idx, e.target.value)}
-                                                        className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                        className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                     />
                                                     {benefits.length > 1 && (
                                                         <button type="button" onClick={() => handleRemoveBenefit(idx)} className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-100 transition-colors">
@@ -601,7 +632,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="text" required placeholder="e.g. Summer Retreat" 
                                                     value={campaignTitle} onChange={e => setCampaignTitle(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -609,7 +640,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="text" required placeholder="e.g. Limited Offer" 
                                                     value={campaignLabel} onChange={e => setCampaignLabel(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
@@ -644,7 +675,7 @@ export default function AdminDashboard() {
                                             <textarea 
                                                 required rows={3} placeholder="Enjoy up to 20% off all signature treatments this month..." 
                                                 value={campaignDesc} onChange={e => setCampaignDesc(e.target.value)}
-                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
@@ -654,7 +685,7 @@ export default function AdminDashboard() {
                                                 <label className="text-xs font-bold uppercase tracking-widest text-white/90-muted ml-1">Campaign Duration</label>
                                                 <div className="relative">
                                                     <select 
-                                                        className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm appearance-none"
+                                                        className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm appearance-none"
                                                         value={campaignDuration}
                                                         onChange={(e) => setCampaignDuration(e.target.value)}
                                                     >
@@ -674,7 +705,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="number" required min="1" max="100" placeholder="20" 
                                                     value={discountPercentage} onChange={e => setDiscountPercentage(Number(e.target.value))}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
@@ -737,7 +768,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="text" required placeholder="e.g. Signature Massage Oil" 
                                                     value={productTitle} onChange={e => setProductTitle(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -745,7 +776,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="text" required placeholder="e.g. Oils" 
                                                     value={productCategory} onChange={e => setProductCategory(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
@@ -757,7 +788,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="text" required placeholder="e.g. 350,000" 
                                                     value={productPrice} onChange={e => setProductPrice(e.target.value)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -765,7 +796,7 @@ export default function AdminDashboard() {
                                                 <input 
                                                     type="number" required min="0" placeholder="e.g. 10" 
                                                     value={productStock} onChange={e => setProductStock(parseInt(e.target.value) || 0)}
-                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm"
+                                                    className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm"
                                                 />
                                             </div>
                                         </div>
@@ -801,7 +832,7 @@ export default function AdminDashboard() {
                                             <textarea 
                                                 required rows={4} placeholder="Write a captivating description about the product..." 
                                                 value={productDesc} onChange={e => setProductDesc(e.target.value)}
-                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
@@ -811,7 +842,7 @@ export default function AdminDashboard() {
                                             <textarea 
                                                 rows={4} placeholder="Instructions on how to use..." 
                                                 value={productHowToUse} onChange={e => setProductHowToUse(e.target.value)}
-                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm resize-none"
                                             />
                                         </div>
 
@@ -821,7 +852,7 @@ export default function AdminDashboard() {
                                             <textarea 
                                                 rows={3} placeholder="Comma-separated ingredients..." 
                                                 value={productIngredients} onChange={e => setProductIngredients(e.target.value)}
-                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-sm resize-none"
+                                                className="w-full bg-white/10 backdrop-blur-[40px] border border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/90-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white/20 transition-all shadow-sm resize-none"
                                             />
                                         </div>
                                     </>
