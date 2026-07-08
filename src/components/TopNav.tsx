@@ -56,8 +56,9 @@ export default function TopNav() {
     return (
         <div className="fixed top-0 md:top-6 left-0 right-0 z-50 flex justify-center pointer-events-none md:px-4">
             <header 
-                className={`pointer-events-auto flex items-center justify-between relative transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-auto
-                    translate-y-4 w-[calc(100%-32px)] max-w-6xl bg-white/70 saturate-[1.8] backdrop-blur-xl border border-white/60 rounded-[32px] md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 py-2 md:py-3`} 
+                className={`flex items-center justify-between relative transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-auto
+                    w-[calc(100%-32px)] max-w-6xl bg-white/70 saturate-[1.8] backdrop-blur-xl border border-white/60 rounded-[32px] md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-4 py-2 md:py-3
+                    ${isScrolled ? 'translate-y-4 opacity-100 pointer-events-auto' : '-translate-y-[150%] opacity-0 pointer-events-none'}`} 
                 ref={dropdownRef}
                 style={{ transformOrigin: 'top center' }}
             >
