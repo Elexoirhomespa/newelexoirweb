@@ -113,9 +113,9 @@ export function SpaProvider({ children }: { children: ReactNode }) {
         async function loadData() {
             let hasCache = false;
             try {
-                const cachedTreatments = localStorage.getItem('spa_treatments');
-                const cachedProducts = localStorage.getItem('spa_products');
-                const cachedCampaign = localStorage.getItem('spa_campaign');
+                const cachedTreatments = localStorage.getItem(`spa_treatments_${siteBrandFilter}`);
+                const cachedProducts = localStorage.getItem(`spa_products_${siteBrandFilter}`);
+                const cachedCampaign = localStorage.getItem(`spa_campaign_${siteBrandFilter}`);
 
                 if (cachedTreatments) {
                     setTreatments(JSON.parse(cachedTreatments));
@@ -150,15 +150,15 @@ export function SpaProvider({ children }: { children: ReactNode }) {
 
                 if (fetchedTreatments && fetchedTreatments.length > 0) {
                     setTreatments(fetchedTreatments);
-                    try { localStorage.setItem('spa_treatments', JSON.stringify(fetchedTreatments)); } catch(e) { console.warn("Cache full"); }
+                    try { localStorage.setItem(`spa_treatments_${siteBrandFilter}`, JSON.stringify(fetchedTreatments)); } catch(e) { console.warn("Cache full"); }
                 }
                 if (productsRes.data && productsRes.data.length > 0) {
                     setProducts(productsRes.data);
-                    try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch(e) { console.warn("Cache full"); }
+                    try { localStorage.setItem(`spa_products_${siteBrandFilter}`, JSON.stringify(productsRes.data)); } catch(e) { console.warn("Cache full"); }
                 }
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
                     setCampaign(campaignsRes.data[0] as Campaign);
-                    localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0]));
+                    localStorage.setItem(`spa_campaign_${siteBrandFilter}`, JSON.stringify(campaignsRes.data[0]));
                 }
                 
                 if (therapistsRes.data) {

@@ -340,10 +340,10 @@ export default async function RootLayout({
         className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
       >
         <SpaProvider>
-          <TopNav />
-          <main className="w-full relative min-h-[100dvh] bg-background overflow-x-hidden">
+            <TopNav />
+            <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">
               {children}
-          </main>
+            </main>
         </SpaProvider>
       </body>
     </html>
