@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, Bitcoin } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSpa } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
@@ -257,10 +258,11 @@ export default function Home() {
                         className="relative w-full h-[240px] md:h-[420px] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-[0_20px_40px_rgb(0,0,0,0.12)] mb-8 group cursor-pointer bg-primary"
                     >
                         {/* Background Image */}
-                        <img 
+                        <Image 
                             src={campaign.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
-                            alt={campaign.title} 
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                            alt={campaign.title}
+                            fill 
+                            className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
                         />
                         
                         {/* Cinematic Vignette & Gradients (Apple-like depth) */}
@@ -312,7 +314,7 @@ export default function Home() {
                                     <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
                                         <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
                                             {treatment.pinned_image ? (
-                                                <img src={treatment.pinned_image} alt={treatment.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                <Image src={treatment.pinned_image} alt={treatment.title} width={400} height={300} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                             ) : (
                                                 <div className={`w-full h-full bg-gradient-to-br ${treatment.bgPattern} opacity-30 group-hover:opacity-50 transition-opacity duration-500`}></div>
                                             )}
@@ -502,7 +504,7 @@ export default function Home() {
                                     
                                     {/* Image */}
                                     <div className="aspect-[4/5] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
-                                        <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <Image src={product.image} alt={product.title} width={400} height={500} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     </div>
                                     
                                     {/* Text Info */}
