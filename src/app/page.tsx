@@ -29,6 +29,13 @@ export default function Home() {
     const [isPriceFilterOpen, setIsPriceFilterOpen] = useState(false);
     const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
     const [showStory, setShowStory] = useState(false);
+    const [domain, setDomain] = useState('ubud');
+    
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setDomain(window.location.hostname.includes('balihomespaandmassage.com') ? 'bali' : 'ubud');
+        }
+    }, []);
     
     // Show only if there is at least one pinned treatment in the database
     const showPinnedTreatments = treatments.some(t => t.is_pinned);
@@ -174,8 +181,17 @@ export default function Home() {
                 {/* Slogan */}
                 <div className="md:hidden mt-4 mb-6 px-2">
                     <h1 className="font-serif text-3xl text-primary font-medium tracking-tight">
-                        The Art of <br/>
-                        <span className="italic opacity-80">Wellbeing</span>
+                        {domain === 'bali' ? (
+                            <>
+                                Bali Home <br/>
+                                <span className="italic opacity-80">Spa & Massage</span>
+                            </>
+                        ) : (
+                            <>
+                                The Art of <br/>
+                                <span className="italic opacity-80">Wellbeing</span>
+                            </>
+                        )}
                     </h1>
                 </div>
 
