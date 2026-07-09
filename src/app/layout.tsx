@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Newsreader } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
 import { SpaProvider } from "@/context/SpaContext";
+import GlobalLoader from "@/components/GlobalLoader";
 import { headers } from "next/headers";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -113,20 +114,13 @@ export default async function RootLayout({
   
   return (
     <html lang="en" className="antialiased scroll-smooth">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+
       <body
         data-domain={isBaliDomain ? "bali" : "ubud"}
         className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
       >
         <SpaProvider>
+          <GlobalLoader />
           <div className="flex flex-col min-h-screen w-full relative">
             <TopNav />
             <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">
