@@ -185,8 +185,8 @@ export default function Home() {
                     <h1 className="font-serif text-3xl text-primary font-medium tracking-tight">
                         {domain === 'bali' ? (
                             <>
-                                Home Spa <br/>
-                                <span className="italic opacity-80">Ubud</span>
+                                Awaken Your <br/>
+                                <span className="italic opacity-80">Senses</span>
                             </>
                         ) : (
                             <>
@@ -538,7 +538,7 @@ export default function Home() {
                             Sanctuary for the Soul
                         </h3>
                         <h3 className="font-serif text-4xl md:text-5xl text-primary font-medium mb-6 leading-tight domain-bali-only">
-                            The Best Mobile Spa in <span className="italic">Bali</span>
+                            Bespoke Tranquility at <span className="italic">Your Doorstep</span>
                         </h3>
                         <p className="text-text-muted leading-relaxed mb-8 font-light domain-ubud-only">
                             Born from the ancient healing traditions of Bali, Elexoir Home Spa was created with a singular vision: to bring unparalleled luxury and profound relaxation directly to your sanctuary. We believe that true wellness requires an environment where you feel completely at ease—your own home or villa.
