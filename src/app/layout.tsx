@@ -35,8 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const url = isBaliDomain ? "https://www.balihomespaandmassage.com" : "https://www.elexoirhomespaubud.com";
   const title = isBaliDomain ? "Bali Home Spa & Massage | Luxury Mobile Spa" : "Elexoir Home Spa | Premium Mobile Spa & In-Villa Massage Ubud";
   const description = isBaliDomain 
-      ? 'Looking for the best massage in Bali? We deliver premium, 5-star professional spa treatments directly to your private villa or hotel. Serving Seminyak, Canggu, Kuta, and Nusa Dua. Book now for ultimate relaxation!' 
-      : 'Experience Bali\'s top-rated luxury mobile spa. Professional in-villa massages, couples treatments & holistic rituals delivered directly to your hotel or villa in Ubud. Book your 5-star sanctuary today!';
+      ? "Looking for the best massage in Bali? We deliver premium, 5-star professional spa treatments directly to your private villa or hotel. Serving Seminyak, Canggu, Kuta, and Nusa Dua. Book now for ultimate relaxation!" 
+      : "Experience the top-rated luxury mobile spa in Bali. Professional in-villa massages, couples treatments & holistic rituals delivered directly to your hotel or villa in Ubud. Book your 5-star sanctuary today!";
 
   return {
     metadataBase: new URL(url),
@@ -60,9 +60,9 @@ export async function generateMetadata(): Promise<Metadata> {
       telephone: false,
     },
     icons: {
-      icon: '/icon.svg',
-      shortcut: '/icon.svg',
-      apple: '/icon.svg',
+      icon: '/logo.png',
+      shortcut: '/logo.png',
+      apple: '/logo.png',
     },
     openGraph: {
       title: title,
