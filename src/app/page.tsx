@@ -34,7 +34,8 @@ export default function Home() {
     
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
-            setDomain(window.location.hostname.includes('balihomespaandmassage.com') ? 'bali' : 'ubud');
+            const host = window.location.hostname;
+            setDomain((host.includes('homespaubud.com') && !host.includes('elexoir')) ? 'bali' : 'ubud');
         }
     }, []);
     
@@ -184,8 +185,8 @@ export default function Home() {
                     <h1 className="font-serif text-3xl text-primary font-medium tracking-tight">
                         {domain === 'bali' ? (
                             <>
-                                Bali Home <br/>
-                                <span className="italic opacity-80">Spa & Massage</span>
+                                Home Spa <br/>
+                                <span className="italic opacity-80">Ubud</span>
                             </>
                         ) : (
                             <>
@@ -539,8 +540,11 @@ export default function Home() {
                         <h3 className="font-serif text-4xl md:text-5xl text-primary font-medium mb-6 leading-tight domain-bali-only">
                             The Best Mobile Spa in <span className="italic">Bali</span>
                         </h3>
-                        <p className="text-text-muted leading-relaxed mb-8 font-light">
+                        <p className="text-text-muted leading-relaxed mb-8 font-light domain-ubud-only">
                             Born from the ancient healing traditions of Bali, Elexoir Home Spa was created with a singular vision: to bring unparalleled luxury and profound relaxation directly to your sanctuary. We believe that true wellness requires an environment where you feel completely at ease—your own home or villa.
+                        </p>
+                        <p className="text-text-muted leading-relaxed mb-8 font-light domain-bali-only">
+                            Born from the ancient healing traditions of Bali, Home Spa Ubud was created with a singular vision: to bring unparalleled luxury and profound relaxation directly to your sanctuary. We believe that true wellness requires an environment where you feel completely at ease—your own home or villa.
                         </p>
                         <AnimatePresence>
                             {showStory && (
@@ -554,7 +558,12 @@ export default function Home() {
                                         The Ultimate <span className="italic">Luxury Home Spa</span> in Bali
                                     </h4>
                                     <p className="text-text-muted leading-relaxed font-light mb-6">
-                                        Elevate your wellness journey with Elexoir Home Spa, Bali's premier mobile spa and in-villa massage service. Whether you are staying in the lush jungles of Ubud, the vibrant coasts of Canggu and Seminyak, or the breathtaking cliffs of Uluwatu, our certified professional therapists bring the ultimate 5-star spa experience directly to your doorstep.
+                                        <div className="domain-ubud-only">
+                                            Elevate your wellness journey with Elexoir Home Spa, Bali's premier mobile spa and in-villa massage service. Whether you are staying in the lush jungles of Ubud, the vibrant coasts of Canggu and Seminyak, or the breathtaking cliffs of Uluwatu, our certified professional therapists bring the ultimate 5-star spa experience directly to your doorstep.
+                                        </div>
+                                        <div className="domain-bali-only">
+                                            Elevate your wellness journey with Home Spa Ubud, Bali's premier mobile spa and in-villa massage service. Whether you are staying in the lush jungles of Ubud, the vibrant coasts of Canggu and Seminyak, or the breathtaking cliffs of Uluwatu, our certified professional therapists bring the ultimate 5-star spa experience directly to your doorstep.
+                                        </div>
                                     </p>
                                     <p className="text-text-muted leading-relaxed font-light mb-6">
                                         We specialize in traditional Balinese Massage, Deep Tissue therapies, and exclusive Couples Massage packages designed for absolute relaxation. Using only premium, organic massage oils and authentic holistic healing techniques, our bespoke spa treatments in Bali transform your private villa or hotel room into a tranquil sanctuary of rejuvenation.

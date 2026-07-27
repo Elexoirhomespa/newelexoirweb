@@ -53,7 +53,7 @@ export default function GlobalLoader() {
                                 transition={{ delay: 0.2, duration: 0.8 }}
                                 className="text-white font-serif tracking-[0.3em] md:tracking-[0.4em] text-xl md:text-2xl uppercase"
                             >
-                                {siteBrandFilter === 'bali' ? 'Bali Home Spa' : 'Elexoir'}
+                                {siteBrandFilter === 'bali' ? 'Home Spa Ubud' : 'Elexoir'}
                             </motion.h1>
                             <motion.p 
                                 initial={{ opacity: 0 }}

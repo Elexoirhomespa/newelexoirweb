@@ -16,7 +16,8 @@ export default function Footer() {
               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white group-hover:bg-primary transition-colors">
                 <Store size={20} strokeWidth={2} />
               </div>
-              <span className="font-serif text-xl font-medium tracking-wide">Elexoir Home Spa</span>
+              <span className="font-serif text-xl font-medium tracking-wide domain-ubud-only">Elexoir Home Spa</span>
+              <span className="font-serif text-xl font-medium tracking-wide domain-bali-only">Home Spa Ubud</span>
             </Link>
             <p className="text-sm text-white/60 leading-relaxed font-light mb-6">
               Bali's premier luxury mobile spa. Bringing 5-star professional massages and organic wellness treatments directly to your private villa or hotel.
@@ -61,7 +62,8 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
-                <span className="text-sm text-white/70 font-light">hello@elexoirhomespaubud.com</span>
+                <span className="text-sm text-white/70 font-light domain-ubud-only">hello@elexoirhomespaubud.com</span>
+                <span className="text-sm text-white/70 font-light domain-bali-only">hello@homespaubud.com</span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
@@ -76,8 +78,11 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/40 font-light">
+          <p className="text-xs text-white/40 font-light domain-ubud-only">
             &copy; {currentYear} Elexoir Home Spa. All rights reserved.
+          </p>
+          <p className="text-xs text-white/40 font-light domain-bali-only">
+            &copy; {currentYear} Home Spa Ubud. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link href="/privacy" className="text-xs text-white/40 hover:text-white transition-colors">Privacy Policy</Link>

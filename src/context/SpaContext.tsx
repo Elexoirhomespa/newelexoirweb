@@ -99,14 +99,14 @@ type SpaContextType = {
 
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
-export function SpaProvider({ children }: { children: ReactNode }) {
+export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
     const [treatments, setTreatments] = useState<Treatment[]>([]);
     const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [siteBrandFilter, setSiteBrandFilter] = useState<string>(process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
+    const [siteBrandFilter, setSiteBrandFilter] = useState<string>(brand || process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
     const [therapists, setTherapists] = useState<Therapist[]>([]);
 
     useEffect(() => {

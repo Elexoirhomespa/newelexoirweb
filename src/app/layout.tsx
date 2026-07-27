@@ -29,11 +29,11 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();
   const host = headersList.get("host") || "www.elexoirhomespaubud.com";
-  const isBaliDomain = host.includes("balihomespaandmassage.com");
+  const isBaliDomain = host.includes("homespaubud.com") && !host.includes("elexoir");
 
-  const name = isBaliDomain ? "Bali Home Spa & Massage" : "Elexoir Home Spa";
-  const url = isBaliDomain ? "https://www.balihomespaandmassage.com" : "https://www.elexoirhomespaubud.com";
-  const title = isBaliDomain ? "Bali Home Spa & Massage | Luxury Mobile Spa" : "Elexoir Home Spa | Premium Mobile Spa & In-Villa Massage Ubud";
+  const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
+  const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
+  const title = isBaliDomain ? "Home Spa Ubud | Luxury Mobile Spa" : "Elexoir Home Spa | Premium Mobile Spa & In-Villa Massage Ubud";
   const description = isBaliDomain 
       ? "Looking for the best massage in Bali? We deliver premium, 5-star professional spa treatments directly to your private villa or hotel. Serving Seminyak, Canggu, Kuta, and Nusa Dua. Book now for ultimate relaxation!" 
       : "Experience the top-rated luxury mobile spa in Bali. Professional in-villa massages, couples treatments & holistic rituals delivered directly to your hotel or villa in Ubud. Book your 5-star sanctuary today!";
@@ -108,10 +108,10 @@ export default async function RootLayout({
 }>) {
   const headersList = await headers();
   const host = headersList.get("host") || "www.elexoirhomespaubud.com";
-  const isBaliDomain = host.includes("balihomespaandmassage.com");
+  const isBaliDomain = host.includes("homespaubud.com") && !host.includes("elexoir");
 
-  const name = isBaliDomain ? "Bali Home Spa & Massage" : "Elexoir Home Spa";
-  const url = isBaliDomain ? "https://www.balihomespaandmassage.com" : "https://www.elexoirhomespaubud.com";
+  const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
+  const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
   
   return (
     <html lang="en" className="antialiased scroll-smooth">
@@ -135,7 +135,7 @@ export default async function RootLayout({
         data-domain={isBaliDomain ? "bali" : "ubud"}
         className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
       >
-        <SpaProvider>
+        <SpaProvider brand={isBaliDomain ? 'bali' : 'elexoir'}>
           <GlobalLoader />
           <div className="flex flex-col min-h-screen w-full relative">
             <TopNav />
