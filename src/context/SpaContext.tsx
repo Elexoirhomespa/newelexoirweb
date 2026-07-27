@@ -139,28 +139,53 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
 
             try {
                 const siteBrand = siteBrandFilter;
-                const [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
+                let [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
                     supabase.from('treatments').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
                     supabase.from('products').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
                     supabase.from('campaigns').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
                     supabase.from('therapists').select('*').eq('is_active', true).eq('brand', siteBrand).order('created_at', { ascending: false })
                 ]);
 
+                // Fallback to 'elexoir' if current brand has no treatments (handles new domains sharing the DB)
+                if (siteBrand !== 'elexoir' && (!treatmentsRes.data || treatmentsRes.data.length === 0)) {
+                    const fallbackRes = await Promise.all([
+                        supabase.from('treatments').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+                        supabase.from('products').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+                        supabase.from('campaigns').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+                        supabase.from('therapists').select('*').eq('is_active', true).eq('brand', 'elexoir').order('created_at', { ascending: false })
+                    ]);
+                    treatmentsRes = fallbackRes[0];
+                    productsRes = fallbackRes[1];
+                    campaignsRes = fallbackRes[2];
+                    therapistsRes = fallbackRes[3];
+                }
+
                 let fetchedTreatments = treatmentsRes.data;
 
                 if (fetchedTreatments && fetchedTreatments.length > 0) {
                     setTreatments(fetchedTreatments);
-                    try { localStorage.setItem('spa_treatments', JSON.stringify(fetchedTreatments)); } catch(e) { console.warn("Cache full"); }
+                    try { localStorage.setItem('spa_treatments', JSON.stringify(fetchedTreatments)); } catch (e) { console.warn("Cache full"); }
+                } else {
+                    setTreatments([]);
+                    try { localStorage.removeItem('spa_treatments'); } catch(e) {}
                 }
+
                 if (productsRes.data && productsRes.data.length > 0) {
                     setProducts(productsRes.data);
-                    try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch(e) { console.warn("Cache full"); }
+                    try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch (e) { console.warn("Cache full"); }
+                } else {
+                    setProducts([]);
+                    try { localStorage.removeItem('spa_products'); } catch(e) {}
                 }
+
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
                     setCampaign(campaignsRes.data[0] as Campaign);
-                    localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0]));
+                    try { localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0])); } catch(e) {}
+                } else {
+                    setCampaign(null);
+                    try { localStorage.removeItem('spa_campaign'); } catch(e) {}
                 }
-                
+
                 if (therapistsRes.data) {
                     setTherapists(therapistsRes.data);
                 }
@@ -179,7 +204,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
     }, [siteBrandFilter]);
 
     const toggleSavedProduct = (productId: string) => {
-        setSavedProducts(prev => 
+        setSavedProducts(prev =>
             prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
         );
     };
@@ -207,7 +232,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
     };
 
     return (
-        <SpaContext.Provider value={{ 
+        <SpaContext.Provider value={{
             treatments, setTreatments, campaign, setCampaign, products, setProducts,
             cartItems, addToCart, updateCartQuantity, removeFromCart, clearCart,
             savedProducts, toggleSavedProduct,
