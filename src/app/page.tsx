@@ -35,7 +35,7 @@ export default function Home() {
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.hostname;
-            setDomain((host.includes('homespaubud.com') && !host.includes('elexoir')) ? 'bali' : 'ubud');
+            setDomain((host.includes('homespaubud') || host.includes('ubudhomespa')) && !host.includes('elexoir') ? 'bali' : 'ubud');
         }
     }, []);
     

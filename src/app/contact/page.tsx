@@ -6,6 +6,17 @@ import { WHATSAPP_NUMBER } from '@/lib/constants';
 import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 
 export default function ContactPage() {
+    const [isBali, setIsBali] = React.useState(false);
+
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const host = window.location.hostname;
+            setIsBali((host.includes('homespaubud') || host.includes('ubudhomespa')) && !host.includes('elexoir'));
+        }
+    }, []);
+
+    const email = isBali ? "info@homespaubud.com" : "info@elexoirhomespa.com";
+
     return (
         <div className="min-h-screen bg-background pb-24">
             {/* Mobile Header */}
@@ -35,13 +46,13 @@ export default function ContactPage() {
                         </div>
                     </a>
 
-                    <a href="mailto:info@elexoirhomespa.com" className="flex items-center gap-4 bg-surface p-5 rounded-2xl border border-border/80 active:scale-95 transition-transform">
+                    <a href={`mailto:${email}`} className="flex items-center gap-4 bg-surface p-5 rounded-2xl border border-border/80 active:scale-95 transition-transform">
                         <div className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center shrink-0">
                             <Mail size={18} className="text-primary" />
                         </div>
                         <div>
                             <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted block mb-1">Email</span>
-                            <span className="font-sans font-medium text-sm text-primary">info@elexoirhomespa.com</span>
+                            <span className="font-sans font-medium text-sm text-primary">{email}</span>
                         </div>
                     </a>
 

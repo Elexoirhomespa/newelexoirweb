@@ -9,7 +9,7 @@ export default function FaqSection() {
   const faqs = [
     {
       q: "What is the best home spa in Bali?",
-      a: "Elexoir Home Spa is highly rated as one of the best luxury mobile spas in Bali. We specialize in bringing 5-star professional spa treatments, premium organic oils, and certified therapists directly to your private villa or hotel."
+      a: "We are highly rated as one of the best luxury mobile spas in Bali. We specialize in bringing 5-star professional spa treatments, premium organic oils, and certified therapists directly to your private villa or hotel."
     },
     {
       q: "Do you provide massage in villas?",

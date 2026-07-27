@@ -32,8 +32,11 @@ export default function ServiceAreas() {
         <div className="max-w-2xl">
           <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-3 block">Service Areas</span>
           <h2 className="font-serif text-3xl md:text-4xl text-primary leading-tight mb-4">We Come to Your Sanctuary</h2>
-          <p className="text-sm text-text-muted leading-relaxed font-light">
+          <p className="text-sm text-text-muted leading-relaxed font-light domain-ubud-only">
             Elexoir Home Spa provides luxury mobile massage and wellness services directly to private villas, estates, and hotels across Bali's most prestigious locations.
+          </p>
+          <p className="text-sm text-text-muted leading-relaxed font-light domain-bali-only">
+            We provide luxury mobile massage and wellness services directly to private villas, estates, and hotels across Bali's most prestigious locations.
           </p>
         </div>
       </div>

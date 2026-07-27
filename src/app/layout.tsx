@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();
   const host = headersList.get("host") || "www.elexoirhomespaubud.com";
-  const isBaliDomain = host.includes("homespaubud.com") && !host.includes("elexoir");
+  const isBaliDomain = (host.includes("homespaubud") || host.includes("ubudhomespa")) && !host.includes("elexoir");
 
   const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
@@ -108,7 +108,7 @@ export default async function RootLayout({
 }>) {
   const headersList = await headers();
   const host = headersList.get("host") || "www.elexoirhomespaubud.com";
-  const isBaliDomain = host.includes("homespaubud.com") && !host.includes("elexoir");
+  const isBaliDomain = (host.includes("homespaubud") || host.includes("ubudhomespa")) && !host.includes("elexoir");
 
   const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
