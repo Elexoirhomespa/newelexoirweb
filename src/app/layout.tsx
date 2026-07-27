@@ -59,6 +59,11 @@ export async function generateMetadata(): Promise<Metadata> {
       address: false,
       telephone: false,
     },
+    icons: {
+      icon: isBaliDomain ? '/bali-logo.png' : '/logo.png',
+      shortcut: isBaliDomain ? '/bali-logo.png' : '/logo.png',
+      apple: isBaliDomain ? '/bali-logo.png' : '/logo.png',
+    },
     openGraph: {
       title: title,
       description: description,
