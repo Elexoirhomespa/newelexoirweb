@@ -70,7 +70,8 @@ export default function AdminDashboard() {
         id: string;
         treatmentId: string;
         duration: string;
-        quantity: number;
+        treatmentsCount: number;
+        therapistsCount: number;
         showAdvanced: boolean;
     }[]>([]);
     const [treatmentDesc, setTreatmentDesc] = useState('');
@@ -892,7 +893,8 @@ export default function AdminDashboard() {
                                                         id: Date.now().toString() + Math.random(),
                                                         treatmentId: '',
                                                         duration: '',
-                                                        quantity: 1,
+                                                        treatmentsCount: 1,
+                                                        therapistsCount: 1,
                                                         showAdvanced: false
                                                     }]);
                                                 }}
@@ -913,7 +915,7 @@ export default function AdminDashboard() {
                                                 </button>
                                                 
                                                 <div className="flex flex-col md:flex-row items-end gap-3 w-full">
-                                                    <div className="flex-[2] space-y-1 w-full">
+                                                    <div className="flex-[3] space-y-1 w-full">
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Treatment</label>
                                                         <select 
                                                             value={calc.treatmentId} 
@@ -924,7 +926,8 @@ export default function AdminDashboard() {
                                                                     ...c, 
                                                                     treatmentId, 
                                                                     duration: '',
-                                                                    quantity: 1,
+                                                                    treatmentsCount: 1,
+                                                                    therapistsCount: 1,
                                                                 } : c));
                                                             }}
                                                             className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
@@ -935,7 +938,7 @@ export default function AdminDashboard() {
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    <div className="flex-1 space-y-1 w-full">
+                                                    <div className="flex-[2] space-y-1 w-full">
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Duration</label>
                                                         <select 
                                                             value={calc.duration} 
@@ -949,27 +952,41 @@ export default function AdminDashboard() {
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    <div className="space-y-1 w-full md:w-auto">
-                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Qty</label>
-                                                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 h-[42px]">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, quantity: Math.max(1, c.quantity - 1) } : c))}
-                                                                className="w-8 h-full rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                                                            >
-                                                                -
-                                                            </button>
-                                                            <span className="text-sm font-bold w-6 text-center text-gray-900">{calc.quantity}</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, quantity: c.quantity + 1 } : c))}
-                                                                className="w-8 h-full rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                                                            >
-                                                                +
-                                                            </button>
+                                                </div>
+
+                                                {/* Advanced Settings Toggle */}
+                                                <div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, showAdvanced: !c.showAdvanced } : c))}
+                                                        className="text-[11px] font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1 uppercase tracking-wider"
+                                                    >
+                                                        <Settings size={12} /> {calc.showAdvanced ? 'Hide Advanced Settings' : 'Advanced Settings'}
+                                                    </button>
+                                                </div>
+
+                                                {calc.showAdvanced && (
+                                                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 mt-2">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Treatments</label>
+                                                            <input 
+                                                                type="number" min="1" 
+                                                                value={calc.treatmentsCount} 
+                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, treatmentsCount: parseInt(e.target.value) || 1 } : c))}
+                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Total Therapists</label>
+                                                            <input 
+                                                                type="number" min="1" 
+                                                                value={calc.therapistsCount} 
+                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: parseInt(e.target.value) || 1 } : c))}
+                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                            />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )}
 
                                                 {calc.treatmentId && calc.duration && (
                                                     <div className="pt-4 border-t border-gray-100">
@@ -980,23 +997,23 @@ export default function AdminDashboard() {
                                                             const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
                                                             const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                             
-                                                            const totalPrice = price * calc.quantity;
-                                                            const totalFee = fee * calc.quantity;
+                                                            const totalPrice = price * calc.treatmentsCount;
+                                                            const totalFee = fee * calc.therapistsCount;
                                                             const profit = totalPrice - totalFee;
 
                                                             return (
-                                                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                                                <div className="grid grid-cols-3 gap-2">
                                                                     <div>
-                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase">Subtotal Revenue</span>
-                                                                        <span className="text-sm font-bold text-gray-900">Rp {totalPrice.toLocaleString('en-US')}</span>
+                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase truncate">Revenue</span>
+                                                                        <span className="text-sm font-bold text-gray-900 truncate">Rp {totalPrice.toLocaleString('en-US')}</span>
                                                                     </div>
-                                                                    <div>
-                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase">Therapist Fees</span>
-                                                                        <span className="text-sm font-bold text-red-500">- Rp {totalFee.toLocaleString('en-US')}</span>
+                                                                    <div className="text-center border-l border-r border-gray-100 px-2">
+                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase truncate">Therapist Fee</span>
+                                                                        <span className="text-sm font-bold text-red-500 truncate">- Rp {totalFee.toLocaleString('en-US')}</span>
                                                                     </div>
                                                                     <div className="text-right">
-                                                                        <span className="block text-[10px] font-bold text-green-600 uppercase">Profit</span>
-                                                                        <span className="text-base font-black text-green-600">Rp {profit.toLocaleString('en-US')}</span>
+                                                                        <span className="block text-[10px] font-bold text-green-600 uppercase truncate">Profit</span>
+                                                                        <span className="text-base font-black text-green-600 truncate">Rp {profit.toLocaleString('en-US')}</span>
                                                                     </div>
                                                                 </div>
                                                             );
@@ -1016,7 +1033,8 @@ export default function AdminDashboard() {
                                                             id: Date.now().toString() + Math.random(),
                                                             treatmentId: '',
                                                             duration: '',
-                                                            quantity: 1,
+                                                            treatmentsCount: 1,
+                                                            therapistsCount: 1,
                                                             showAdvanced: false
                                                         }]);
                                                     }}
@@ -1039,20 +1057,25 @@ export default function AdminDashboard() {
                                                 const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
                                                 const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                 
-                                                const totalPrice = price * calc.quantity;
-                                                const totalFee = fee * calc.quantity;
+                                                const totalPrice = price * calc.treatmentsCount;
+                                                const totalFee = fee * calc.therapistsCount;
                                                 
                                                 grandTotalPrice += totalPrice;
                                                 grandTotalFee += totalFee;
 
-                                                summaryLines.push(`• ${treatment?.title}`);
-                                                summaryLines.push(`  Duration: ${calc.duration} Mins`);
-                                                if (calc.quantity > 1) {
-                                                    summaryLines.push(`  Quantity: ${calc.quantity}`);
+                                                summaryLines.push(treatment?.title.toUpperCase() || 'TREATMENT');
+                                                summaryLines.push(`DURATION ${calc.duration} MINUTES`);
+                                                if (calc.treatmentsCount > 1) {
+                                                    summaryLines.push(`TREATMENTS ${calc.treatmentsCount}`);
                                                 }
-                                                summaryLines.push(`  Revenue: Rp ${totalPrice.toLocaleString('en-US')}`);
-                                                summaryLines.push(`  Therapist Fee: Rp ${totalFee.toLocaleString('en-US')}`);
-                                                summaryLines.push('  ------------------------');
+                                                summaryLines.push(`REVENUE IDR ${totalPrice.toLocaleString('en-US')}`);
+                                                summaryLines.push(`THERAPIST FEE IDR ${totalFee.toLocaleString('en-US')}`);
+                                                summaryLines.push(`${calc.therapistsCount} THERAPIST${calc.therapistsCount > 1 ? 'S' : ''}`);
+                                                summaryLines.push('');
+                                                if (idx < calculations.length - 1) {
+                                                    summaryLines.push('------------------------');
+                                                    summaryLines.push('');
+                                                }
                                             });
 
                                             const grandProfit = grandTotalPrice - grandTotalFee;
