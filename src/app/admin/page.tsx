@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle, Store, Sparkles, Plus, Trash2, Megaphone, Edit3, Pin, ChevronDown, ChevronUp, Calculator, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle, Store, Sparkles, Plus, Trash2, Megaphone, Edit3, Pin, ChevronDown, ChevronUp, Calculator, MoreHorizontal, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
@@ -66,8 +66,14 @@ export default function AdminDashboard() {
     const [treatmentCategory, setTreatmentCategory] = useState('massage');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-    const [calcTreatmentId, setCalcTreatmentId] = useState('');
-    const [calcDuration, setCalcDuration] = useState('');
+    const [calculations, setCalculations] = useState<{
+        id: string;
+        treatmentId: string;
+        duration: string;
+        customersCount: number;
+        therapistsCount: number;
+        showAdvanced: boolean;
+    }[]>([]);
     const [treatmentDesc, setTreatmentDesc] = useState('');
     const [editingTreatmentId, setEditingTreatmentId] = useState<string | null>(null);
 
@@ -386,7 +392,7 @@ export default function AdminDashboard() {
                 <div className="p-8">
                     <Link href="/" className="flex items-center gap-2 text-gray-900 hover:opacity-80 transition-opacity">
                         <Store size={20} strokeWidth={2.5} />
-                        <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Elexoir Admin</span>
+                        <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Admin</span>
                     </Link>
                 </div>
                 
@@ -453,27 +459,12 @@ export default function AdminDashboard() {
                     <div className="md:hidden flex items-center justify-between mb-8">
                         <Link href="/" className="flex items-center gap-2 text-gray-900">
                             <Store size={20} strokeWidth={2.5} />
-                            <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Elexoir</span>
+                            <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Admin</span>
                         </Link>
                         {/* Tab buttons removed in favor of bottom nav bar */}
                     </div>
 
-                    <header className="mb-10">
-                        <h1 className="font-serif text-3xl md:text-4xl text-gray-900 font-medium mb-2">
-                            {activeTab === 'treatment' ? (editingTreatmentId ? 'Edit Treatment' : 'Create New Treatment') : 
-                             activeTab === 'campaign' ? 'Create Campaign Card' : 
-                             activeTab === 'store' ? (editingProductId ? 'Edit Product' : 'Add New Product') : 
-                             activeTab === 'fees' ? 'Set Therapist Fee' :
-                             activeTab === 'list' ? 'Menu & Offers Management' : 'Settings'}
-                        </h1>
-                        <p className="text-gray-600 text-sm">
-                            {activeTab === 'treatment' ? 'Add or edit a massage or ritual to your spa menu.' : 
-                             activeTab === 'campaign' ? 'Design a stunning new promotional banner for the homepage.' :
-                             activeTab === 'store' ? 'Add physical products like oils or candles to the Elexoir Boutique.' :
-                             activeTab === 'fees' ? 'Configure fees paid to therapists based on the duration of the treatment.' :
-                             activeTab === 'list' ? 'Manage your published treatments, campaigns, and store products.' : ''}
-                        </p>
-                    </header>
+
 
                     <AnimatePresence mode="wait">
                         <motion.div 
@@ -918,68 +909,220 @@ export default function AdminDashboard() {
                                             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                                                 <Calculator size={20} className="text-secondary" /> Commission Calculator
                                             </h2>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => {
+                                                    setCalculations([...calculations, {
+                                                        id: Date.now().toString() + Math.random(),
+                                                        treatmentId: '',
+                                                        duration: '',
+                                                        customersCount: 1,
+                                                        therapistsCount: 1,
+                                                        showAdvanced: false
+                                                    }]);
+                                                }}
+                                                className="text-xs font-bold text-white bg-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm"
+                                            >
+                                                <Plus size={14} /> Add Treatment
+                                            </button>
                                         </div>
-                                        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Select Treatment</label>
-                                                    <select 
-                                                        value={calcTreatmentId} 
-                                                        onChange={e => { setCalcTreatmentId(e.target.value); setCalcDuration(''); }}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
-                                                    >
-                                                        <option value="" disabled>Select a treatment</option>
-                                                        {treatments.map(t => (
-                                                            <option key={t.id} value={t.id}>{t.title}</option>
-                                                        ))}
-                                                    </select>
+
+                                        {calculations.map((calc, idx) => (
+                                            <div key={calc.id} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 md:p-6 space-y-4 relative">
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setCalculations(calculations.filter(c => c.id !== calc.id))}
+                                                    className="absolute top-4 right-4 text-red-400 hover:text-red-600 p-1 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Treatment</label>
+                                                        <select 
+                                                            value={calc.treatmentId} 
+                                                            onChange={e => { 
+                                                                const treatmentId = e.target.value;
+                                                                const selectedTreatment = treatments.find(t => t.id === treatmentId);
+                                                                const title = selectedTreatment?.title.toLowerCase() || '';
+                                                                const isTwoTherapists = title.includes('couple') || title.includes('four hand') || title.includes('four-hand');
+                                                                
+                                                                setCalculations(calculations.map(c => c.id === calc.id ? { 
+                                                                    ...c, 
+                                                                    treatmentId, 
+                                                                    duration: '',
+                                                                    therapistsCount: isTwoTherapists ? 2 : 1,
+                                                                    customersCount: title.includes('couple') ? 2 : 1
+                                                                } : c));
+                                                            }}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
+                                                        >
+                                                            <option value="" disabled>Select a treatment</option>
+                                                            {treatments.map(t => (
+                                                                <option key={t.id} value={t.id}>{t.title}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Duration</label>
+                                                        <select 
+                                                            value={calc.duration} 
+                                                            onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, duration: e.target.value } : c))}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
+                                                            disabled={!calc.treatmentId}
+                                                        >
+                                                            <option value="" disabled>Select a duration</option>
+                                                            {calc.treatmentId && treatments.find(t => t.id === calc.treatmentId)?.options.map(opt => (
+                                                                <option key={opt.duration} value={opt.duration}>{opt.duration}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Select Duration</label>
-                                                    <select 
-                                                        value={calcDuration} 
-                                                        onChange={e => setCalcDuration(e.target.value)}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
-                                                        disabled={!calcTreatmentId}
+
+                                                {/* Advanced Settings Toggle */}
+                                                <div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, showAdvanced: !c.showAdvanced } : c))}
+                                                        className="text-[11px] font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1 uppercase tracking-wider"
                                                     >
-                                                        <option value="" disabled>Select a duration</option>
-                                                        {calcTreatmentId && treatments.find(t => t.id === calcTreatmentId)?.options.map(opt => (
-                                                            <option key={opt.duration} value={opt.duration}>{opt.duration}</option>
-                                                        ))}
-                                                    </select>
+                                                        <Settings size={12} /> {calc.showAdvanced ? 'Hide Advanced Settings' : 'Advanced Settings'}
+                                                    </button>
                                                 </div>
+
+                                                {calc.showAdvanced && (
+                                                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 mt-2">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Customers</label>
+                                                            <input 
+                                                                type="number" min="1" 
+                                                                value={calc.customersCount} 
+                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, customersCount: parseInt(e.target.value) || 1 } : c))}
+                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Total Therapists</label>
+                                                            <input 
+                                                                type="number" min="1" 
+                                                                value={calc.therapistsCount} 
+                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: parseInt(e.target.value) || 1 } : c))}
+                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {calc.treatmentId && calc.duration && (
+                                                    <div className="pt-4 border-t border-gray-100">
+                                                        {(() => {
+                                                            const treatment = treatments.find(t => t.id === calc.treatmentId);
+                                                            const option = treatment?.options.find(o => o.duration === calc.duration);
+                                                            const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
+                                                            const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
+                                                            const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
+                                                            
+                                                            const totalPrice = price * calc.customersCount;
+                                                            const totalFee = fee * calc.therapistsCount;
+                                                            const profit = totalPrice - totalFee;
+
+                                                            return (
+                                                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                                                    <div>
+                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase">Subtotal Revenue</span>
+                                                                        <span className="text-sm font-bold text-gray-900">Rp {totalPrice.toLocaleString('en-US')}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase">Therapist Fees</span>
+                                                                        <span className="text-sm font-bold text-red-500">- Rp {totalFee.toLocaleString('en-US')}</span>
+                                                                    </div>
+                                                                    <div className="text-right">
+                                                                        <span className="block text-[10px] font-bold text-green-600 uppercase">Profit</span>
+                                                                        <span className="text-base font-black text-green-600">Rp {profit.toLocaleString('en-US')}</span>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                )}
                                             </div>
+                                        ))}
+
+                                        {calculations.length === 0 && (
+                                            <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-white">
+                                                <p className="text-sm text-gray-600 mb-4">No treatments added to calculator.</p>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => {
+                                                        setCalculations([{
+                                                            id: Date.now().toString() + Math.random(),
+                                                            treatmentId: '',
+                                                            duration: '',
+                                                            customersCount: 1,
+                                                            therapistsCount: 1,
+                                                            showAdvanced: false
+                                                        }]);
+                                                    }}
+                                                    className="text-xs font-bold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-block"
+                                                >
+                                                    Add First Treatment
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {calculations.length > 0 && calculations.every(c => c.treatmentId && c.duration) && (() => {
+                                            let grandTotalPrice = 0;
+                                            let grandTotalFee = 0;
+                                            let summaryLines: string[] = [];
+
+                                            calculations.forEach(calc => {
+                                                const treatment = treatments.find(t => t.id === calc.treatmentId);
+                                                const option = treatment?.options.find(o => o.duration === calc.duration);
+                                                const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
+                                                const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
+                                                const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
+                                                
+                                                const totalPrice = price * calc.customersCount;
+                                                const totalFee = fee * calc.therapistsCount;
+                                                
+                                                grandTotalPrice += totalPrice;
+                                                grandTotalFee += totalFee;
+
+                                                summaryLines.push(`• ${treatment?.title} (${calc.duration})`);
+                                                summaryLines.push(`  Revenue: Rp ${totalPrice.toLocaleString('en-US')}`);
+                                                summaryLines.push(`  Therapist Fee: Rp ${totalFee.toLocaleString('en-US')} (${calc.therapistsCount} therapist${calc.therapistsCount > 1 ? 's' : ''})`);
+                                            });
+
+                                            const grandProfit = grandTotalPrice - grandTotalFee;
                                             
-                                            {calcTreatmentId && calcDuration && (
-                                                <div className="mt-8 p-6 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
-                                                    {(() => {
-                                                        const treatment = treatments.find(t => t.id === calcTreatmentId);
-                                                        const option = treatment?.options.find(o => o.duration === calcDuration);
-                                                        const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
-                                                        const feeStr = therapistFees.find(f => f.treatment_id === calcTreatmentId && f.duration === calcDuration)?.fee || '0';
-                                                        const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
-                                                        const profit = price - fee;
-                                                        
-                                                        return (
-                                                            <>
-                                                                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                                                                    <span className="text-sm font-semibold text-gray-600">Customer Price</span>
-                                                                    <span className="text-lg font-bold text-gray-900">Rp {price.toLocaleString('en-US')}</span>
-                                                                </div>
-                                                                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                                                                    <span className="text-sm font-semibold text-gray-600">Therapist Fee</span>
-                                                                    <span className="text-lg font-bold text-red-500">- Rp {fee.toLocaleString('en-US')}</span>
-                                                                </div>
-                                                                <div className="flex justify-between items-center pt-2">
-                                                                    <span className="text-base font-bold text-gray-900">Spa Profit</span>
-                                                                    <span className="text-xl font-black text-green-600">Rp {profit.toLocaleString('en-US')}</span>
-                                                                </div>
-                                                            </>
-                                                        );
-                                                    })()}
+                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nTotal Revenue: Rp ${grandTotalPrice.toLocaleString('en-US')}\nTotal Therapist Fees: Rp ${grandTotalFee.toLocaleString('en-US')}\n*Net Profit: Rp ${grandProfit.toLocaleString('en-US')}*`;
+
+                                            return (
+                                                <div className="mt-8 p-6 bg-gray-900 rounded-2xl shadow-xl space-y-4">
+                                                    <div className="flex justify-between items-center pb-4 border-b border-white/20">
+                                                        <span className="text-sm font-semibold text-white/80">Total Customer Revenue</span>
+                                                        <span className="text-lg font-bold text-white">Rp {grandTotalPrice.toLocaleString('en-US')}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center pb-4 border-b border-white/20">
+                                                        <span className="text-sm font-semibold text-white/80">Total Therapist Fees</span>
+                                                        <span className="text-lg font-bold text-red-400">- Rp {grandTotalFee.toLocaleString('en-US')}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center pt-2 mb-6">
+                                                        <span className="text-base font-bold text-white">Total Spa Profit</span>
+                                                        <span className="text-xl font-black text-green-400">Rp {grandProfit.toLocaleString('en-US')}</span>
+                                                    </div>
+                                                    <a 
+                                                        href={`https://wa.me/6285174119423?text=${encodeURIComponent(waText)}`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm"
+                                                    >
+                                                        <Send size={18} /> Send Summary to WhatsApp
+                                                    </a>
                                                 </div>
-                                            )}
-                                        </div>
+                                            );
+                                        })()}
                                     </div>
                                 )}
 
@@ -995,7 +1138,7 @@ export default function AdminDashboard() {
                                                     type="button"
                                                     className={`flex-1 py-3 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${listView === view ? 'bg-gray-900 text-white shadow-md' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                                                 >
-                                                    {view === 'campaign' ? 'Active Campaign' : view === 'treatments' ? 'Treatments' : 'Elexoir Boutique'}
+                                                    {view === 'campaign' ? 'Active Campaign' : view === 'treatments' ? 'Treatments' : 'Boutique'}
                                                 </button>
                                             ))}
                                         </div>
@@ -1153,7 +1296,7 @@ export default function AdminDashboard() {
                                                 {/* Store Section */}
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        <Store size={20} className="text-gray-900" /> Elexoir Boutique
+                                                        <Store size={20} className="text-gray-900" /> Boutique
                                                     </h2>
                                                     <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">{products.length} Products</span>
                                                 </div>
