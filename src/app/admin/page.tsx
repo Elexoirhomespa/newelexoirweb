@@ -70,7 +70,6 @@ export default function AdminDashboard() {
         id: string;
         treatmentId: string;
         duration: string;
-        customersCount: number;
         therapistsCount: number;
         showAdvanced: boolean;
     }[]>([]);
@@ -909,7 +908,6 @@ export default function AdminDashboard() {
                                                         id: Date.now().toString() + Math.random(),
                                                         treatmentId: '',
                                                         duration: '',
-                                                        customersCount: 1,
                                                         therapistsCount: 1,
                                                         showAdvanced: false
                                                     }]);
@@ -946,7 +944,6 @@ export default function AdminDashboard() {
                                                                     treatmentId, 
                                                                     duration: '',
                                                                     therapistsCount: isTwoTherapists ? 2 : 1,
-                                                                    customersCount: title.includes('couple') ? 2 : 1
                                                                 } : c));
                                                             }}
                                                             className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
@@ -984,28 +981,28 @@ export default function AdminDashboard() {
                                                     </button>
                                                 </div>
 
-                                                {calc.showAdvanced && (
-                                                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 mt-2">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Customers</label>
-                                                            <input 
-                                                                type="number" min="1" 
-                                                                value={calc.customersCount} 
-                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, customersCount: parseInt(e.target.value) || 1 } : c))}
-                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900"
-                                                            />
-                                                        </div>
-                                                        <div className="space-y-1">
+                                                    <div className="pt-2 border-t border-gray-100 mt-2">
+                                                        <div className="space-y-1 max-w-[200px]">
                                                             <label className="text-[10px] font-bold uppercase text-gray-500">Total Therapists</label>
-                                                            <input 
-                                                                type="number" min="1" 
-                                                                value={calc.therapistsCount} 
-                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: parseInt(e.target.value) || 1 } : c))}
-                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900"
-                                                            />
+                                                            <div className="flex items-center gap-3">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: Math.max(1, c.therapistsCount - 1) } : c))}
+                                                                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                                                                >
+                                                                    -
+                                                                </button>
+                                                                <span className="text-sm font-bold w-4 text-center">{calc.therapistsCount}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: c.therapistsCount + 1 } : c))}
+                                                                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                )}
 
                                                 {calc.treatmentId && calc.duration && (
                                                     <div className="pt-4 border-t border-gray-100">
@@ -1016,7 +1013,7 @@ export default function AdminDashboard() {
                                                             const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
                                                             const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                             
-                                                            const totalPrice = price * calc.customersCount;
+                                                            const totalPrice = price;
                                                             const totalFee = fee * calc.therapistsCount;
                                                             const profit = totalPrice - totalFee;
 
@@ -1052,7 +1049,6 @@ export default function AdminDashboard() {
                                                             id: Date.now().toString() + Math.random(),
                                                             treatmentId: '',
                                                             duration: '',
-                                                            customersCount: 1,
                                                             therapistsCount: 1,
                                                             showAdvanced: false
                                                         }]);
@@ -1076,20 +1072,25 @@ export default function AdminDashboard() {
                                                 const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
                                                 const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                 
-                                                const totalPrice = price * calc.customersCount;
+                                                const totalPrice = price;
                                                 const totalFee = fee * calc.therapistsCount;
                                                 
                                                 grandTotalPrice += totalPrice;
                                                 grandTotalFee += totalFee;
 
-                                                summaryLines.push(`• ${treatment?.title} (${calc.duration})`);
+                                                summaryLines.push(`• ${treatment?.title}`);
+                                                summaryLines.push(`  Duration: ${calc.duration} Mins`);
+                                                if (calc.therapistsCount > 1) {
+                                                    summaryLines.push(`  Therapists: ${calc.therapistsCount}`);
+                                                }
                                                 summaryLines.push(`  Revenue: Rp ${totalPrice.toLocaleString('en-US')}`);
-                                                summaryLines.push(`  Therapist Fee: Rp ${totalFee.toLocaleString('en-US')} (${calc.therapistsCount} therapist${calc.therapistsCount > 1 ? 's' : ''})`);
+                                                summaryLines.push(`  Therapist Fee: Rp ${totalFee.toLocaleString('en-US')}`);
+                                                summaryLines.push(''); // Add a blank line between treatments
                                             });
 
                                             const grandProfit = grandTotalPrice - grandTotalFee;
                                             
-                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nTotal Revenue: Rp ${grandTotalPrice.toLocaleString('en-US')}\nTotal Therapist Fees: Rp ${grandTotalFee.toLocaleString('en-US')}\n*Net Profit: Rp ${grandProfit.toLocaleString('en-US')}*`;
+                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}*TOTALS*\nTotal Revenue: Rp ${grandTotalPrice.toLocaleString('en-US')}\nTotal Therapist Fees: Rp ${grandTotalFee.toLocaleString('en-US')}\n*Net Profit: Rp ${grandProfit.toLocaleString('en-US')}*`;
 
                                             return (
                                                 <div className="mt-8 p-6 bg-gray-900 rounded-2xl shadow-xl space-y-4">
