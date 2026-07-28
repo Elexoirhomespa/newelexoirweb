@@ -70,7 +70,7 @@ export default function AdminDashboard() {
         id: string;
         treatmentId: string;
         duration: string;
-        therapistsCount: number;
+        quantity: number;
         showAdvanced: boolean;
     }[]>([]);
     const [treatmentDesc, setTreatmentDesc] = useState('');
@@ -297,27 +297,20 @@ export default function AdminDashboard() {
         }));
     };
 
-    const handleSaveFees = async (treatmentId: string, options: {duration: string}[]) => {
-        setIsSubmitting(true);
-        for (const opt of options) {
-            const feeValue = feeInputs[`${treatmentId}-${opt.duration}`];
-            if (feeValue) {
-                // Check if exists
-                const existing = therapistFees.find(f => f.treatment_id === treatmentId && f.duration === opt.duration);
-                if (existing) {
-                    await supabase.from('therapist_fees').update({ fee: feeValue }).eq('id', existing.id);
-                    setTherapistFees(prev => prev.map(f => f.id === existing.id ? { ...f, fee: feeValue } : f));
-                } else {
-                    const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration: opt.duration, fee: feeValue }]).select();
-                    if (data && data.length > 0) {
-                        setTherapistFees(prev => [...prev, data[0] as TherapistFee]);
-                    }
+    const handleSaveFeeSingle = async (treatmentId: string, duration: string) => {
+        const feeValue = feeInputs[`${treatmentId}-${duration}`];
+        if (feeValue !== undefined) {
+            const existing = therapistFees.find(f => f.treatment_id === treatmentId && f.duration === duration);
+            if (existing && existing.fee !== feeValue) {
+                await supabase.from('therapist_fees').update({ fee: feeValue }).eq('id', existing.id);
+                setTherapistFees(prev => prev.map(f => f.id === existing.id ? { ...f, fee: feeValue } : f));
+            } else if (!existing && feeValue) {
+                const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration, fee: feeValue }]).select();
+                if (data && data.length > 0) {
+                    setTherapistFees(prev => [...prev, data[0] as TherapistFee]);
                 }
             }
         }
-        setIsSubmitting(false);
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
     };
 
     const resizeImage = (file: File): Promise<string> => {
@@ -867,22 +860,13 @@ export default function AdminDashboard() {
                                                                                             placeholder="0"
                                                                                             value={feeInputs[`${t.id}-${opt.duration}`] || ''}
                                                                                             onChange={(e) => handleFeeChange(t.id, opt.duration, e.target.value)}
+                                                                                            onBlur={() => handleSaveFeeSingle(t.id, opt.duration)}
                                                                                             className="w-32 bg-gray-100 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-right"
                                                                                         />
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
                                                                         ))}
-                                                                    </div>
-                                                                    <div className="flex justify-end pt-2">
-                                                                        <button 
-                                                                            type="button"
-                                                                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleSaveFees(t.id, t.options); }}
-                                                                            className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                            disabled={isSubmitting}
-                                                                        >
-                                                                            <CheckCircle size={14} /> Save {t.title} Fees
-                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             </motion.div>
@@ -908,7 +892,7 @@ export default function AdminDashboard() {
                                                         id: Date.now().toString() + Math.random(),
                                                         treatmentId: '',
                                                         duration: '',
-                                                        therapistsCount: 1,
+                                                        quantity: 1,
                                                         showAdvanced: false
                                                     }]);
                                                 }}
@@ -928,22 +912,19 @@ export default function AdminDashboard() {
                                                     <Trash2 size={14} />
                                                 </button>
                                                 
-                                                <div className="flex items-end gap-3 w-full">
-                                                    <div className="flex-[3] space-y-1">
+                                                <div className="flex flex-col md:flex-row items-end gap-3 w-full">
+                                                    <div className="flex-[2] space-y-1 w-full">
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Treatment</label>
                                                         <select 
                                                             value={calc.treatmentId} 
                                                             onChange={e => { 
                                                                 const treatmentId = e.target.value;
-                                                                const selectedTreatment = treatments.find(t => t.id === treatmentId);
-                                                                const title = selectedTreatment?.title.toLowerCase() || '';
-                                                                const isTwoTherapists = title.includes('couple') || title.includes('four hand') || title.includes('four-hand');
                                                                 
                                                                 setCalculations(calculations.map(c => c.id === calc.id ? { 
                                                                     ...c, 
                                                                     treatmentId, 
                                                                     duration: '',
-                                                                    therapistsCount: isTwoTherapists ? 2 : 1,
+                                                                    quantity: 1,
                                                                 } : c));
                                                             }}
                                                             className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
@@ -954,7 +935,7 @@ export default function AdminDashboard() {
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    <div className="flex-[2] space-y-1">
+                                                    <div className="flex-1 space-y-1 w-full">
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Duration</label>
                                                         <select 
                                                             value={calc.duration} 
@@ -968,41 +949,27 @@ export default function AdminDashboard() {
                                                             ))}
                                                         </select>
                                                     </div>
-                                                </div>
-
-                                                {/* Advanced Settings Toggle */}
-                                                <div>
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, showAdvanced: !c.showAdvanced } : c))}
-                                                        className="text-[11px] font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1 uppercase tracking-wider"
-                                                    >
-                                                        <Settings size={12} /> {calc.showAdvanced ? 'Hide Advanced Settings' : 'Advanced Settings'}
-                                                    </button>
-                                                </div>
-
-                                                    <div className="pt-2 border-t border-gray-100 mt-2">
-                                                        <div className="space-y-1 max-w-[200px]">
-                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Total Therapists</label>
-                                                            <div className="flex items-center gap-3">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: Math.max(1, c.therapistsCount - 1) } : c))}
-                                                                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                                                                >
-                                                                    -
-                                                                </button>
-                                                                <span className="text-sm font-bold w-4 text-center">{calc.therapistsCount}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: c.therapistsCount + 1 } : c))}
-                                                                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                                                                >
-                                                                    +
-                                                                </button>
-                                                            </div>
+                                                    <div className="space-y-1 w-full md:w-auto">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Qty</label>
+                                                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 h-[42px]">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, quantity: Math.max(1, c.quantity - 1) } : c))}
+                                                                className="w-8 h-full rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                                            >
+                                                                -
+                                                            </button>
+                                                            <span className="text-sm font-bold w-6 text-center text-gray-900">{calc.quantity}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, quantity: c.quantity + 1 } : c))}
+                                                                className="w-8 h-full rounded-lg bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                                            >
+                                                                +
+                                                            </button>
                                                         </div>
                                                     </div>
+                                                </div>
 
                                                 {calc.treatmentId && calc.duration && (
                                                     <div className="pt-4 border-t border-gray-100">
@@ -1013,8 +980,8 @@ export default function AdminDashboard() {
                                                             const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
                                                             const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                             
-                                                            const totalPrice = price;
-                                                            const totalFee = fee * calc.therapistsCount;
+                                                            const totalPrice = price * calc.quantity;
+                                                            const totalFee = fee * calc.quantity;
                                                             const profit = totalPrice - totalFee;
 
                                                             return (
@@ -1049,7 +1016,7 @@ export default function AdminDashboard() {
                                                             id: Date.now().toString() + Math.random(),
                                                             treatmentId: '',
                                                             duration: '',
-                                                            therapistsCount: 1,
+                                                            quantity: 1,
                                                             showAdvanced: false
                                                         }]);
                                                     }}
@@ -1072,20 +1039,20 @@ export default function AdminDashboard() {
                                                 const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
                                                 const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                 
-                                                const totalPrice = price;
-                                                const totalFee = fee * calc.therapistsCount;
+                                                const totalPrice = price * calc.quantity;
+                                                const totalFee = fee * calc.quantity;
                                                 
                                                 grandTotalPrice += totalPrice;
                                                 grandTotalFee += totalFee;
 
                                                 summaryLines.push(`• ${treatment?.title}`);
                                                 summaryLines.push(`  Duration: ${calc.duration} Mins`);
-                                                if (calc.therapistsCount > 1) {
-                                                    summaryLines.push(`  Therapists: ${calc.therapistsCount}`);
+                                                if (calc.quantity > 1) {
+                                                    summaryLines.push(`  Quantity: ${calc.quantity}`);
                                                 }
                                                 summaryLines.push(`  Revenue: Rp ${totalPrice.toLocaleString('en-US')}`);
                                                 summaryLines.push(`  Therapist Fee: Rp ${totalFee.toLocaleString('en-US')}`);
-                                                summaryLines.push(''); // Add a blank line between treatments
+                                                summaryLines.push('  ------------------------');
                                             });
 
                                             const grandProfit = grandTotalPrice - grandTotalFee;
