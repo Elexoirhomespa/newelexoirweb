@@ -1007,7 +1007,7 @@ export default function AdminDashboard() {
                                                             const treatment = treatments.find(t => t.id === calc.treatmentId);
                                                             const option = treatment?.options.find(o => o.duration === calc.duration);
                                                             const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
-                                                            const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
+                                                            const feeStr = feeInputs[`${calc.treatmentId}-${calc.duration}`] || '0';
                                                             const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                             
                                                             const totalPrice = price * calc.treatmentsCount;
@@ -1067,7 +1067,7 @@ export default function AdminDashboard() {
                                                 const treatment = treatments.find(t => t.id === calc.treatmentId);
                                                 const option = treatment?.options.find(o => o.duration === calc.duration);
                                                 const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
-                                                const feeStr = therapistFees.find(f => f.treatment_id === calc.treatmentId && f.duration === calc.duration)?.fee || '0';
+                                                const feeStr = feeInputs[`${calc.treatmentId}-${calc.duration}`] || '0';
                                                 const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
                                                 
                                                 const totalPrice = price * calc.treatmentsCount;
