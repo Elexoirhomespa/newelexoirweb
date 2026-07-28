@@ -1091,7 +1091,7 @@ export default function AdminDashboard() {
 
                                             const grandProfit = grandTotalPrice - grandTotalFee;
                                             
-                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nTOTAL REVENUE: RP ${grandTotalPrice.toLocaleString('en-US')}\nTOTAL THERAPIST FEES: RP ${grandTotalFee.toLocaleString('en-US')}\n*NET PROFIT: RP ${grandProfit.toLocaleString('en-US')}*`;
+                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nREVENUE: RP ${grandTotalPrice.toLocaleString('en-US')}\nTHERAPIST FEES: RP ${grandTotalFee.toLocaleString('en-US')}\n*NET PROFIT: RP ${grandProfit.toLocaleString('en-US')}*`;
 
                                             return (
                                                 <div className="mt-8 p-6 bg-gray-900 rounded-2xl shadow-xl space-y-4">
