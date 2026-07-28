@@ -24,13 +24,13 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         async function fetchFees() {
-            const { data } = await supabase.from('therapist_fees').select('*').eq('brand', 'elexoir').order('created_at', { ascending: false });
+            const { data } = await supabase.from('therapist_fees').select('*').eq('brand', siteBrandFilter).order('created_at', { ascending: false });
             if (data) {
                 setTherapistFees(data);
             }
         }
         fetchFees();
-    }, []);
+    }, [siteBrandFilter]);
 
     // Campaign specific fields
     const [campaignTitle, setCampaignTitle] = useState(campaign?.title || '');
@@ -146,7 +146,8 @@ export default function AdminDashboard() {
                     duration: campaignDuration,
                     discountPercentage,
                     selectedTreatments: campaignTreatments,
-                    is_published: true
+                    is_published: true,
+                    brand: siteBrandFilter
                 };
                 if (editingCampaignId) {
                     await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
@@ -168,7 +169,8 @@ export default function AdminDashboard() {
                     benefits: benefits.filter(b => b.trim() !== ''),
                     bgPattern: 'from-secondary/10 via-white to-white',
                     options: pricingOptions.map(o => ({ duration: o.duration, price: o.price })),
-                    is_published: true
+                    is_published: true,
+                    brand: siteBrandFilter
                 };
                 
                 if (editingTreatmentId) {
@@ -195,7 +197,8 @@ export default function AdminDashboard() {
                     stock: productStock,
                     howToUse: productHowToUse,
                     ingredients: productIngredients,
-                    is_published: true
+                    is_published: true,
+                    brand: siteBrandFilter
                 };
                 
                 if (editingProductId) {
@@ -306,7 +309,7 @@ export default function AdminDashboard() {
                 await supabase.from('therapist_fees').update({ fee: feeValue }).eq('id', existing.id);
                 setTherapistFees(prev => prev.map(f => f.id === existing.id ? { ...f, fee: feeValue } : f));
             } else if (!existing && feeValue) {
-                const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration, fee: feeValue }]).select();
+                const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration, fee: feeValue, brand: siteBrandFilter }]).select();
                 if (data && data.length > 0) {
                     setTherapistFees(prev => [...prev, data[0] as TherapistFee]);
                 }
@@ -444,6 +447,26 @@ export default function AdminDashboard() {
 
                 <div className="max-w-4xl mx-auto p-6 md:p-12 relative z-10 pt-12 md:pt-12 pb-32 md:pb-12">
                     
+                    {/* Domain Switcher */}
+                    <div className="mb-8 flex justify-center">
+                        <div className="inline-flex bg-gray-200/50 p-1.5 rounded-2xl backdrop-blur-md border border-gray-100 shadow-inner">
+                            <button
+                                type="button"
+                                onClick={() => setSiteBrandFilter('elexoir')}
+                                className={`px-6 py-2.5 rounded-[12px] text-sm font-bold transition-all duration-300 ${siteBrandFilter === 'elexoir' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                            >
+                                Elexoir (Ubud)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSiteBrandFilter('bali')}
+                                className={`px-6 py-2.5 rounded-[12px] text-sm font-bold transition-all duration-300 ${siteBrandFilter === 'bali' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                            >
+                                Home Spa (Bali)
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Mobile Header (Hidden on Desktop) */}
                     <div className="md:hidden flex items-center justify-between mb-8">
                         {/* Mobile Header Removed */}
