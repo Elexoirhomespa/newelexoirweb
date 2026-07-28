@@ -390,10 +390,6 @@ export default function AdminDashboard() {
             {/* Sidebar */}
             <aside className="hidden md:flex flex-col w-64 bg-white border border-gray-200 border-r border-gray-200 shadow-soft z-20">
                 <div className="p-8">
-                    <Link href="/" className="flex items-center gap-2 text-gray-900 hover:opacity-80 transition-opacity">
-                        <Store size={20} strokeWidth={2.5} />
-                        <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Admin</span>
-                    </Link>
                 </div>
                 
                 <nav className="flex-1 px-4 py-6 space-y-2">
@@ -457,10 +453,7 @@ export default function AdminDashboard() {
                     
                     {/* Mobile Header (Hidden on Desktop) */}
                     <div className="md:hidden flex items-center justify-between mb-8">
-                        <Link href="/" className="flex items-center gap-2 text-gray-900">
-                            <Store size={20} strokeWidth={2.5} />
-                            <span className="text-[13px] font-bold tracking-widest uppercase mt-1">Admin</span>
-                        </Link>
+                        {/* Mobile Header Removed */}
                         {/* Tab buttons removed in favor of bottom nav bar */}
                     </div>
 
@@ -810,7 +803,7 @@ export default function AdminDashboard() {
                                     <div className="space-y-6">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                                             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                <Store size={20} className="text-secondary" /> Therapist Fees Setup
+                                                Therapist Fees Setup
                                             </h2>
                                             <div className="flex items-center gap-4">
                                                 <input 
@@ -907,7 +900,7 @@ export default function AdminDashboard() {
                                     <div className="space-y-6">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                                             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                <Calculator size={20} className="text-secondary" /> Commission Calculator
+                                                Commission Calculator
                                             </h2>
                                             <button 
                                                 type="button" 
@@ -937,9 +930,9 @@ export default function AdminDashboard() {
                                                     <Trash2 size={14} />
                                                 </button>
                                                 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="space-y-2">
-                                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Treatment</label>
+                                                <div className="flex items-end gap-3 w-full">
+                                                    <div className="flex-[3] space-y-1">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Treatment</label>
                                                         <select 
                                                             value={calc.treatmentId} 
                                                             onChange={e => { 
@@ -956,23 +949,23 @@ export default function AdminDashboard() {
                                                                     customersCount: title.includes('couple') ? 2 : 1
                                                                 } : c));
                                                             }}
-                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
                                                         >
-                                                            <option value="" disabled>Select a treatment</option>
+                                                            <option value="" disabled>Select</option>
                                                             {treatments.map(t => (
                                                                 <option key={t.id} value={t.id}>{t.title}</option>
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    <div className="space-y-2">
-                                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Duration</label>
+                                                    <div className="flex-[2] space-y-1">
+                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Duration</label>
                                                         <select 
                                                             value={calc.duration} 
                                                             onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, duration: e.target.value } : c))}
-                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
                                                             disabled={!calc.treatmentId}
                                                         >
-                                                            <option value="" disabled>Select a duration</option>
+                                                            <option value="" disabled>Select</option>
                                                             {calc.treatmentId && treatments.find(t => t.id === calc.treatmentId)?.options.map(opt => (
                                                                 <option key={opt.duration} value={opt.duration}>{opt.duration}</option>
                                                             ))}
@@ -1148,7 +1141,7 @@ export default function AdminDashboard() {
                                                 {/* Campaigns Section */}
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        <Megaphone size={20} className="text-accent" /> Active Campaign
+                                                        Active Campaign
                                                     </h2>
                                                     {campaign && (
                                                         <span className="text-xs font-semibold text-accent bg-accent/10 px-3 py-1 rounded-full">Live on Homepage</span>
@@ -1204,7 +1197,7 @@ export default function AdminDashboard() {
                                                 {/* Treatments Section */}
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        <Store size={20} className="text-secondary" /> Published Treatments
+                                                        Published Treatments
                                                     </h2>
                                                     <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">{treatments.length} Active</span>
                                                 </div>
@@ -1296,7 +1289,7 @@ export default function AdminDashboard() {
                                                 {/* Store Section */}
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        <Store size={20} className="text-gray-900" /> Boutique
+                                                        Boutique
                                                     </h2>
                                                     <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">{products.length} Products</span>
                                                 </div>
