@@ -1077,21 +1077,21 @@ export default function AdminDashboard() {
                                                 grandTotalFee += totalFee;
 
                                                 summaryLines.push(treatment?.title.toUpperCase() || 'TREATMENT');
-                                                summaryLines.push(`Duration: ${calc.duration} Mins`);
+                                                summaryLines.push(`DURATION: ${calc.duration} MINS`);
                                                 if (calc.treatmentsCount > 1) {
-                                                    summaryLines.push(`Treatments: ${calc.treatmentsCount}`);
+                                                    summaryLines.push(`TREATMENTS: ${calc.treatmentsCount}`);
                                                 }
-                                                summaryLines.push(`Revenue: Rp ${totalPrice.toLocaleString('en-US')}`);
-                                                summaryLines.push(`Therapist Fee: Rp ${totalFee.toLocaleString('en-US')}`);
+                                                summaryLines.push(`REVENUE: RP ${totalPrice.toLocaleString('en-US')}`);
+                                                summaryLines.push(`THERAPIST FEE: RP ${totalFee.toLocaleString('en-US')}`);
                                                 if (calc.therapistsCount > 1) {
-                                                    summaryLines.push(`Therapists: ${calc.therapistsCount}`);
+                                                    summaryLines.push(`THERAPISTS: ${calc.therapistsCount}`);
                                                 }
                                                 summaryLines.push('------------------------');
                                             });
 
                                             const grandProfit = grandTotalPrice - grandTotalFee;
                                             
-                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nTotal Revenue: Rp ${grandTotalPrice.toLocaleString('en-US')}\nTotal Therapist Fees: Rp ${grandTotalFee.toLocaleString('en-US')}\n*Net Profit: Rp ${grandProfit.toLocaleString('en-US')}*`;
+                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nTOTAL REVENUE: RP ${grandTotalPrice.toLocaleString('en-US')}\nTOTAL THERAPIST FEES: RP ${grandTotalFee.toLocaleString('en-US')}\n*NET PROFIT: RP ${grandProfit.toLocaleString('en-US')}*`;
 
                                             return (
                                                 <div className="mt-8 p-6 bg-gray-900 rounded-2xl shadow-xl space-y-4">
