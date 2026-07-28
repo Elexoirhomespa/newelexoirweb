@@ -914,79 +914,92 @@ export default function AdminDashboard() {
                                                     <Trash2 size={14} />
                                                 </button>
                                                 
-                                                <div className="flex flex-col md:flex-row items-end gap-3 w-full">
-                                                    <div className="flex-[3] space-y-1 w-full">
-                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Treatment</label>
-                                                        <select 
-                                                            value={calc.treatmentId} 
-                                                            onChange={e => { 
-                                                                const treatmentId = e.target.value;
-                                                                
-                                                                setCalculations(calculations.map(c => c.id === calc.id ? { 
-                                                                    ...c, 
-                                                                    treatmentId, 
-                                                                    duration: '',
-                                                                    treatmentsCount: 1,
-                                                                    therapistsCount: 1,
-                                                                } : c));
-                                                            }}
-                                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
-                                                        >
-                                                            <option value="" disabled>Select</option>
-                                                            {treatments.map(t => (
-                                                                <option key={t.id} value={t.id}>{t.title}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div className="flex-[2] space-y-1 w-full">
-                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Duration</label>
-                                                        <select 
-                                                            value={calc.duration} 
-                                                            onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, duration: e.target.value } : c))}
-                                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
-                                                            disabled={!calc.treatmentId}
-                                                        >
-                                                            <option value="" disabled>Select</option>
-                                                            {calc.treatmentId && treatments.find(t => t.id === calc.treatmentId)?.options.map(opt => (
-                                                                <option key={opt.duration} value={opt.duration}>{opt.duration}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                {/* Advanced Settings Toggle */}
-                                                <div>
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, showAdvanced: !c.showAdvanced } : c))}
-                                                        className="text-[11px] font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1 uppercase tracking-wider"
-                                                    >
-                                                        <Settings size={12} /> {calc.showAdvanced ? 'Hide Advanced Settings' : 'Advanced Settings'}
-                                                    </button>
-                                                </div>
-
-                                                {calc.showAdvanced && (
-                                                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 mt-2">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Treatments</label>
-                                                            <input 
-                                                                type="number" min="1" 
-                                                                value={calc.treatmentsCount} 
-                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, treatmentsCount: parseInt(e.target.value) || 1 } : c))}
-                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                            />
+                                                <div className="flex flex-col gap-3 w-full">
+                                                    <div className="flex flex-col md:flex-row items-end gap-3 w-full">
+                                                        <div className="flex-[3] space-y-1 w-full">
+                                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Treatment</label>
+                                                            <select 
+                                                                value={calc.treatmentId} 
+                                                                onChange={e => { 
+                                                                    const treatmentId = e.target.value;
+                                                                    
+                                                                    setCalculations(calculations.map(c => c.id === calc.id ? { 
+                                                                        ...c, 
+                                                                        treatmentId, 
+                                                                        duration: '',
+                                                                        treatmentsCount: 1,
+                                                                        therapistsCount: 1,
+                                                                    } : c));
+                                                                }}
+                                                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
+                                                            >
+                                                                <option value="" disabled>Select</option>
+                                                                {treatments.map(t => (
+                                                                    <option key={t.id} value={t.id}>{t.title}</option>
+                                                                ))}
+                                                            </select>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10px] font-bold uppercase text-gray-500">Total Therapists</label>
-                                                            <input 
-                                                                type="number" min="1" 
-                                                                value={calc.therapistsCount} 
-                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: parseInt(e.target.value) || 1 } : c))}
-                                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                                            />
+                                                        <div className="flex-[2] space-y-1 w-full">
+                                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Duration</label>
+                                                            <select 
+                                                                value={calc.duration} 
+                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, duration: e.target.value } : c))}
+                                                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
+                                                                disabled={!calc.treatmentId}
+                                                            >
+                                                                <option value="" disabled>Select</option>
+                                                                {calc.treatmentId && treatments.find(t => t.id === calc.treatmentId)?.options.map(opt => (
+                                                                    <option key={opt.duration} value={opt.duration}>{opt.duration}</option>
+                                                                ))}
+                                                            </select>
                                                         </div>
                                                     </div>
-                                                )}
+                                                    
+                                                    {calc.treatmentId && (
+                                                        <div className="flex flex-col md:flex-row items-center gap-3 w-full pt-1">
+                                                            <div className="flex items-center justify-between w-full md:w-auto md:gap-3 bg-gray-50/50 rounded-xl px-3 py-1.5 border border-gray-100">
+                                                                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Treatments</label>
+                                                                <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 h-[32px]">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, treatmentsCount: Math.max(1, c.treatmentsCount - 1) } : c))}
+                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                                                    >
+                                                                        -
+                                                                    </button>
+                                                                    <span className="text-sm font-bold w-6 text-center text-gray-900">{calc.treatmentsCount}</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, treatmentsCount: c.treatmentsCount + 1 } : c))}
+                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                                                    >
+                                                                        +
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center justify-between w-full md:w-auto md:gap-3 bg-gray-50/50 rounded-xl px-3 py-1.5 border border-gray-100">
+                                                                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Therapists</label>
+                                                                <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 h-[32px]">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: Math.max(1, c.therapistsCount - 1) } : c))}
+                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                                                    >
+                                                                        -
+                                                                    </button>
+                                                                    <span className="text-sm font-bold w-6 text-center text-gray-900">{calc.therapistsCount}</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: c.therapistsCount + 1 } : c))}
+                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                                                    >
+                                                                        +
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
 
                                                 {calc.treatmentId && calc.duration && (
                                                     <div className="pt-4 border-t border-gray-100">
@@ -1064,23 +1077,21 @@ export default function AdminDashboard() {
                                                 grandTotalFee += totalFee;
 
                                                 summaryLines.push(treatment?.title.toUpperCase() || 'TREATMENT');
-                                                summaryLines.push(`DURATION ${calc.duration} MINUTES`);
+                                                summaryLines.push(`Duration: ${calc.duration} Mins`);
                                                 if (calc.treatmentsCount > 1) {
-                                                    summaryLines.push(`TREATMENTS ${calc.treatmentsCount}`);
+                                                    summaryLines.push(`Treatments: ${calc.treatmentsCount}`);
                                                 }
-                                                summaryLines.push(`REVENUE IDR ${totalPrice.toLocaleString('en-US')}`);
-                                                summaryLines.push(`THERAPIST FEE IDR ${totalFee.toLocaleString('en-US')}`);
-                                                summaryLines.push(`${calc.therapistsCount} THERAPIST${calc.therapistsCount > 1 ? 'S' : ''}`);
-                                                summaryLines.push('');
-                                                if (idx < calculations.length - 1) {
-                                                    summaryLines.push('------------------------');
-                                                    summaryLines.push('');
+                                                summaryLines.push(`Revenue: Rp ${totalPrice.toLocaleString('en-US')}`);
+                                                summaryLines.push(`Therapist Fee: Rp ${totalFee.toLocaleString('en-US')}`);
+                                                if (calc.therapistsCount > 1) {
+                                                    summaryLines.push(`Therapists: ${calc.therapistsCount}`);
                                                 }
+                                                summaryLines.push('------------------------');
                                             });
 
                                             const grandProfit = grandTotalPrice - grandTotalFee;
                                             
-                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}*TOTALS*\nTotal Revenue: Rp ${grandTotalPrice.toLocaleString('en-US')}\nTotal Therapist Fees: Rp ${grandTotalFee.toLocaleString('en-US')}\n*Net Profit: Rp ${grandProfit.toLocaleString('en-US')}*`;
+                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nTotal Revenue: Rp ${grandTotalPrice.toLocaleString('en-US')}\nTotal Therapist Fees: Rp ${grandTotalFee.toLocaleString('en-US')}\n*Net Profit: Rp ${grandProfit.toLocaleString('en-US')}*`;
 
                                             return (
                                                 <div className="mt-8 p-6 bg-gray-900 rounded-2xl shadow-xl space-y-4">
