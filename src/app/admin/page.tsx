@@ -1083,6 +1083,7 @@ export default function AdminDashboard() {
                                                 }
                                                 summaryLines.push(`REVENUE: RP ${totalPrice.toLocaleString('en-US')}`);
                                                 summaryLines.push(`THERAPIST FEE: RP ${totalFee.toLocaleString('en-US')}`);
+                                                summaryLines.push(`PROFIT: RP ${(totalPrice - totalFee).toLocaleString('en-US')}`);
                                                 if (calc.therapistsCount > 1) {
                                                     summaryLines.push(`THERAPISTS: ${calc.therapistsCount}`);
                                                 }
