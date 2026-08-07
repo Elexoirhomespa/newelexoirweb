@@ -63,6 +63,7 @@ export type Campaign = {
     tripOffer?: string; // e.g. "25% OFF Bali Day Trip & Fastboat"
     campaignType?: string; // "trip_discount" | "spa_discount" | "nusa_penida"
     is_published?: boolean;
+    brand?: string;
     created_at?: string;
     updated_at?: string;
 };
@@ -189,12 +190,46 @@ type SpaContextType = {
 
 
 
+export const DEFAULT_CAMPAIGNS: Campaign[] = [
+    {
+        id: 'summer-retreat-2026',
+        title: 'Summer Retreat',
+        label: 'EXCLUSIVE OFFER',
+        description: 'Indulge in holistic relaxation with private therapist villa service, organic botanical aromatherapy, and revitalizing body treatments.',
+        image: 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center',
+        duration: '1_month',
+        discountPercentage: 20,
+        selectedTreatments: [
+            { treatmentId: 'balinese-massage', durations: ['60 MINS', '90 MINS', '120 MINS', '60', '90', '120'] },
+            { treatmentId: 'aromatherapy-massage', durations: ['60 MINS', '90 MINS', '120 MINS', '60', '90', '120'] }
+        ],
+        tripOffer: 'Complimentary Botanical Scrub & Luxury Villa Setup',
+        is_published: true,
+        brand: 'elexoir'
+    },
+    {
+        id: 'bali-day-trip-combo',
+        title: 'Bali Day Trip & Spa Combo',
+        label: 'EXCLUSIVE TRIP DEAL',
+        description: 'Full day private exploration across Ubud waterfalls & sacred temples, followed by our signature restorative villa body ritual.',
+        image: 'https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center',
+        duration: '1_month',
+        discountPercentage: 25,
+        selectedTreatments: [
+            { treatmentId: 'balinese-massage', durations: ['60 MINS', '90 MINS', '60', '90'] }
+        ],
+        tripOffer: '25% OFF Bali Day Trip & Fastboat Transfer',
+        is_published: true,
+        brand: 'elexoir'
+    }
+];
+
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
 export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
     const [treatments, setTreatments] = useState<Treatment[]>([]);
-    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-    const [campaign, setCampaign] = useState<Campaign | null>(null);
+    const [campaigns, setCampaigns] = useState<Campaign[]>(DEFAULT_CAMPAIGNS);
+    const [campaign, setCampaign] = useState<Campaign | null>(DEFAULT_CAMPAIGNS[0]);
     const [products, setProducts] = useState<Product[]>([]);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
@@ -221,18 +256,31 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 }
                 if (cachedCampaigns) {
                     const parsed = JSON.parse(cachedCampaigns);
-                    setCampaigns(parsed);
-                    if (parsed.length > 0) setCampaign(parsed[0]);
-                    hasCache = true;
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        setCampaigns(parsed);
+                        setCampaign(parsed[0]);
+                        hasCache = true;
+                    }
                 } else if (cachedCampaign) {
                     const single = JSON.parse(cachedCampaign);
-                    setCampaign(single);
-                    setCampaigns([single]);
-                    hasCache = true;
+                    if (single) {
+                        setCampaign(single);
+                        setCampaigns([single]);
+                        hasCache = true;
+                    }
+                }
+
+                if (!cachedCampaigns && !cachedCampaign) {
+                    setCampaigns(DEFAULT_CAMPAIGNS);
+                    setCampaign(DEFAULT_CAMPAIGNS[0]);
+                    try {
+                        localStorage.setItem('spa_campaigns', JSON.stringify(DEFAULT_CAMPAIGNS));
+                        localStorage.setItem('spa_campaign', JSON.stringify(DEFAULT_CAMPAIGNS[0]));
+                    } catch(e) {}
                 }
 
                 if (hasCache) {
-                    setIsLoading(false); // Hide skeleton if we have cached data
+                    setIsLoading(false);
                 }
             } catch (e) {
                 console.error("Error reading from localStorage", e);
@@ -261,24 +309,17 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                     therapistsRes = fallbackRes[3];
                 }
 
-                let fetchedTreatments = treatmentsRes.data;
-
-                if (fetchedTreatments && fetchedTreatments.length > 0) {
-                    setTreatments(fetchedTreatments);
-                    try { localStorage.setItem('spa_treatments', JSON.stringify(fetchedTreatments)); } catch (e) { console.warn("Cache full"); }
-                } else {
-                    setTreatments([]);
-                    try { localStorage.removeItem('spa_treatments'); } catch(e) {}
+                if (treatmentsRes.data && treatmentsRes.data.length > 0) {
+                    setTreatments(treatmentsRes.data);
+                    try { localStorage.setItem('spa_treatments', JSON.stringify(treatmentsRes.data)); } catch (e) { console.warn("Cache full"); }
                 }
 
                 if (productsRes.data && productsRes.data.length > 0) {
                     setProducts(productsRes.data);
                     try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch (e) { console.warn("Cache full"); }
-                } else {
-                    setProducts([]);
-                    try { localStorage.removeItem('spa_products'); } catch(e) {}
                 }
 
+                // If DB has campaigns, update state and local cache
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
                     const fetchedCampaigns = campaignsRes.data as Campaign[];
                     setCampaigns(fetchedCampaigns);
@@ -287,21 +328,10 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                         localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
                         localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0]));
                     } catch(e) {}
-                } else {
-                    setCampaigns([]);
-                    setCampaign(null);
-                    try { 
-                        localStorage.removeItem('spa_campaigns');
-                        localStorage.removeItem('spa_campaign');
-                    } catch(e) {}
                 }
 
                 if (therapistsRes.data) {
                     setTherapists(therapistsRes.data);
-                }
-
-                if (hasCache) {
-                    setIsLoading(false);
                 }
             } catch (error) {
                 console.error("Error fetching data from Supabase:", error);
@@ -311,6 +341,28 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
         }
 
         loadData();
+
+        // Listen for realtime sync across tabs or admin updates
+        const handleSync = () => {
+            try {
+                const stored = localStorage.getItem('spa_campaigns');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        setCampaigns(parsed);
+                        setCampaign(parsed[0]);
+                    }
+                }
+            } catch (e) {}
+        };
+
+        window.addEventListener('storage', handleSync);
+        window.addEventListener('spa_campaigns_updated', handleSync);
+
+        return () => {
+            window.removeEventListener('storage', handleSync);
+            window.removeEventListener('spa_campaigns_updated', handleSync);
+        };
     }, [siteBrandFilter]);
 
     const toggleSavedProduct = (productId: string) => {

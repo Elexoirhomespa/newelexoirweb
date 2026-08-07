@@ -332,7 +332,7 @@ export default function Home() {
                                             : 'w-full'
                                     }`}
                                 >
-                                    <div className="relative w-full h-[200px] sm:h-[230px] md:h-[260px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-md group bg-black border border-black/15">
+                                    <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-black border border-black/15">
                                         {/* Background Image */}
                                         <Image 
                                             src={camp.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
@@ -346,14 +346,10 @@ export default function Home() {
                                         
                                         {/* Card Content */}
                                         <div className="absolute inset-0 p-4 sm:p-5 md:p-6 flex flex-col justify-between z-10 text-white">
-                                            {/* Top Badges */}
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-black text-[9px] font-black tracking-widest uppercase shadow-sm">
+                                            {/* Top Badge */}
+                                            <div className="flex items-center justify-start">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] md:text-[10px] font-black tracking-widest uppercase shadow-md">
                                                     {camp.label || 'SPECIAL PROMO'}
-                                                </span>
-
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
-                                                    -{camp.discountPercentage}% OFF
                                                 </span>
                                             </div>
 
@@ -361,21 +357,23 @@ export default function Home() {
                                             <div className="flex items-end justify-between gap-3">
                                                 <div className="min-w-0 pr-2">
                                                     {camp.tripOffer && (
-                                                        <span className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-white/80 block mb-0.5 line-clamp-1">
+                                                        <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-1 drop-shadow-sm line-clamp-1">
                                                             {camp.tripOffer}
                                                         </span>
                                                     )}
-                                                    <h3 className="font-serif text-base sm:text-lg md:text-2xl font-bold leading-tight text-white line-clamp-1">
+                                                    <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-white drop-shadow-md tracking-tight line-clamp-1">
                                                         {camp.title}
                                                     </h3>
-                                                    <p className="text-white/80 text-[11px] md:text-xs line-clamp-1 font-light mt-0.5 hidden sm:block">
-                                                        {camp.description}
-                                                    </p>
+                                                    {camp.description && (
+                                                        <p className="text-white/80 text-[11px] md:text-xs line-clamp-1 font-light mt-1 hidden sm:block">
+                                                            {camp.description}
+                                                        </p>
+                                                    )}
                                                 </div>
 
-                                                <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white text-black text-[11px] md:text-xs font-black tracking-wider uppercase flex items-center gap-1.5 shrink-0 shadow-md group-hover:bg-white/90 group-hover:scale-105 transition-all">
+                                                <div className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white text-black text-xs md:text-sm font-black tracking-wider uppercase flex items-center gap-1.5 shrink-0 shadow-lg group-hover:bg-white/90 group-hover:scale-105 transition-all">
                                                     <span>Claim</span>
-                                                    <ArrowRight size={13} strokeWidth={2.5} />
+                                                    <ArrowRight size={14} strokeWidth={2.5} />
                                                 </div>
                                             </div>
                                         </div>

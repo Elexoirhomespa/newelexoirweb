@@ -116,7 +116,6 @@ export default function AdminDashboard() {
     const handleDeleteCampaign = async (id: string) => {
         if (!confirm('Are you sure you want to delete this campaign?')) return;
         try {
-            await supabase.from('campaigns').delete().eq('id', id);
             const updated = campaigns.filter(c => c.id !== id);
             setCampaigns(updated);
             if (updated.length > 0) {
@@ -130,7 +129,14 @@ export default function AdminDashboard() {
                 localStorage.setItem('spa_campaigns', JSON.stringify(updated));
                 if (updated.length > 0) localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
                 else localStorage.removeItem('spa_campaign');
+                if (typeof window !== 'undefined') window.dispatchEvent(new Event('spa_campaigns_updated'));
             } catch(e) {}
+
+            try {
+                await supabase.from('campaigns').delete().eq('id', id);
+            } catch(e) {
+                console.warn("Supabase delete failed (using local sync)", e);
+            }
         } catch(e) {
             console.error(e);
             alert('Failed to delete campaign.');
@@ -139,17 +145,19 @@ export default function AdminDashboard() {
 
     const handleTogglePublishCampaign = async (camp: Campaign) => {
         const newStatus = !(camp.is_published !== false);
+        const updated = campaigns.map(c => c.id === camp.id ? { ...c, is_published: newStatus } : c);
+        setCampaigns(updated);
+        try {
+            localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+            if (typeof window !== 'undefined') window.dispatchEvent(new Event('spa_campaigns_updated'));
+        } catch(e) {}
+
         try {
             if (camp.id) {
                 await supabase.from('campaigns').update({ is_published: newStatus }).eq('id', camp.id);
             }
-            const updated = campaigns.map(c => c.id === camp.id ? { ...c, is_published: newStatus } : c);
-            setCampaigns(updated);
-            try {
-                localStorage.setItem('spa_campaigns', JSON.stringify(updated));
-            } catch(e) {}
         } catch(e) {
-            console.error(e);
+            console.warn("Supabase update publish failed (using local sync)", e);
         }
     };
 
@@ -281,7 +289,9 @@ export default function AdminDashboard() {
         
         try {
             if (activeTab === 'campaign') {
+                const targetId = editingCampaignId || `camp-${Date.now()}`;
                 const campaignData: Campaign = {
+                    id: targetId,
                     title: campaignTitle,
                     label: campaignLabel,
                     description: campaignDesc,
@@ -294,39 +304,31 @@ export default function AdminDashboard() {
                     brand: siteBrandFilter
                 } as any;
 
+                let updated: Campaign[];
+                if (editingCampaignId) {
+                    updated = campaigns.map(c => c.id === editingCampaignId ? campaignData : c);
+                } else {
+                    updated = [campaignData, ...campaigns.filter(c => c.id !== campaignData.id)];
+                }
+
+                setCampaigns(updated);
+                setCampaign(updated[0] || null);
+                setEditingCampaignId(targetId);
+
+                try {
+                    localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+                    localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
+                    if (typeof window !== 'undefined') window.dispatchEvent(new Event('spa_campaigns_updated'));
+                } catch(e) {}
+
                 try {
                     if (editingCampaignId) {
                         await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
-                        const updated = campaigns.map(c => c.id === editingCampaignId ? { ...campaignData, id: editingCampaignId } : c);
-                        setCampaigns(updated);
-                        setCampaign(updated[0] || null);
-                        try {
-                            localStorage.setItem('spa_campaigns', JSON.stringify(updated));
-                            localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
-                        } catch(e) {}
                     } else {
-                        const { data } = await supabase.from('campaigns').insert([campaignData]).select();
-                        let newCamp: Campaign;
-                        if (data && data.length > 0) {
-                            newCamp = data[0] as Campaign;
-                        } else {
-                            newCamp = { ...campaignData, id: Date.now().toString() };
-                        }
-                        const updated = [newCamp, ...campaigns.filter(c => c.id !== newCamp.id)];
-                        setCampaigns(updated);
-                        setCampaign(updated[0]);
-                        setEditingCampaignId(newCamp.id || null);
-                        try {
-                            localStorage.setItem('spa_campaigns', JSON.stringify(updated));
-                            localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
-                        } catch(e) {}
+                        await supabase.from('campaigns').insert([campaignData]);
                     }
                 } catch (err) {
-                    console.error(err);
-                    const localCamp = { ...campaignData, id: editingCampaignId || Date.now().toString() };
-                    const updated = editingCampaignId ? campaigns.map(c => c.id === editingCampaignId ? localCamp : c) : [localCamp, ...campaigns];
-                    setCampaigns(updated);
-                    setCampaign(updated[0]);
+                    console.warn("Supabase campaign sync warning (saved locally):", err);
                 }
 
                 setSuccess(true);
@@ -740,39 +742,40 @@ export default function AdminDashboard() {
                                     <span className="text-[10px] font-medium text-black/50">Compact Homepage Sizing</span>
                                 </div>
 
-                                <div className="relative w-full max-w-lg mx-auto h-[200px] md:h-[240px] rounded-2xl overflow-hidden shadow-md border border-black/20 bg-black group">
+                                <div className="relative w-full max-w-lg mx-auto h-[210px] md:h-[250px] rounded-2xl overflow-hidden shadow-lg border border-black/20 bg-black group">
                                     <img 
                                         src={campaignImage || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
                                         alt={campaignTitle}
                                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/20"></div>
                                     
                                     <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-between z-10 text-white">
-                                        <div className="flex items-center justify-between">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-black text-[9px] font-black tracking-widest uppercase shadow-sm">
+                                        <div className="flex items-center justify-start">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] md:text-[10px] font-black tracking-widest uppercase shadow-md">
                                                 {campaignLabel || 'SPECIAL OFFER'}
-                                            </span>
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
-                                                -{discountPercentage}% OFF
                                             </span>
                                         </div>
 
                                         <div className="flex items-end justify-between gap-3">
                                             <div className="min-w-0">
-                                                <span className="text-[9px] font-bold tracking-widest uppercase text-white/70 block mb-0.5 line-clamp-1">
-                                                    {campaignTripOffer || 'Special Trip Discount Included'}
-                                                </span>
-                                                <h3 className="text-base md:text-xl font-bold tracking-tight text-white line-clamp-1">
-                                                    {campaignTitle || 'Campaign Title'}
+                                                {campaignTripOffer && (
+                                                    <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-1 drop-shadow-sm line-clamp-1">
+                                                        {campaignTripOffer}
+                                                    </span>
+                                                )}
+                                                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-md line-clamp-1">
+                                                    {campaignTitle || 'Summer Retreat'}
                                                 </h3>
-                                                <p className="text-[11px] text-white/80 line-clamp-1 font-light hidden sm:block">
-                                                    {campaignDesc || 'Description of the campaign offer and discount voucher.'}
-                                                </p>
+                                                {campaignDesc && (
+                                                    <p className="text-[11px] md:text-xs text-white/80 line-clamp-1 font-light mt-1 hidden sm:block">
+                                                        {campaignDesc}
+                                                    </p>
+                                                )}
                                             </div>
 
-                                            <div className="px-3 py-2 rounded-xl bg-white text-black text-[11px] font-black tracking-wider uppercase flex items-center gap-1 shrink-0 shadow-md">
-                                                Claim <ArrowRight size={12} />
+                                            <div className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white text-black text-xs font-black tracking-wider uppercase flex items-center gap-1 shrink-0 shadow-lg">
+                                                Claim <ArrowRight size={13} strokeWidth={2.5} />
                                             </div>
                                         </div>
                                     </div>
