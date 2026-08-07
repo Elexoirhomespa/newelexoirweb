@@ -339,20 +339,31 @@ export default function AdminDashboard() {
         }
     };
 
+    const generateUUID = () => {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+            return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         
         try {
             if (activeTab === 'campaign') {
-                const targetId = editingCampaignId || `camp-${Date.now()}`;
+                const targetId = editingCampaignId || generateUUID();
                 const targetOrder = Number(campaignOrder) || (editingCampaignId ? 1 : campaigns.length + 1);
                 const campaignData: Campaign = {
                     id: targetId,
                     title: campaignTitle.trim() || 'Special Spa Campaign',
                     label: campaignLabel.trim() || 'EXCLUSIVE OFFER',
                     description: campaignDesc.trim() || 'Book any eligible treatment below to claim your exclusive perk & special discount.',
-                    image: campaignImage || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg',
+                    image: campaignImage || '',
                     duration: campaignDuration || '1_month',
                     discountPercentage: Number(discountPercentage) || 20,
                     selectedTreatments: campaignTreatments.length > 0 
@@ -392,10 +403,18 @@ export default function AdminDashboard() {
                     if (editingCampaignId) {
                         await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
                     } else {
-                        await supabase.from('campaigns').insert([campaignData]);
+                        const { data, error } = await supabase.from('campaigns').insert([campaignData]).select();
+                        if (error) {
+                            console.warn("Supabase campaign insert warning:", error);
+                        } else if (data && data.length > 0) {
+                            const saved = data[0] as Campaign;
+                            if (saved?.id) {
+                                setEditingCampaignId(saved.id);
+                            }
+                        }
                     }
                 } catch (err) {
-                    console.warn("Supabase campaign sync warning (saved locally):", err);
+                    console.warn("Supabase campaign sync warning:", err);
                 }
 
                 setSuccess(true);

@@ -1,11 +1,14 @@
 -- =========================================================
 -- ELEXOIR HOME SPA - SUPABASE SCHEMA & MIGRATION SCRIPT
--- (Safe to run multiple times, works on existing or new tables)
+-- (Safe to run on existing tables, supports UUID & Text PKs)
 -- =========================================================
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 1. CAMPAIGNS TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.campaigns (
-    id TEXT PRIMARY KEY
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
 
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS title TEXT;
@@ -39,7 +42,7 @@ CREATE POLICY "Public delete campaigns" ON public.campaigns FOR DELETE USING (tr
 
 -- 2. TREATMENTS TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.treatments (
-    id TEXT PRIMARY KEY
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
 
 ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS title TEXT;
@@ -72,7 +75,7 @@ CREATE POLICY "Public delete treatments" ON public.treatments FOR DELETE USING (
 
 -- 3. PRODUCTS TABLE & COLUMNS (Store)
 CREATE TABLE IF NOT EXISTS public.products (
-    id TEXT PRIMARY KEY
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
 
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS title TEXT;
@@ -105,7 +108,7 @@ CREATE POLICY "Public delete products" ON public.products FOR DELETE USING (true
 
 -- 4. THERAPISTS TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.therapists (
-    id TEXT PRIMARY KEY
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
 
 ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS name TEXT;
@@ -133,7 +136,7 @@ CREATE POLICY "Public delete therapists" ON public.therapists FOR DELETE USING (
 
 -- 5. THERAPIST FEES TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.therapist_fees (
-    id TEXT PRIMARY KEY
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
 
 ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS therapist_id TEXT;
@@ -157,12 +160,12 @@ CREATE POLICY "Public delete therapist_fees" ON public.therapist_fees FOR DELETE
 
 
 -- =========================================================
--- SEED INITIAL 2 ACTIVE HOMEPAGE CAMPAIGNS (NO PEXELS IMAGES)
+-- SEED INITIAL 2 ACTIVE HOMEPAGE CAMPAIGNS (VALID UUIDs, NO PEXELS)
 -- =========================================================
 INSERT INTO public.campaigns (id, title, label, description, image, duration, "discountPercentage", "selectedTreatments", "tripOffer", "order", is_published, brand)
 VALUES 
 (
-    'camp-default-1',
+    'a0000000-0000-0000-0000-000000000001'::uuid,
     'Summer Retreat',
     'EXCLUSIVE OFFER',
     'Special summer massage package designed to rejuvenate your senses in the comfort of your private villa. Includes complimentary local organic fruit basket.',
@@ -176,7 +179,7 @@ VALUES
     'elexoir'
 ),
 (
-    'camp-default-2',
+    'a0000000-0000-0000-0000-000000000002'::uuid,
     'Bali Day Trip & Spa Combo',
     'EXCLUSIVE TRIP DEAL',
     'Book any signature in-villa massage below and claim an exclusive 25% discount voucher for private Bali Day Trips, Waterfall Tours & Temple excursions.',
