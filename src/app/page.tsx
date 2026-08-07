@@ -355,8 +355,8 @@ export default function Home() {
                                                 src={camp.image} 
                                                 alt={camp.title}
                                                 fill 
-                                                priority={idx === 0}
-                                                loading={idx === 0 ? "eager" : "lazy"}
+                                                priority={idx < 3}
+                                                loading="eager"
                                                 sizes="(max-width: 768px) 90vw, 480px"
                                                 className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
