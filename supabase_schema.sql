@@ -1,27 +1,27 @@
--- ==========================================
--- ELEXOIR HOME SPA - COMPLETE SUPABASE SQL SCHEMA
--- Run this in your Supabase Project -> SQL Editor
--- ==========================================
+-- =========================================================
+-- ELEXOIR HOME SPA - SUPABASE SCHEMA & MIGRATION SCRIPT
+-- (Safe to run multiple times, works on existing or new tables)
+-- =========================================================
 
--- 1. CAMPAIGNS TABLE
+-- 1. CAMPAIGNS TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.campaigns (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    label TEXT,
-    description TEXT,
-    image TEXT,
-    duration TEXT DEFAULT '1_month',
-    "discountPercentage" NUMERIC DEFAULT 20,
-    "selectedTreatments" JSONB DEFAULT '[]'::jsonb,
-    "tripOffer" TEXT,
-    "order" INTEGER DEFAULT 1,
-    is_published BOOLEAN DEFAULT true,
-    brand TEXT DEFAULT 'elexoir',
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+    id TEXT PRIMARY KEY
 );
 
--- Enable RLS and create full access policies for campaigns
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS label TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS image TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS duration TEXT DEFAULT '1_month';
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "discountPercentage" NUMERIC DEFAULT 20;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "selectedTreatments" JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "tripOffer" TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 1;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+
 ALTER TABLE public.campaigns ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public read campaigns" ON public.campaigns;
@@ -37,22 +37,23 @@ DROP POLICY IF EXISTS "Public delete campaigns" ON public.campaigns;
 CREATE POLICY "Public delete campaigns" ON public.campaigns FOR DELETE USING (true);
 
 
--- 2. TREATMENTS TABLE
+-- 2. TREATMENTS TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.treatments (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    "desc" TEXT,
-    options JSONB DEFAULT '[]'::jsonb,
-    benefits JSONB DEFAULT '[]'::jsonb,
-    "bgPattern" TEXT,
-    is_published BOOLEAN DEFAULT true,
-    is_pinned BOOLEAN DEFAULT false,
-    pinned_image TEXT,
-    brand TEXT DEFAULT 'elexoir',
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+    id TEXT PRIMARY KEY
 );
+
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS "desc" TEXT;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS options JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS benefits JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS "bgPattern" TEXT;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT false;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS pinned_image TEXT;
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.treatments ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 ALTER TABLE public.treatments ENABLE ROW LEVEL SECURITY;
 
@@ -69,22 +70,23 @@ DROP POLICY IF EXISTS "Public delete treatments" ON public.treatments;
 CREATE POLICY "Public delete treatments" ON public.treatments FOR DELETE USING (true);
 
 
--- 3. PRODUCTS TABLE (Store)
+-- 3. PRODUCTS TABLE & COLUMNS (Store)
 CREATE TABLE IF NOT EXISTS public.products (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    category TEXT,
-    price TEXT,
-    image TEXT,
-    description TEXT,
-    stock INTEGER DEFAULT 10,
-    "howToUse" TEXT,
-    ingredients TEXT,
-    is_published BOOLEAN DEFAULT true,
-    brand TEXT DEFAULT 'elexoir',
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+    id TEXT PRIMARY KEY
 );
+
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS price TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS image TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS stock INTEGER DEFAULT 10;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "howToUse" TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS ingredients TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
@@ -101,17 +103,18 @@ DROP POLICY IF EXISTS "Public delete products" ON public.products;
 CREATE POLICY "Public delete products" ON public.products FOR DELETE USING (true);
 
 
--- 4. THERAPISTS TABLE
+-- 4. THERAPISTS TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.therapists (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    bio TEXT,
-    image_url TEXT,
-    rating NUMERIC DEFAULT 5.0,
-    is_active BOOLEAN DEFAULT true,
-    brand TEXT DEFAULT 'elexoir',
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+    id TEXT PRIMARY KEY
 );
+
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS rating NUMERIC DEFAULT 5.0;
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 ALTER TABLE public.therapists ENABLE ROW LEVEL SECURITY;
 
@@ -128,14 +131,15 @@ DROP POLICY IF EXISTS "Public delete therapists" ON public.therapists;
 CREATE POLICY "Public delete therapists" ON public.therapists FOR DELETE USING (true);
 
 
--- 5. THERAPIST FEES TABLE
+-- 5. THERAPIST FEES TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.therapist_fees (
-    id TEXT PRIMARY KEY,
-    therapist_id TEXT,
-    fee NUMERIC DEFAULT 0,
-    brand TEXT DEFAULT 'elexoir',
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+    id TEXT PRIMARY KEY
 );
+
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS therapist_id TEXT;
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS fee NUMERIC DEFAULT 0;
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 ALTER TABLE public.therapist_fees ENABLE ROW LEVEL SECURITY;
 
@@ -152,9 +156,9 @@ DROP POLICY IF EXISTS "Public delete therapist_fees" ON public.therapist_fees;
 CREATE POLICY "Public delete therapist_fees" ON public.therapist_fees FOR DELETE USING (true);
 
 
--- ==========================================
+-- =========================================================
 -- SEED INITIAL 2 ACTIVE HOMEPAGE CAMPAIGNS (NO PEXELS IMAGES)
--- ==========================================
+-- =========================================================
 INSERT INTO public.campaigns (id, title, label, description, image, duration, "discountPercentage", "selectedTreatments", "tripOffer", "order", is_published, brand)
 VALUES 
 (
