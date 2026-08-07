@@ -153,7 +153,7 @@ CREATE POLICY "Public delete therapist_fees" ON public.therapist_fees FOR DELETE
 
 
 -- ==========================================
--- SEED INITIAL 2 ACTIVE HOMEPAGE CAMPAIGNS
+-- SEED INITIAL 2 ACTIVE HOMEPAGE CAMPAIGNS (NO PEXELS IMAGES)
 -- ==========================================
 INSERT INTO public.campaigns (id, title, label, description, image, duration, "discountPercentage", "selectedTreatments", "tripOffer", "order", is_published, brand)
 VALUES 
@@ -162,7 +162,7 @@ VALUES
     'Summer Retreat',
     'EXCLUSIVE OFFER',
     'Special summer massage package designed to rejuvenate your senses in the comfort of your private villa. Includes complimentary local organic fruit basket.',
-    'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center',
+    NULL,
     '1_month',
     10,
     '[]'::jsonb,
@@ -176,7 +176,7 @@ VALUES
     'Bali Day Trip & Spa Combo',
     'EXCLUSIVE TRIP DEAL',
     'Book any signature in-villa massage below and claim an exclusive 25% discount voucher for private Bali Day Trips, Waterfall Tours & Temple excursions.',
-    'https://images.pexels.com/photos/3865676/pexels-photo-3865676.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center',
+    NULL,
     '1_month',
     25,
     '[]'::jsonb,

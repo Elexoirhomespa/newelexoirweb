@@ -329,14 +329,16 @@ export default function Home() {
                                             : 'w-full'
                                     }`}
                                 >
-                                    <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-black border border-black/15">
-                                        {/* Background Image */}
-                                        <Image 
-                                            src={camp.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
-                                            alt={camp.title}
-                                            fill 
-                                            className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
-                                        />
+                                    <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-gradient-to-br from-neutral-900 via-stone-900 to-black border border-black/15">
+                                        {/* Background Image (if available) */}
+                                        {camp.image && (
+                                            <Image 
+                                                src={camp.image} 
+                                                alt={camp.title}
+                                                fill 
+                                                className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
+                                            />
+                                        )}
                                         
                                         {/* Cinematic Contrast Overlay */}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/20"></div>

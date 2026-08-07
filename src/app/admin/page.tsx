@@ -150,7 +150,7 @@ export default function AdminDashboard() {
         setCampaignDuration('1_month');
         setDiscountPercentage(25);
         selectAllTreatments();
-        setCampaignImage('https://images.pexels.com/photos/3865676/pexels-photo-3865676.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center');
+        setCampaignImage('');
         setCampaignOrder(campaigns.length + 1);
         setEditingCampaignId(null);
         scrollToCampaignForm();
@@ -705,12 +705,18 @@ export default function AdminDashboard() {
                                                     }`}
                                                 >
                                                     <div className="flex gap-3 items-start">
-                                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/10 shrink-0 relative">
-                                                            <img 
-                                                                src={camp.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg"} 
-                                                                alt={camp.title}
-                                                                className="w-full h-full object-cover"
-                                                            />
+                                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-stone-900 border border-black/10 shrink-0 relative flex items-center justify-center">
+                                                            {camp.image ? (
+                                                                <img 
+                                                                    src={camp.image} 
+                                                                    alt={camp.title}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gradient-to-br from-neutral-900 via-stone-900 to-black flex items-center justify-center text-white/40">
+                                                                    <Sparkles size={16} />
+                                                                </div>
+                                                            )}
                                                             <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-sm text-white font-bold text-[9px] px-1.5 py-0.5 rounded shadow">
                                                                 #{displayOrder}
                                                             </div>
@@ -870,12 +876,14 @@ export default function AdminDashboard() {
                                     <span className="text-[10px] font-medium text-black/50">Compact Homepage Sizing</span>
                                 </div>
 
-                                <div className="relative w-full max-w-lg mx-auto h-[210px] md:h-[250px] rounded-2xl overflow-hidden shadow-lg border border-black/20 bg-black group">
-                                    <img 
-                                        src={campaignImage || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
-                                        alt={campaignTitle}
-                                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-                                    />
+                                <div className="relative w-full max-w-lg mx-auto h-[210px] md:h-[250px] rounded-2xl overflow-hidden shadow-lg border border-black/20 bg-gradient-to-br from-neutral-900 via-stone-900 to-black group">
+                                    {campaignImage && (
+                                        <img 
+                                            src={campaignImage} 
+                                            alt={campaignTitle}
+                                            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                                        />
+                                    )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/20"></div>
                                     
                                     <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-between z-10 text-white">
