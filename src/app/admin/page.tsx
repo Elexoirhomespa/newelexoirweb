@@ -2,14 +2,16 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle, Store, Sparkles, Plus, Trash2, Megaphone, Edit3, Pin, ChevronDown, ChevronUp, Calculator, MoreHorizontal, Send } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle, Store, Sparkles, Plus, Trash2, Megaphone, Edit3, Pin, ChevronDown, ChevronUp, Calculator, MoreHorizontal, Send, CalendarCheck, Compass, Ship } from 'lucide-react';
 import Link from 'next/link';
 import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
+import AdminBookingManager from '@/components/AdminBookingManager';
+import AdminDayTripManager from '@/components/AdminDayTripManager';
 
 export default function AdminDashboard() {
 
-    const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees' | 'therapists' | 'calculator'>('treatment');
+    const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees' | 'therapists' | 'calculator' | 'booking' | 'daytrip'>('booking');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     
@@ -388,8 +390,25 @@ export default function AdminDashboard() {
                 <div className="p-8">
                 </div>
                 
-                <nav className="flex-1 px-4 py-6 space-y-2">
+                <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
                     <button 
+                        type="button"
+                        onClick={() => setActiveTab('booking')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'booking' ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
+                    >
+                        <CalendarCheck size={18} />
+                        Booking & Dispatch
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setActiveTab('daytrip')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'daytrip' ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
+                    >
+                        <Compass size={18} />
+                        Day Trips & Fastboat
+                    </button>
+                    <button 
+                        type="button"
                         onClick={() => setActiveTab('treatment')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'treatment' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
                     >
@@ -397,6 +416,7 @@ export default function AdminDashboard() {
                         Create Treatment
                     </button>
                     <button 
+                        type="button"
                         onClick={() => setActiveTab('campaign')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'campaign' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
                     >
@@ -404,6 +424,7 @@ export default function AdminDashboard() {
                         Create Campaign
                     </button>
                     <button 
+                        type="button"
                         onClick={() => setActiveTab('store')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'store' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
                     >
@@ -411,6 +432,7 @@ export default function AdminDashboard() {
                         Store Product
                     </button>
                     <button 
+                        type="button"
                         onClick={() => setActiveTab('fees')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
                     >
@@ -418,20 +440,24 @@ export default function AdminDashboard() {
                         Therapist Fees
                     </button>
                     <button 
+                        type="button"
+                        onClick={() => setActiveTab('calculator')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'calculator' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
+                    >
+                        <Calculator size={18} />
+                        Commission Calc
+                    </button>
+                    <button 
+                        type="button"
                         onClick={() => setActiveTab('list')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'list' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
                     >
                         <LayoutDashboard size={18} />
                         Overview
                     </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-white hover:text-gray-900 rounded-xl text-sm font-semibold transition-colors">
-                        <Settings size={18} />
-                        Settings
-                    </button>
                 </nav>
 
                 <div className="p-4 space-y-2">
-
                     <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors">
                         <LogOut size={18} />
                         Logout
@@ -445,10 +471,10 @@ export default function AdminDashboard() {
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[100px] pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-highlight/20 rounded-full blur-[100px] pointer-events-none" />
 
-                <div className="max-w-4xl mx-auto p-6 md:p-12 relative z-10 pt-12 md:pt-12 pb-32 md:pb-12">
+                <div className="max-w-4xl mx-auto p-4 md:p-12 relative z-10 pt-8 md:pt-12 pb-32 md:pb-12">
                     
                     {/* Domain Switcher */}
-                    <div className="mb-8 flex justify-center">
+                    <div className="mb-6 flex justify-center">
                         <div className="inline-flex bg-gray-200/50 p-1.5 rounded-2xl backdrop-blur-md border border-gray-100 shadow-inner">
                             <button
                                 type="button"
@@ -467,10 +493,43 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Mobile Header (Hidden on Desktop) */}
-                    <div className="md:hidden flex items-center justify-between mb-8">
-                        {/* Mobile Header Removed */}
-                        {/* Tab buttons removed in favor of bottom nav bar */}
+                    {/* Mobile Quick Category Bar (Horizontal Scrollable) */}
+                    <div className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
+                        {[
+                            { id: 'booking', label: 'Booking & Dispatch', icon: CalendarCheck, badge: 'Hot' },
+                            { id: 'daytrip', label: 'Day Trips & Penida', icon: Compass, badge: 'New' },
+                            { id: 'treatment', label: 'Treatments', icon: PlusCircle },
+                            { id: 'campaign', label: 'Campaigns', icon: Megaphone },
+                            { id: 'store', label: 'Store', icon: Store },
+                            { id: 'fees', label: 'Fees', icon: Settings },
+                            { id: 'calculator', label: 'Calculator', icon: Calculator },
+                            { id: 'list', label: 'Overview', icon: LayoutDashboard },
+                        ].map(pill => {
+                            const isPillActive = activeTab === pill.id;
+                            const Icon = pill.icon;
+                            return (
+                                <button
+                                    key={pill.id}
+                                    type="button"
+                                    onClick={() => setActiveTab(pill.id as any)}
+                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
+                                        isPillActive 
+                                            ? 'bg-gray-900 text-white shadow-md' 
+                                            : 'bg-white/90 text-gray-700 border border-gray-200 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <Icon size={14} />
+                                    {pill.label}
+                                    {pill.badge && (
+                                        <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold uppercase ${
+                                            isPillActive ? 'bg-amber-400 text-gray-900' : 'bg-primary text-white'
+                                        }`}>
+                                            {pill.badge}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
 
 
@@ -486,6 +545,20 @@ export default function AdminDashboard() {
                         >
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 
+                                {activeTab === 'booking' && (
+                                    <AdminBookingManager 
+                                        brand={siteBrandFilter} 
+                                        therapistFees={therapistFees} 
+                                        feeInputs={feeInputs} 
+                                    />
+                                )}
+
+                                {activeTab === 'daytrip' && (
+                                    <AdminDayTripManager 
+                                        brand={siteBrandFilter} 
+                                    />
+                                )}
+
                                 {activeTab === 'treatment' && (
                                     <>
                                         {/* Title & Category */}
@@ -1420,12 +1493,13 @@ export default function AdminDashboard() {
             </main>
 
             {/* Mobile Bottom Navigation Bar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-2xl border-t border-gray-200 z-50 px-6 pb-safe">
-                <div className="flex items-center justify-between h-full max-w-md mx-auto relative">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-2xl border-t border-gray-200 z-50 px-4 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+                <div className="flex items-center justify-around h-full max-w-lg mx-auto relative">
                     {[
+                        { id: 'booking', icon: CalendarCheck, label: 'Bookings' },
+                        { id: 'daytrip', icon: Compass, label: 'Day Trip' },
                         { id: 'treatment', icon: PlusCircle, label: 'Add' },
                         { id: 'store', icon: Store, label: 'Store' },
-                        { id: 'list', icon: LayoutDashboard, label: 'Menu' },
                         { id: 'more', icon: MoreHorizontal, label: 'More' },
                     ].map((tab) => {
                         const isActive = tab.id === 'more' ? isMoreMenuOpen : activeTab === tab.id;
@@ -1441,14 +1515,14 @@ export default function AdminDashboard() {
                                         setIsMoreMenuOpen(false);
                                     }
                                 }}
-                                className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${
-                                    isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                                className={`flex flex-col items-center justify-center min-w-[54px] h-full gap-1 transition-colors ${
+                                    isActive ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
-                                <div className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isActive ? 'bg-gray-100 scale-110' : 'bg-transparent'}`}>
+                                <div className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isActive ? 'bg-primary/10 scale-105 text-primary' : 'bg-transparent text-gray-500'}`}>
                                     <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                                 </div>
-                                <span className={`text-[10px] font-bold tracking-wider ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                                <span className={`text-[10px] font-bold tracking-tight ${isActive ? 'text-primary opacity-100' : 'opacity-70'}`}>
                                     {tab.label}
                                 </span>
                             </button>
@@ -1462,12 +1536,13 @@ export default function AdminDashboard() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 20 }}
-                                className="absolute bottom-24 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 flex flex-col gap-1 z-50 w-40"
+                                className="absolute bottom-24 right-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 flex flex-col gap-1 z-50 w-48"
                             >
                                 {[
-                                    { id: 'campaign', icon: Megaphone, label: 'Promo' },
-                                    { id: 'fees', icon: Settings, label: 'Fees' },
-                                    { id: 'calculator', icon: Calculator, label: 'Calc' },
+                                    { id: 'campaign', icon: Megaphone, label: 'Campaigns' },
+                                    { id: 'list', icon: LayoutDashboard, label: 'Menu Overview' },
+                                    { id: 'fees', icon: Settings, label: 'Therapist Fees' },
+                                    { id: 'calculator', icon: Calculator, label: 'Commission Calc' },
                                 ].map(tab => (
                                     <button
                                         key={tab.id}
@@ -1475,7 +1550,7 @@ export default function AdminDashboard() {
                                             setActiveTab(tab.id as any);
                                             setIsMoreMenuOpen(false);
                                         }}
-                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === tab.id ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === tab.id ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
                                     >
                                         <tab.icon size={16} />
                                         {tab.label}

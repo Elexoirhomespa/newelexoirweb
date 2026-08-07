@@ -74,6 +74,94 @@ export type TherapistFee = {
     updated_at?: string;
 };
 
+export type AdminBookingItem = {
+    id: string;
+    treatmentId: string;
+    duration: string;
+    treatmentsCount: number;
+    therapistsCount: number;
+    therapistNames?: string;
+    priceOverride?: number;
+    feeOverride?: number;
+};
+
+export type AdminBooking = {
+    id: string;
+    clientName: string;
+    clientPhone: string;
+    bookingDate: string;
+    bookingTime: string;
+    villaName: string;
+    address: string;
+    roomNumber?: string;
+    googleMapsUrl?: string;
+    items: AdminBookingItem[];
+    transportFee: number;
+    discountAmount: number;
+    notes?: string;
+    status: 'pending' | 'confirmed' | 'in_transit' | 'completed' | 'cancelled';
+    brand: string;
+    created_at: string;
+};
+
+export type DayTripPackage = {
+    id: string;
+    title: string;
+    subtitle: string;
+    region: string; // e.g. "Ubud & Waterfalls", "Uluwatu Sunset", "Bedugul & North", "Kintamani Volcano", "East Bali"
+    highlights: string[];
+    durationHours: number; // e.g. 6 (Half day) or 10 (Full day)
+    carType: string; // e.g. "Private 5-Seater MPV" | "Luxury Van 12-Seater"
+    includesDriver: boolean;
+    includesFuel: boolean;
+    includesTickets: boolean;
+    includesWater: boolean;
+    spaTreatmentAddon?: {
+        enabled: boolean;
+        treatmentTitle: string;
+        duration: string;
+        price: number;
+    };
+    customerPrice: number;
+    driverFee: number;
+    ticketCost: number;
+    notes?: string;
+    image?: string;
+    brand: string;
+    is_published?: boolean;
+};
+
+export type NusaPenidaTrip = {
+    id: string;
+    title: string;
+    routeType: 'west' | 'east' | 'mix' | 'snorkeling';
+    boatPort: string; // "Sanur Harbor"
+    boatDepartureTime: string; // "07:30 AM" | "08:30 AM" | "09:15 AM"
+    boatReturnTime: string; // "16:30 PM" | "17:00 PM"
+    hotelPickupArea: string; // "Seminyak / Canggu / Ubud / Sanur / Kuta / Nusa Dua"
+    passengerCount: number;
+    includesFastboat: boolean;
+    includesBaliTransfer: boolean;
+    includesIslandCar: boolean;
+    includesSnorkeling: boolean;
+    includesLunch: boolean;
+    spaTreatmentAddon?: {
+        enabled: boolean;
+        treatmentTitle: string;
+        duration: string;
+        price: number;
+    };
+    pricePerPerson: number;
+    fastboatCostPerPerson: number;
+    islandCarCost: number;
+    baliTransferCost: number;
+    snorkelingCostPerPerson: number;
+    notes?: string;
+    image?: string;
+    brand: string;
+    is_published?: boolean;
+};
+
 type SpaContextType = {
     treatments: Treatment[];
     setTreatments: React.Dispatch<React.SetStateAction<Treatment[]>>;
