@@ -707,7 +707,7 @@ export default function Home() {
 
             {/* Campaign Modal */}
             {isCampaignModalOpen && selectedCampaignModal && (
-                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-md">
+                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-md overflow-x-hidden max-w-[100vw]">
                     <motion.div 
                         initial={{ opacity: 0, y: 100 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -851,16 +851,17 @@ export default function Home() {
                                                     ? Math.round(originalPriceNum * (1 - (discount / 100)))
                                                     : originalPriceNum;
 
+                                                const isCouple = ['couple', 'four hand'].some(k => treatment.title.toLowerCase().includes(k));
                                                 const handleBookTreatment = () => {
                                                     setCartItems([{
                                                         id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                                                         treatmentId: treatment.id,
                                                         campaignTitle: selectedCampaignModal.title,
-                                                        tripOffer: selectedCampaignModal.tripOffer || 'Special Trip Discount',
+                                                        tripOffer: selectedCampaignModal.tripOffer || '',
                                                         title: treatment.title,
                                                         duration: activeOption.duration,
                                                         price: discountedPriceNum,
-                                                        guests: 1,
+                                                        guests: isCouple ? 2 : 1,
                                                         isCampaign: true,
                                                         discountPercentage: discount
                                                     }]);
@@ -972,17 +973,17 @@ export default function Home() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[110] flex items-center justify-center px-0 md:px-4 bg-black/40 backdrop-blur-sm"
+                        className="fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm overflow-x-hidden overflow-y-auto w-full max-w-[100vw]"
                     >
                         <motion.div 
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white rounded-none md:rounded-[32px] p-6 md:p-8 w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-md shadow-2xl relative overflow-y-auto no-scrollbar"
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            className="bg-white rounded-none sm:rounded-[28px] p-5 sm:p-7 md:p-8 w-full max-w-full sm:max-w-lg min-h-[100dvh] sm:min-h-0 sm:max-h-[90vh] shadow-2xl relative overflow-y-auto overflow-x-hidden no-scrollbar flex flex-col justify-between box-border"
                         >
                             <button 
                                 onClick={() => setIsBookingModalOpen(false)}
-                                className="absolute top-6 right-6 w-8 h-8 rounded-full bg-surface flex items-center justify-center text-text-muted hover:bg-border transition-colors z-10"
+                                className="absolute top-5 right-5 sm:top-6 sm:right-6 w-8 h-8 rounded-full bg-surface flex items-center justify-center text-text-muted hover:bg-border transition-colors z-10 shadow-sm"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -1035,13 +1036,14 @@ export default function Home() {
                                                                             key={idx}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
+                                                                                const isCouple = ['couple', 'four hand'].some(k => t.title.toLowerCase().includes(k));
                                                                                 setCartItems([...cartItems, {
                                                                                     id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                                                                                     treatmentId: t.id,
                                                                                     title: t.title,
                                                                                     duration: opt.duration,
                                                                                     price: parseInt(opt.price.replace(/,/g, '') || '0'),
-                                                                                    guests: 1,
+                                                                                    guests: isCouple ? 2 : 1,
                                                                                     isCampaign: false
                                                                                 }]);
                                                                                 setExpandedTreatmentId(null);
@@ -1087,16 +1089,20 @@ export default function Home() {
                                                 <div className="flex items-start justify-between mb-4 pr-6">
                                                     <div>
                                                         {item.isCampaign && (
-                                                            <div className="space-y-1 mb-2">
-                                                                <div className="bg-primary text-white px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest inline-flex items-center gap-1 whitespace-nowrap shadow-sm">
-                                                                    <span>{item.campaignTitle}</span>
-                                                                    <span className="opacity-90">(-{item.discountPercentage}%)</span>
-                                                                </div>
-                                                                {item.tripOffer && (
-                                                                    <div className="text-[10px] font-bold text-primary flex items-center gap-1">
-                                                                        <span>🎁 Perk:</span> {item.tripOffer}
-                                                                    </div>
-                                                                )}
+                                                            <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+                                                                <span className="bg-black text-white px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-sm">
+                                                                    {item.campaignTitle}
+                                                                </span>
+                                                                {item.discountPercentage && Number(item.discountPercentage) > 0 ? (
+                                                                    <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                                                                        {item.discountPercentage}% OFF SPA
+                                                                    </span>
+                                                                ) : null}
+                                                                {item.tripOffer ? (
+                                                                    <span className="bg-stone-100 text-stone-700 border border-stone-200/80 px-2.5 py-0.5 rounded-full text-[9px] font-medium tracking-wide">
+                                                                        {item.tripOffer}
+                                                                    </span>
+                                                                ) : null}
                                                             </div>
                                                         )}
                                                         <h3 className="font-bold text-sm text-primary leading-tight">{item.title}</h3>
@@ -1200,7 +1206,13 @@ export default function Home() {
                                         <div className="mt-8 pt-6 border-t border-border/50">
                                             <div className="flex items-end justify-between mb-6">
                                                 <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Total Price</span>
-                                                <span className="text-2xl font-serif text-primary">IDR {cartItems.reduce((acc, item) => acc + (item.price * item.guests), 0).toLocaleString('en-US')}</span>
+                                                <span className="text-2xl font-serif text-primary">
+                                                    IDR {cartItems.reduce((acc, item) => {
+                                                        const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                                                        const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                                                        return acc + (item.price * multiplier);
+                                                    }, 0).toLocaleString('en-US')}
+                                                </span>
                                             </div>
                                             <div className="flex flex-col gap-3">
                                                 <button 
