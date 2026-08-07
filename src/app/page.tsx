@@ -283,9 +283,11 @@ export default function Home() {
                 {/* Cinematic Multi-Campaign Carousel */}
                 {activeCampaigns.length > 0 && (
                     <div className="mb-8 w-full relative">
-                        {/* Navigation Controls (when multiple campaigns exist) */}
-                        {activeCampaigns.length > 1 && (
-                            <div className="flex items-center justify-end mb-2 px-1">
+                        {/* Section Title matching 'Most Booked' styling */}
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Special Offers</h3>
+                            {/* Navigation Controls (when multiple campaigns exist) */}
+                            {activeCampaigns.length > 1 && (
                                 <div className="flex items-center gap-1.5">
                                     <button
                                         type="button"
@@ -304,8 +306,8 @@ export default function Home() {
                                         <ChevronRight size={14} />
                                     </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* Scrollable Container with Peek Effect */}
                         <div 
@@ -780,13 +782,12 @@ export default function Home() {
                             )}
 
                             <div>
-                                <div className="flex items-center justify-between mb-3">
+                                <div className="mb-3">
                                     <span className="text-xs font-bold uppercase tracking-wider text-black">
                                         {Number(selectedCampaignModal.discountPercentage) > 0 
                                             ? 'Select Treatment to Activate Discount & Benefit' 
                                             : 'Select Treatment to Unlock Travel Benefit'}
                                     </span>
-                                    <span className="text-[10px] text-black/50 font-medium">Select duration & book</span>
                                 </div>
 
                                 {(() => {
