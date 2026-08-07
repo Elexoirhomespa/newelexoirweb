@@ -62,6 +62,7 @@ export type Campaign = {
     selectedTreatments: SelectedCampaignTreatment[];
     tripOffer?: string; // e.g. "25% OFF Bali Day Trip & Fastboat"
     campaignType?: string; // "trip_discount" | "spa_discount" | "nusa_penida"
+    order?: number; // 1, 2, 3...
     is_published?: boolean;
     brand?: string;
     created_at?: string;
@@ -190,6 +191,16 @@ type SpaContextType = {
 
 
 
+export const sortCampaigns = (list: Campaign[]): Campaign[] => {
+    if (!Array.isArray(list)) return [];
+    return [...list].sort((a, b) => {
+        const orderA = a.order !== undefined && a.order !== null ? a.order : 999;
+        const orderB = b.order !== undefined && b.order !== null ? b.order : 999;
+        if (orderA !== orderB) return orderA - orderB;
+        return 0;
+    });
+};
+
 export const DEFAULT_CAMPAIGNS: Campaign[] = [
     {
         id: 'summer-retreat-2026',
@@ -201,6 +212,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
         discountPercentage: 20,
         selectedTreatments: [],
         tripOffer: 'Complimentary Botanical Scrub & Luxury Villa Setup',
+        order: 1,
         is_published: true,
         brand: 'elexoir'
     },
@@ -214,6 +226,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
         discountPercentage: 25,
         selectedTreatments: [],
         tripOffer: '25% OFF Bali Day Trip & Fastboat Transfer',
+        order: 2,
         is_published: true,
         brand: 'elexoir'
     }
@@ -252,8 +265,9 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 if (cachedCampaigns !== null) {
                     const parsed = JSON.parse(cachedCampaigns);
                     if (Array.isArray(parsed)) {
-                        setCampaigns(parsed);
-                        setCampaign(parsed[0] || null);
+                        const sorted = sortCampaigns(parsed);
+                        setCampaigns(sorted);
+                        setCampaign(sorted[0] || null);
                         hasCache = true;
                     }
                 } else if (cachedCampaign !== null) {
@@ -314,7 +328,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
 
                 // If DB has campaigns, update state and local cache
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
-                    const fetchedCampaigns = campaignsRes.data as Campaign[];
+                    const fetchedCampaigns = sortCampaigns(campaignsRes.data as Campaign[]);
                     setCampaigns(fetchedCampaigns);
                     setCampaign(fetchedCampaigns[0] || null);
                     try { 
@@ -342,8 +356,9 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 if (stored !== null) {
                     const parsed = JSON.parse(stored);
                     if (Array.isArray(parsed)) {
-                        setCampaigns(parsed);
-                        setCampaign(parsed[0] || null);
+                        const sorted = sortCampaigns(parsed);
+                        setCampaigns(sorted);
+                        setCampaign(sorted[0] || null);
                     }
                 }
             } catch (e) {}

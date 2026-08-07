@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, ChevronRight, Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSpa, Campaign, Treatment } from '@/context/SpaContext';
+import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import ServiceAreas from '@/components/ServiceAreas';
@@ -35,9 +35,11 @@ export default function Home() {
     const [showStory, setShowStory] = useState(false);
     const [domain, setDomain] = useState('ubud');
 
-    const activeCampaigns = (campaigns && campaigns.length > 0)
-        ? campaigns.filter(c => c.is_published !== false)
-        : (campaign ? [campaign] : []);
+    const activeCampaigns = sortCampaigns(
+        (campaigns && campaigns.length > 0)
+            ? campaigns.filter(c => c.is_published !== false)
+            : (campaign ? [campaign] : [])
+    );
 
     const scrollCampaignCarousel = (direction: 'left' | 'right') => {
         if (campaignCarouselRef.current) {
@@ -352,15 +354,15 @@ export default function Home() {
                                             <div className="flex items-end justify-between gap-3">
                                                 <div className="min-w-0 pr-2">
                                                     {camp.tripOffer && (
-                                                        <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-1 drop-shadow-sm line-clamp-1">
+                                                        <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-0.5 drop-shadow-sm line-clamp-1">
                                                             {camp.tripOffer}
                                                         </span>
                                                     )}
-                                                    <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-white drop-shadow-md tracking-tight line-clamp-1">
+                                                    <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold leading-tight text-white drop-shadow-md tracking-tight line-clamp-1">
                                                         {camp.title}
                                                     </h3>
                                                     {camp.description && (
-                                                        <p className="text-white/80 text-[11px] md:text-xs line-clamp-1 font-light mt-1 hidden sm:block">
+                                                        <p className="text-white/85 text-[11px] sm:text-xs line-clamp-2 font-light mt-1 drop-shadow-sm leading-snug">
                                                             {camp.description}
                                                         </p>
                                                     )}
@@ -712,8 +714,8 @@ export default function Home() {
                         className="bg-white w-full h-[90dvh] md:h-auto md:max-h-[85vh] md:max-w-3xl md:rounded-[32px] rounded-t-[32px] shadow-2xl relative overflow-hidden flex flex-col border border-black/10 text-black font-sans"
                     >
                         {/* Modal Header */}
-                        <div className="p-5 md:p-7 flex items-center justify-between border-b border-black/10 bg-white shrink-0">
-                            <div>
+                        <div className="p-5 md:p-7 border-b border-black/10 bg-white shrink-0">
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-black text-white text-[9px] font-bold tracking-widest uppercase">
                                         {selectedCampaignModal.label || 'EXCLUSIVE PROMO'}
@@ -722,17 +724,22 @@ export default function Home() {
                                         -{selectedCampaignModal.discountPercentage}% OFF
                                     </span>
                                 </div>
-                                <h2 className="font-serif text-xl md:text-2xl font-bold text-black">{selectedCampaignModal.title}</h2>
+                                <button 
+                                    onClick={() => {
+                                        setIsCampaignModalOpen(false);
+                                        setSelectedCampaignModal(null);
+                                    }}
+                                    className="w-9 h-9 rounded-full bg-black/5 flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
-                            <button 
-                                onClick={() => {
-                                    setIsCampaignModalOpen(false);
-                                    setSelectedCampaignModal(null);
-                                }}
-                                className="w-9 h-9 rounded-full bg-black/5 flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
-                            >
-                                <X size={18} />
-                            </button>
+                            <h2 className="font-serif text-xl md:text-2xl font-bold text-black mt-1">{selectedCampaignModal.title}</h2>
+                            {selectedCampaignModal.description && (
+                                <p className="text-xs md:text-sm text-black/70 mt-1.5 leading-relaxed font-light">
+                                    {selectedCampaignModal.description}
+                                </p>
+                            )}
                         </div>
                         
                         {/* Modal Content (Campaign Treatments) */}

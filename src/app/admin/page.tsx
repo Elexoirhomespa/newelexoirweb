@@ -6,10 +6,10 @@ import {
     Megaphone, PlusCircle, Store, Settings, LayoutDashboard, 
     UploadCloud, CheckCircle, Plus, Trash2, Edit3, Pin, 
     ChevronDown, ChevronUp, Calculator, LogOut, Sparkles,
-    ArrowRight, Compass, ShieldCheck, Check
+    ArrowRight, ArrowUp, ArrowDown, Compass, ShieldCheck, Check
 } from 'lucide-react';
 import Link from 'next/link';
-import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee, Campaign } from '@/context/SpaContext';
+import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee, Campaign, sortCampaigns } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
 
 // Quick Preset Campaigns for Trip & Spa Deals
@@ -28,25 +28,34 @@ const CAMPAIGN_PRESETS = [
         title: "Nusa Penida & Fastboat Combo",
         label: "Island Tour Promo",
         description: "Unlock VIP rates for Sanur-Penida return fastboat tickets and private island transfers when booking your in-villa massage retreat.",
-        tripOffer: "Special Fastboat & Island Tour Rate",
+        tripOffer: "Free Fastboat & Island Tour Pass",
         discountPercentage: 20,
-        image: "https://images.pexels.com/photos/1450360/pexels-photo-1450360.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
+        image: "https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
         campaignType: "nusa_penida",
         duration: "1_month"
     },
     {
-        title: "Signature In-Villa Retreat",
-        label: "Limited Offer",
-        description: "Experience authentic Balinese relaxation with an exclusive 20% discount on all our premier bodywork rituals this month.",
-        tripOffer: "20% Discount on Selected Rituals",
+        title: "Summer Retreat & Spa Package",
+        label: "Limited 20% OFF",
+        description: "Relax deeply with customized flower baths, traditional Balinese massage, and organic botanical body wraps in the comfort of your villa.",
+        tripOffer: "Complimentary Botanical Scrub & Setup",
         discountPercentage: 20,
-        image: "https://images.pexels.com/photos/3951375/pexels-photo-3951375.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
+        image: "https://images.pexels.com/photos/3865712/pexels-photo-3865712.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
         campaignType: "spa_discount",
         duration: "1_month"
     }
 ];
 
 export default function AdminDashboard() {
+    const { 
+        treatments, setTreatments, 
+        campaign, setCampaign,
+        campaigns, setCampaigns,
+        products, setProducts,
+        siteBrandFilter, setSiteBrandFilter,
+        therapists, setTherapists
+    } = useSpa();
+
     const [activeTab, setActiveTab] = useState<'campaign' | 'treatment' | 'store' | 'fees' | 'calculator' | 'list' | 'settings'>('campaign');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -54,18 +63,8 @@ export default function AdminDashboard() {
     // File input ref for pinning treatments
     const pinImageInputRef = useRef<HTMLInputElement>(null);
     const [pendingPinId, setPendingPinId] = useState<string | null>(null);
-
-    const { 
-        treatments, setTreatments, 
-        campaign, setCampaign, 
-        campaigns, setCampaigns,
-        products, setProducts, 
-        siteBrandFilter, setSiteBrandFilter, 
-        therapists, setTherapists 
-    } = useSpa();
-
-    // Local state for Therapist Fees (private to admin dashboard)
     const [therapistFees, setTherapistFees] = useState<TherapistFee[]>([]);
+    const [feeLoading, setFeeLoading] = useState(false);
 
     useEffect(() => {
         async function fetchFees() {
@@ -77,6 +76,9 @@ export default function AdminDashboard() {
         fetchFees();
     }, [siteBrandFilter]);
 
+    // Filter by Brand / Property (elexoir, thevisala, etc)
+    const [selectedBrand, setSelectedBrand] = useState(siteBrandFilter);
+
     // Campaign specific fields
     const [campaignTitle, setCampaignTitle] = useState(campaign?.title || 'Bali Day Trip & Spa Combo');
     const [campaignLabel, setCampaignLabel] = useState(campaign?.label || 'Exclusive Trip Deal');
@@ -84,6 +86,7 @@ export default function AdminDashboard() {
     const [campaignTripOffer, setCampaignTripOffer] = useState(campaign?.tripOffer || '25% OFF Bali Day Trip & Fastboat');
     const [campaignDuration, setCampaignDuration] = useState(campaign?.duration || '1_month');
     const [discountPercentage, setDiscountPercentage] = useState<number>(campaign?.discountPercentage || 20);
+    const [campaignOrder, setCampaignOrder] = useState<number>(campaign?.order || 1);
     const [campaignTreatments, setCampaignTreatments] = useState<SelectedCampaignTreatment[]>(campaign?.selectedTreatments || []);
     const [campaignImage, setCampaignImage] = useState<string>(campaign?.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
     const [editingCampaignId, setEditingCampaignId] = useState<string | null>(campaign?.id || null);
@@ -98,6 +101,7 @@ export default function AdminDashboard() {
         setDiscountPercentage(c.discountPercentage ?? 20);
         setCampaignTreatments(c.selectedTreatments || []);
         setCampaignImage(c.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
+        setCampaignOrder(c.order ?? (campaigns.findIndex(item => item.id === c.id) + 1));
         setEditingCampaignId(c.id || null);
     };
 
@@ -110,7 +114,40 @@ export default function AdminDashboard() {
         setDiscountPercentage(20);
         selectAllTreatments();
         setCampaignImage('https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center');
+        setCampaignOrder(campaigns.length + 1);
         setEditingCampaignId(null);
+    };
+
+    const handleMoveCampaign = async (index: number, direction: 'up' | 'down') => {
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= campaigns.length) return;
+        
+        const reordered = [...campaigns];
+        const [moved] = reordered.splice(index, 1);
+        reordered.splice(targetIndex, 0, moved);
+        
+        // Assign explicit order numbers 1, 2, 3...
+        const updated = reordered.map((c, i) => ({ ...c, order: i + 1 }));
+        setCampaigns(updated);
+        if (updated.length > 0) {
+            setCampaign(updated[0]);
+        }
+        
+        try {
+            localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+            if (updated.length > 0) localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
+            if (typeof window !== 'undefined') window.dispatchEvent(new Event('spa_campaigns_updated'));
+        } catch(e) {}
+
+        try {
+            for (const item of updated) {
+                if (item.id) {
+                    await supabase.from('campaigns').update({ order: item.order }).eq('id', item.id);
+                }
+            }
+        } catch(e) {
+            console.warn("Supabase reorder failed", e);
+        }
     };
 
     const handleDeleteCampaign = async (id: string) => {
@@ -168,6 +205,7 @@ export default function AdminDashboard() {
         setDiscountPercentage(preset.discountPercentage);
         setCampaignImage(preset.image);
         setCampaignDuration(preset.duration);
+        setCampaignOrder(campaigns.length + 1);
         setEditingCampaignId(null); // CRITICAL: creating a new card from preset
         selectAllTreatments();
     };
@@ -287,6 +325,7 @@ export default function AdminDashboard() {
         try {
             if (activeTab === 'campaign') {
                 const targetId = editingCampaignId || `camp-${Date.now()}`;
+                const targetOrder = Number(campaignOrder) || 1;
                 const campaignData: Campaign = {
                     id: targetId,
                     title: campaignTitle,
@@ -297,17 +336,19 @@ export default function AdminDashboard() {
                     discountPercentage: Number(discountPercentage) || 20,
                     selectedTreatments: campaignTreatments,
                     tripOffer: campaignTripOffer,
+                    order: targetOrder,
                     is_published: true,
                     brand: siteBrandFilter
                 } as any;
 
-                let updated: Campaign[];
+                let updatedList: Campaign[];
                 if (editingCampaignId) {
-                    updated = campaigns.map(c => c.id === editingCampaignId ? campaignData : c);
+                    updatedList = campaigns.map(c => c.id === editingCampaignId ? campaignData : c);
                 } else {
-                    updated = [campaignData, ...campaigns.filter(c => c.id !== campaignData.id)];
+                    updatedList = [...campaigns.filter(c => c.id !== campaignData.id), campaignData];
                 }
 
+                const updated = sortCampaigns(updatedList);
                 setCampaigns(updated);
                 setCampaign(updated[0] || null);
                 setEditingCampaignId(targetId);
@@ -624,6 +665,7 @@ export default function AdminDashboard() {
                                         {campaigns.map((camp, idx) => {
                                             const isCurrentEditing = editingCampaignId === camp.id;
                                             const isPub = camp.is_published !== false;
+                                            const displayOrder = camp.order ?? (idx + 1);
                                             return (
                                                 <div 
                                                     key={camp.id || idx}
@@ -640,6 +682,9 @@ export default function AdminDashboard() {
                                                                 alt={camp.title}
                                                                 className="w-full h-full object-cover"
                                                             />
+                                                            <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-sm text-white font-bold text-[9px] px-1.5 py-0.5 rounded shadow">
+                                                                #{displayOrder}
+                                                            </div>
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -649,6 +694,11 @@ export default function AdminDashboard() {
                                                                 <span className="text-[9px] font-bold text-black/60">
                                                                     {camp.discountPercentage ?? 20}% OFF
                                                                 </span>
+                                                                {idx === 0 && (
+                                                                    <span className="text-[8px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded uppercase">
+                                                                        1st Card
+                                                                    </span>
+                                                                )}
                                                                 {!isPub && (
                                                                     <span className="text-[9px] font-bold text-black/40 border border-black/20 px-1 rounded">
                                                                         Draft
@@ -685,16 +735,41 @@ export default function AdminDashboard() {
                                                                 {isPub ? 'Published' : 'Hidden'}
                                                             </button>
                                                         </div>
-                                                        {camp.id && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleDeleteCampaign(camp.id!)}
-                                                                className="p-1.5 text-black/40 hover:text-black hover:bg-black/10 rounded-lg transition-colors"
-                                                                title="Delete campaign"
-                                                            >
-                                                                <Trash2 size={13} />
-                                                            </button>
-                                                        )}
+
+                                                        <div className="flex items-center gap-1">
+                                                            {/* Reorder Arrows */}
+                                                            <div className="flex items-center border border-black/15 rounded-lg p-0.5 bg-black/[0.02]">
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={idx === 0}
+                                                                    onClick={() => handleMoveCampaign(idx, 'up')}
+                                                                    className="p-1 rounded text-black hover:bg-black hover:text-white disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-black transition-colors"
+                                                                    title="Move Earlier (Higher Order)"
+                                                                >
+                                                                    <ArrowUp size={11} />
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={idx === campaigns.length - 1}
+                                                                    onClick={() => handleMoveCampaign(idx, 'down')}
+                                                                    className="p-1 rounded text-black hover:bg-black hover:text-white disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-black transition-colors"
+                                                                    title="Move Later (Lower Order)"
+                                                                >
+                                                                    <ArrowDown size={11} />
+                                                                </button>
+                                                            </div>
+
+                                                            {camp.id && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleDeleteCampaign(camp.id!)}
+                                                                    className="p-1.5 text-black/40 hover:text-black hover:bg-black/10 rounded-lg transition-colors"
+                                                                    title="Delete campaign"
+                                                                >
+                                                                    <Trash2 size={13} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
@@ -772,7 +847,7 @@ export default function AdminDashboard() {
                                         <div className="flex items-end justify-between gap-3">
                                             <div className="min-w-0">
                                                 {campaignTripOffer && (
-                                                    <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-1 drop-shadow-sm line-clamp-1">
+                                                    <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-0.5 drop-shadow-sm line-clamp-1">
                                                         {campaignTripOffer}
                                                     </span>
                                                 )}
@@ -780,7 +855,7 @@ export default function AdminDashboard() {
                                                     {campaignTitle || 'Summer Retreat'}
                                                 </h3>
                                                 {campaignDesc && (
-                                                    <p className="text-[11px] md:text-xs text-white/80 line-clamp-1 font-light mt-1 hidden sm:block">
+                                                    <p className="text-white/85 text-[11px] sm:text-xs line-clamp-2 font-light mt-1 drop-shadow-sm leading-snug">
                                                         {campaignDesc}
                                                     </p>
                                                 )}
@@ -844,7 +919,7 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold uppercase tracking-wider text-black/70">Trip / Perk Discount Note</label>
                                         <input 
@@ -868,6 +943,23 @@ export default function AdminDashboard() {
                                             value={discountPercentage} 
                                             onChange={e => setDiscountPercentage(Number(e.target.value))}
                                             className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-black/70 flex items-center justify-between">
+                                            <span>Display Order (1, 2, 3...)</span>
+                                            <span className="text-[10px] text-black/40 font-normal">#1 = First Card</span>
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            required 
+                                            min="1" 
+                                            max="99" 
+                                            placeholder="1" 
+                                            value={campaignOrder} 
+                                            onChange={e => setCampaignOrder(Number(e.target.value))}
+                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all font-bold"
                                         />
                                     </div>
                                 </div>
