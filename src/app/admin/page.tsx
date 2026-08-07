@@ -974,11 +974,11 @@ export default function AdminDashboard() {
                                                     : 'border-black/15 bg-white text-black hover:border-black/40'
                                             }`}
                                         >
-                                            <div className="font-bold text-xs flex items-center gap-1.5 mb-1">
-                                                <span>🌴</span> Trip Perk Only
+                                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
+                                                Trip Perk Only
                                             </div>
                                             <p className={`text-[10px] leading-snug ${discountPercentage === 0 && Boolean(campaignTripOffer) ? 'text-white/80' : 'text-black/60'}`}>
-                                                Massage at standard regular price. Guest claims Day Trip voucher perk.
+                                                Massage at standard regular rate. Guest claims Day Trip voucher perk.
                                             </p>
                                         </button>
 
@@ -994,8 +994,8 @@ export default function AdminDashboard() {
                                                     : 'border-black/15 bg-white text-black hover:border-black/40'
                                             }`}
                                         >
-                                            <div className="font-bold text-xs flex items-center gap-1.5 mb-1">
-                                                <span>💆</span> Spa Discount Only
+                                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
+                                                Spa Discount Only
                                             </div>
                                             <p className={`text-[10px] leading-snug ${discountPercentage > 0 && !campaignTripOffer ? 'text-white/80' : 'text-black/60'}`}>
                                                 Slashes massage prices automatically (-{discountPercentage || 20}%).
@@ -1015,11 +1015,11 @@ export default function AdminDashboard() {
                                                     : 'border-black/15 bg-white text-black hover:border-black/40'
                                             }`}
                                         >
-                                            <div className="font-bold text-xs flex items-center gap-1.5 mb-1">
-                                                <span>✨</span> Full Combo Deal
+                                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
+                                                Combo (Spa + Trip)
                                             </div>
                                             <p className={`text-[10px] leading-snug ${discountPercentage > 0 && Boolean(campaignTripOffer) ? 'text-white/80' : 'text-black/60'}`}>
-                                                Both slashed massage prices (-{discountPercentage || 20}%) AND travel excursion perk.
+                                                Both slashed massage prices (-{discountPercentage || 20}%) AND travel perk.
                                             </p>
                                         </button>
                                     </div>
@@ -1109,7 +1109,7 @@ export default function AdminDashboard() {
                                             ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' 
                                             : 'bg-black/5 text-black border border-black/10'
                                     }`}>
-                                        <span className="text-sm shrink-0">{discountPercentage === 0 ? '🟢' : '🔥'}</span>
+                                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${discountPercentage === 0 ? 'bg-emerald-600' : 'bg-black'}`} />
                                         <div>
                                             <div className="font-bold">
                                                 {discountPercentage === 0 ? 'Standard Spa Rate Mode (0% Spa Discount)' : `${discountPercentage}% Slashed Spa Price Mode`}
@@ -1171,8 +1171,8 @@ export default function AdminDashboard() {
                                                     <img src={campaignTripImage} alt="Trip Perk" className="w-full h-full object-cover" />
                                                 </div>
                                             ) : (
-                                                <div className="w-12 h-12 rounded-xl bg-black/5 border border-dashed border-black/20 shrink-0 flex items-center justify-center text-xs text-black/30">
-                                                    🌴
+                                                <div className="w-12 h-12 rounded-xl bg-black/5 border border-dashed border-black/20 shrink-0 flex items-center justify-center text-[10px] font-bold text-black/30 tracking-wider uppercase">
+                                                    IMAGE
                                                 </div>
                                             )}
                                             <input 
@@ -1226,27 +1226,25 @@ export default function AdminDashboard() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Description / Highlights</label>
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Short Description</label>
                                     <textarea 
-                                        required 
-                                        rows={3} 
-                                        placeholder="Explain what the guest unlocks when claiming this campaign card..." 
+                                        rows={2} 
+                                        placeholder="Describe what guests unlock with this promo..." 
                                         value={campaignDesc} 
                                         onChange={e => setCampaignDesc(e.target.value)}
                                         className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all resize-none"
                                     />
                                 </div>
 
-                                {/* Background Image Upload / URL */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Card Background Image (Upload or URL)</label>
-                                    <div className="flex flex-col sm:flex-row gap-3 items-center">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Background Image URL</label>
+                                    <div className="flex flex-col sm:flex-row gap-3">
                                         <input 
                                             type="text" 
-                                            placeholder="Paste image URL or click to upload file" 
+                                            placeholder="Paste URL or upload..." 
                                             value={campaignImage} 
                                             onChange={e => setCampaignImage(e.target.value)}
-                                            className="flex-1 w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-xs text-black placeholder:text-black/40 focus:outline-none focus:border-black"
+                                            className="flex-1 bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black transition-all"
                                         />
                                         <label className="w-full sm:w-auto px-4 py-3 rounded-xl border border-black/20 bg-black/5 hover:bg-black hover:text-white cursor-pointer transition-colors text-xs font-bold flex items-center justify-center gap-1.5 shrink-0">
                                             <UploadCloud size={16} /> Upload Image
@@ -1317,6 +1315,7 @@ export default function AdminDashboard() {
                                                     <div className="flex flex-wrap gap-2">
                                                         {t.options.map((opt) => {
                                                             const isDurationSelected = selectedT?.durations.includes(opt.duration);
+                                                            const priceNum = parseInt(String(opt.price).replace(/[^0-9]/g, '') || '0', 10);
                                                             return (
                                                                 <button
                                                                     type="button"
@@ -1329,7 +1328,7 @@ export default function AdminDashboard() {
                                                                     }`}
                                                                 >
                                                                     {isDurationSelected && <Check size={12} strokeWidth={3} />}
-                                                                    {opt.duration} MINS - Rp {opt.price}
+                                                                    {opt.duration.toUpperCase().includes('MIN') ? opt.duration : `${opt.duration} MINS`} - IDR {priceNum.toLocaleString('en-US')}
                                                                 </button>
                                                             );
                                                         })}

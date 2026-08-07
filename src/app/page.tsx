@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, ChevronRight, Bitcoin } from 'lucide-react';
+import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext';
@@ -89,6 +89,7 @@ export default function Home() {
     const [expandedTreatmentId, setExpandedTreatmentId] = useState<string | null>(null);
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [selectedCampaignDurations, setSelectedCampaignDurations] = useState<Record<string, string>>({});
     
     // Initialize date and time
     const getInitialDateTime = () => {
@@ -310,11 +311,7 @@ export default function Home() {
                         <div 
                             ref={campaignCarouselRef}
                             onScroll={handleCarouselScroll}
-                            className={`flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory ${
-                                activeCampaigns.length > 1 
-                                    ? '-mx-6 px-6 md:mx-0 md:px-0' 
-                                    : ''
-                            }`}
+                            className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory w-full pb-1"
                         >
                             {activeCampaigns.map((camp, idx) => (
                                 <div
@@ -325,7 +322,7 @@ export default function Home() {
                                     }}
                                     className={`shrink-0 snap-start cursor-pointer block outline-none transition-transform active:scale-[0.99] ${
                                         activeCampaigns.length > 1
-                                            ? 'w-[85vw] sm:w-[380px] md:w-[480px]'
+                                            ? 'w-[88vw] sm:w-[380px] md:w-[480px]'
                                             : 'w-full'
                                     }`}
                                 >
@@ -756,7 +753,7 @@ export default function Home() {
                             {/* Travel Benefit / Tour Voucher Banner */}
                             {selectedCampaignModal.tripOffer && (
                                 <div className="p-4 rounded-2xl bg-[#faf9f6] border border-black/10 flex items-center gap-3.5 shadow-sm">
-                                    {/* Small image for travel perk */}
+                                    {/* Small image for travel perk without generic icon overlay */}
                                     <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-black/10 bg-black/5 shadow-inner">
                                         <img 
                                             src={
@@ -767,9 +764,6 @@ export default function Home() {
                                             alt="Bali Travel Privilege"
                                             className="w-full h-full object-cover"
                                         />
-                                        <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/75 backdrop-blur-sm text-white flex items-center justify-center shadow">
-                                            <Sparkles size={11} />
-                                        </div>
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded inline-block mb-1 border border-emerald-200">
@@ -792,18 +786,15 @@ export default function Home() {
                                             ? 'Select Treatment to Activate Discount & Benefit' 
                                             : 'Select Treatment to Unlock Travel Benefit'}
                                     </span>
-                                    <span className="text-[10px] text-black/50 font-medium">Click to choose duration</span>
+                                    <span className="text-[10px] text-black/50 font-medium">Select duration & book</span>
                                 </div>
 
                                 {(() => {
-                                    type CardItem = {
+                                    type UniqueTreatmentItem = {
                                         treatment: Treatment;
-                                        duration: string;
-                                        option: { duration: string; price: string };
-                                        discountedPriceNum: number;
-                                        hasSpaDiscount: boolean;
+                                        allowedOptions: { duration: string; price: string }[];
                                     };
-                                    const cards: CardItem[] = [];
+                                    const uniqueTreatmentItems: UniqueTreatmentItem[] = [];
                                     const discount = Number(selectedCampaignModal.discountPercentage) || 0;
                                     const hasSpaDiscount = discount > 0;
 
@@ -815,120 +806,155 @@ export default function Home() {
                                             );
                                             if (!treatment) return;
 
-                                            ct.durations.forEach(duration => {
-                                                const cleanDur = duration.replace(/MINS/gi, '').trim();
-                                                const option = treatment.options.find(o => 
-                                                    o.duration.replace(/MINS/gi, '').trim() === cleanDur ||
-                                                    o.duration.trim() === duration.trim()
-                                                ) || treatment.options[0];
+                                            const allowedOptions = (ct.durations && ct.durations.length > 0)
+                                                ? treatment.options.filter(o => 
+                                                    ct.durations.some(d => 
+                                                        d.replace(/MINS/gi, '').trim() === o.duration.replace(/MINS/gi, '').trim() ||
+                                                        d.trim() === o.duration.trim()
+                                                    )
+                                                )
+                                                : treatment.options;
 
-                                                if (option) {
-                                                    const originalPriceNum = parseInt(option.price.replace(/,/g, '')) || 0;
-                                                    const discountedPriceNum = hasSpaDiscount 
-                                                        ? Math.round(originalPriceNum * (1 - (discount / 100)))
-                                                        : originalPriceNum;
-                                                    cards.push({
-                                                        treatment,
-                                                        duration: option.duration,
-                                                        option,
-                                                        discountedPriceNum,
-                                                        hasSpaDiscount
-                                                    });
-                                                }
-                                            });
+                                            if (allowedOptions.length > 0) {
+                                                uniqueTreatmentItems.push({
+                                                    treatment,
+                                                    allowedOptions
+                                                });
+                                            }
                                         });
                                     }
 
-                                    // Fallback if no specific treatments were selected or IDs matched: show all treatments
-                                    if (cards.length === 0) {
+                                    // Fallback if no specific treatments were selected or matched: show all treatments
+                                    if (uniqueTreatmentItems.length === 0) {
                                         treatments.forEach(treatment => {
-                                            treatment.options.forEach(option => {
-                                                const originalPriceNum = parseInt(option.price.replace(/,/g, '')) || 0;
-                                                const discountedPriceNum = hasSpaDiscount 
-                                                    ? Math.round(originalPriceNum * (1 - (discount / 100)))
-                                                    : originalPriceNum;
-                                                cards.push({
+                                            if (treatment.options && treatment.options.length > 0) {
+                                                uniqueTreatmentItems.push({
                                                     treatment,
-                                                    duration: option.duration,
-                                                    option,
-                                                    discountedPriceNum,
-                                                    hasSpaDiscount
+                                                    allowedOptions: treatment.options
                                                 });
-                                            });
+                                            }
                                         });
                                     }
 
                                     return (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {cards.map(({ treatment, duration, option, discountedPriceNum, hasSpaDiscount }, idx) => (
-                                                <div 
-                                                    key={`${treatment.id}-${duration}-${idx}`} 
-                                                    className="p-5 rounded-2xl border border-black/15 hover:border-black bg-white hover:bg-black/[0.02] shadow-sm transition-all duration-300 flex flex-col justify-between cursor-pointer group"
-                                                    onClick={() => {
-                                                        setCartItems([{
-                                                            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                                                            treatmentId: treatment.id,
-                                                            campaignTitle: selectedCampaignModal.title,
-                                                            tripOffer: selectedCampaignModal.tripOffer || 'Special Trip Discount',
-                                                            title: treatment.title,
-                                                            duration: duration,
-                                                            price: discountedPriceNum,
-                                                            guests: 1,
-                                                            isCampaign: true,
-                                                            discountPercentage: discount
-                                                        }]);
-                                                        setIsCampaignModalOpen(false);
-                                                        setIsBookingModalOpen(true);
-                                                    }}
-                                                >
-                                                    <div>
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-black/5 text-black border border-black/10">
-                                                                {treatment.category}
-                                                            </span>
-                                                            {hasSpaDiscount ? (
-                                                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
-                                                                    -{discount}%
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 text-black/60 border border-black/10">
-                                                                    Standard Rate
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <h4 className="text-base font-bold text-black mb-1">{treatment.title}</h4>
-                                                        <p className="text-xs text-black/60 line-clamp-2 mb-4 font-light leading-relaxed">{treatment.desc}</p>
-                                                    </div>
+                                            {uniqueTreatmentItems.map(({ treatment, allowedOptions }) => {
+                                                const currentDuration = selectedCampaignDurations[treatment.id] || allowedOptions[0]?.duration;
+                                                const activeOption = allowedOptions.find(o => 
+                                                    o.duration === currentDuration ||
+                                                    o.duration.replace(/MINS/gi, '').trim() === String(currentDuration).replace(/MINS/gi, '').trim()
+                                                ) || allowedOptions[0];
 
-                                                    <div className="pt-3 border-t border-black/10 flex items-end justify-between">
+                                                const originalPriceNum = parseInt(String(activeOption.price).replace(/[^0-9]/g, '') || '0', 10);
+                                                const discountedPriceNum = hasSpaDiscount 
+                                                    ? Math.round(originalPriceNum * (1 - (discount / 100)))
+                                                    : originalPriceNum;
+
+                                                const handleBookTreatment = () => {
+                                                    setCartItems([{
+                                                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                                                        treatmentId: treatment.id,
+                                                        campaignTitle: selectedCampaignModal.title,
+                                                        tripOffer: selectedCampaignModal.tripOffer || 'Special Trip Discount',
+                                                        title: treatment.title,
+                                                        duration: activeOption.duration,
+                                                        price: discountedPriceNum,
+                                                        guests: 1,
+                                                        isCampaign: true,
+                                                        discountPercentage: discount
+                                                    }]);
+                                                    setIsCampaignModalOpen(false);
+                                                    setIsBookingModalOpen(true);
+                                                };
+
+                                                return (
+                                                    <div 
+                                                        key={treatment.id} 
+                                                        className="p-5 rounded-2xl border border-black/15 hover:border-black bg-white hover:bg-black/[0.01] shadow-sm transition-all duration-300 flex flex-col justify-between cursor-pointer group"
+                                                        onClick={handleBookTreatment}
+                                                    >
                                                         <div>
-                                                            <div className="flex items-center gap-1 text-[10px] font-bold text-black/60 uppercase mb-1">
-                                                                <Clock className="w-3 h-3" /> {duration.includes('MIN') ? duration : `${duration} MINS`}
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-black/5 text-black border border-black/10">
+                                                                    {treatment.category}
+                                                                </span>
                                                                 {hasSpaDiscount ? (
-                                                                    <>
-                                                                        <span className="text-[11px] text-black/40 line-through font-medium">
-                                                                            IDR {parseInt(String(option.price).replace(/[^0-9]/g, '') || '0', 10).toLocaleString('en-US')}
-                                                                        </span>
-                                                                        <span className="text-base font-bold text-black">
-                                                                            IDR {discountedPriceNum.toLocaleString('en-US')}
-                                                                        </span>
-                                                                    </>
+                                                                    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
+                                                                        -{discount}%
+                                                                    </span>
                                                                 ) : (
-                                                                    <span className="text-base font-bold text-black">
-                                                                        IDR {parseInt(String(option.price).replace(/[^0-9]/g, '') || '0', 10).toLocaleString('en-US')}
+                                                                    <span className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 text-black/60 border border-black/10">
+                                                                        Standard Rate
                                                                     </span>
                                                                 )}
                                                             </div>
+                                                            <h4 className="text-base font-bold text-black mb-1">{treatment.title}</h4>
+                                                            <p className="text-xs text-black/60 line-clamp-2 mb-4 font-light leading-relaxed">{treatment.desc}</p>
                                                         </div>
 
-                                                        <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                                                            <ArrowRight size={15} />
+                                                        <div className="pt-3 border-t border-black/10 flex items-end justify-between gap-3">
+                                                            <div className="flex-1 min-w-0">
+                                                                {/* Duration Selection Dropdown */}
+                                                                <div 
+                                                                    className="flex items-center gap-1.5 mb-2" 
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    <div className="relative inline-flex items-center">
+                                                                        <Clock className="w-3.5 h-3.5 text-black/60 absolute left-2 pointer-events-none" />
+                                                                        <select
+                                                                            value={activeOption.duration}
+                                                                            onChange={(e) => {
+                                                                                setSelectedCampaignDurations(prev => ({
+                                                                                    ...prev,
+                                                                                    [treatment.id]: e.target.value
+                                                                                }));
+                                                                            }}
+                                                                            className="appearance-none bg-black/5 hover:bg-black/10 focus:bg-white text-[11px] font-bold text-black uppercase tracking-wider pl-7 pr-6 py-1.5 rounded-lg border border-black/15 cursor-pointer focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                                                        >
+                                                                            {allowedOptions.map(opt => (
+                                                                                <option key={opt.duration} value={opt.duration} className="text-black bg-white font-semibold">
+                                                                                    {opt.duration.toUpperCase().includes('MIN') ? opt.duration : `${opt.duration} MINS`}
+                                                                                </option>
+                                                                            ))}
+                                                                        </select>
+                                                                        <ChevronDown size={12} className="absolute right-2 pointer-events-none text-black/60" />
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Dynamic Price Display */}
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    {hasSpaDiscount ? (
+                                                                        <>
+                                                                            <span className="text-[11px] text-black/40 line-through font-medium">
+                                                                                IDR {originalPriceNum.toLocaleString('en-US')}
+                                                                            </span>
+                                                                            <span className="text-base font-bold text-black">
+                                                                                IDR {discountedPriceNum.toLocaleString('en-US')}
+                                                                            </span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <span className="text-base font-bold text-black">
+                                                                            IDR {originalPriceNum.toLocaleString('en-US')}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleBookTreatment();
+                                                                }}
+                                                                className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shrink-0"
+                                                                aria-label="Book Treatment"
+                                                            >
+                                                                <ArrowRight size={16} />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     );
                                 })()}
