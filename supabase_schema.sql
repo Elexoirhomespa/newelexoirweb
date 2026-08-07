@@ -19,6 +19,8 @@ ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS duration TEXT DEFAULT '1_m
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "discountPercentage" NUMERIC DEFAULT 20;
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "selectedTreatments" JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "tripOffer" TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "tripImage" TEXT;
+ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "campaignType" TEXT;
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 1;
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
@@ -73,76 +75,17 @@ DROP POLICY IF EXISTS "Public delete treatments" ON public.treatments;
 CREATE POLICY "Public delete treatments" ON public.treatments FOR DELETE USING (true);
 
 
--- 3. PRODUCTS TABLE & COLUMNS (Store)
-CREATE TABLE IF NOT EXISTS public.products (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
-);
-
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS title TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS price TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS image TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS stock INTEGER DEFAULT 10;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "howToUse" TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS ingredients TEXT;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
-ALTER TABLE public.products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
-
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public read products" ON public.products;
-CREATE POLICY "Public read products" ON public.products FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Public insert products" ON public.products;
-CREATE POLICY "Public insert products" ON public.products FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public update products" ON public.products;
-CREATE POLICY "Public update products" ON public.products FOR UPDATE USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public delete products" ON public.products;
-CREATE POLICY "Public delete products" ON public.products FOR DELETE USING (true);
-
-
--- 4. THERAPISTS TABLE & COLUMNS
-CREATE TABLE IF NOT EXISTS public.therapists (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
-);
-
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS name TEXT;
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS bio TEXT;
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS image_url TEXT;
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS rating NUMERIC DEFAULT 5.0;
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
-ALTER TABLE public.therapists ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
-
-ALTER TABLE public.therapists ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public read therapists" ON public.therapists;
-CREATE POLICY "Public read therapists" ON public.therapists FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Public insert therapists" ON public.therapists;
-CREATE POLICY "Public insert therapists" ON public.therapists FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public update therapists" ON public.therapists;
-CREATE POLICY "Public update therapists" ON public.therapists FOR UPDATE USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public delete therapists" ON public.therapists;
-CREATE POLICY "Public delete therapists" ON public.therapists FOR DELETE USING (true);
-
-
--- 5. THERAPIST FEES TABLE & COLUMNS
+-- 3. THERAPIST FEES TABLE & COLUMNS
 CREATE TABLE IF NOT EXISTS public.therapist_fees (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
 
-ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS therapist_id TEXT;
-ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS fee NUMERIC DEFAULT 0;
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS treatment_id TEXT;
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS duration TEXT;
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS fee TEXT;
 ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
 ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.therapist_fees ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 ALTER TABLE public.therapist_fees ENABLE ROW LEVEL SECURITY;
 
@@ -159,21 +102,72 @@ DROP POLICY IF EXISTS "Public delete therapist_fees" ON public.therapist_fees;
 CREATE POLICY "Public delete therapist_fees" ON public.therapist_fees FOR DELETE USING (true);
 
 
+-- 4. BOOKINGS TABLE & COLUMNS
+CREATE TABLE IF NOT EXISTS public.bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+);
+
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS reference_number TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS guest_name TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS guest_whatsapp TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS guest_email TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS booking_date DATE;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS booking_time TIME;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS room_number TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS total_price NUMERIC DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS total_therapist_fee NUMERIC DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS net_profit NUMERIC DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS therapist_names TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Confirmed';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read bookings" ON public.bookings;
+CREATE POLICY "Public read bookings" ON public.bookings FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public insert bookings" ON public.bookings;
+CREATE POLICY "Public insert bookings" ON public.bookings FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public update bookings" ON public.bookings;
+CREATE POLICY "Public update bookings" ON public.bookings FOR UPDATE USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public delete bookings" ON public.bookings;
+CREATE POLICY "Public delete bookings" ON public.bookings FOR DELETE USING (true);
+
+
 -- =========================================================
--- SEED INITIAL 2 ACTIVE HOMEPAGE CAMPAIGNS (VALID UUIDs, NO PEXELS)
+-- SEED DATA (Clean, valid standard UUIDs)
 -- =========================================================
-INSERT INTO public.campaigns (id, title, label, description, image, duration, "discountPercentage", "selectedTreatments", "tripOffer", "order", is_published, brand)
-VALUES 
+
+INSERT INTO public.campaigns (
+    id,
+    title,
+    label,
+    description,
+    image,
+    duration,
+    "discountPercentage",
+    "selectedTreatments",
+    "tripOffer",
+    "order",
+    is_published,
+    brand
+) VALUES 
 (
     'a0000000-0000-0000-0000-000000000001'::uuid,
     'Summer Retreat',
     'EXCLUSIVE OFFER',
-    'Special summer massage package designed to rejuvenate your senses in the comfort of your private villa. Includes complimentary local organic fruit basket.',
+    'Indulge in holistic relaxation with private therapist villa service, organic botanical aromatherapy, and revitalizing body treatments.',
     NULL,
     '1_month',
-    10,
+    20,
     '[]'::jsonb,
-    '20% OFF Bali Day Trip Tour Included',
+    'Complimentary Botanical Scrub & Luxury Villa Setup',
     1,
     true,
     'elexoir'
@@ -185,7 +179,7 @@ VALUES
     'Book any signature in-villa massage below and claim an exclusive 25% discount voucher for private Bali Day Trips, Waterfall Tours & Temple excursions.',
     NULL,
     '1_month',
-    25,
+    0,
     '[]'::jsonb,
     '25% OFF Private Bali Day Trip & Waterfalls',
     2,

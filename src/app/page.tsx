@@ -167,12 +167,15 @@ export default function Home() {
                 }
 
                 if (item.isCampaign) {
-                    const originalPriceNum = item.price / (1 - (item.discountPercentage / 100));
+                    const hasSpaDiscount = item.discountPercentage && Number(item.discountPercentage) > 0;
+                    const originalPriceNum = hasSpaDiscount ? item.price / (1 - (item.discountPercentage / 100)) : item.price;
                     const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
                     const multiplier = isCouple ? (item.guests / 2) : item.guests;
                     const originalPrice = (originalPriceNum * multiplier).toLocaleString('en-US');
-                    const tripOfferText = item.tripOffer ? `\n*CLAIMED PERK:* ${item.tripOffer}` : '';
-                    return `*CAMPAIGN: ${item.campaignTitle.trim().toUpperCase()}*${tripOfferText}\n*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON [${item.discountPercentage}% OFF]\nIDR ${price} ~IDR ${originalPrice}~${whatsIncludedText}`;
+                    const discountTag = hasSpaDiscount ? ` [${item.discountPercentage}% OFF SPA]` : '';
+                    const priceText = hasSpaDiscount ? `IDR ${price} ~IDR ${originalPrice}~` : `IDR ${price}`;
+                    const tripOfferText = item.tripOffer ? `\n*TRAVEL BENEFIT:* ${item.tripOffer}` : '';
+                    return `*CAMPAIGN: ${item.campaignTitle.trim().toUpperCase()}*${tripOfferText}\n*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON${discountTag}\n${priceText}${whatsIncludedText}`;
                 }
                 return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON IDR ${price}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
@@ -718,13 +721,19 @@ export default function Home() {
                         {/* Modal Header */}
                         <div className="p-5 md:p-7 border-b border-black/10 bg-white shrink-0">
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 mb-1.5">
+                                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-black text-white text-[9px] font-bold tracking-widest uppercase">
-                                        {selectedCampaignModal.label || 'EXCLUSIVE PROMO'}
+                                        {selectedCampaignModal.label || 'EXCLUSIVE OFFER'}
                                     </span>
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/5 text-black text-[9px] font-bold uppercase tracking-wider border border-black/10">
-                                        -{selectedCampaignModal.discountPercentage}% OFF
-                                    </span>
+                                    {Number(selectedCampaignModal.discountPercentage) > 0 ? (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-black/5 text-black text-[9px] font-bold uppercase tracking-wider border border-black/10">
+                                            -{selectedCampaignModal.discountPercentage}% OFF SPA
+                                        </span>
+                                    ) : selectedCampaignModal.tripOffer ? (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[9px] font-bold uppercase tracking-wider border border-emerald-200">
+                                            Travel Benefit Included
+                                        </span>
+                                    ) : null}
                                 </div>
                                 <button 
                                     onClick={() => {
@@ -747,16 +756,34 @@ export default function Home() {
                         {/* Modal Content (Campaign Treatments) */}
                         <div className="p-5 md:p-7 overflow-y-auto bg-white space-y-6">
                             
-                            {/* Trip Perk Unlocked Banner */}
+                            {/* Travel Benefit / Tour Voucher Banner */}
                             {selectedCampaignModal.tripOffer && (
-                                <div className="p-4 rounded-2xl bg-black/5 border border-black/10 flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0 mt-0.5">
-                                        <Sparkles size={16} />
+                                <div className="p-4 rounded-2xl bg-[#faf9f6] border border-black/10 flex items-center gap-3.5 shadow-sm">
+                                    {/* Small image for travel perk */}
+                                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-black/10 bg-black/5 shadow-inner">
+                                        <img 
+                                            src={
+                                                selectedCampaignModal.tripImage ||
+                                                selectedCampaignModal.image ||
+                                                'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=300&q=80'
+                                            }
+                                            alt="Bali Travel Privilege"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/75 backdrop-blur-sm text-white flex items-center justify-center shadow">
+                                            <Sparkles size={11} />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-black/60 block">Claimable Trip Perk</span>
-                                        <h4 className="text-sm font-bold text-black">{selectedCampaignModal.tripOffer}</h4>
-                                        <p className="text-xs text-black/70 mt-0.5">Select an eligible treatment below to claim this perk voucher.</p>
+                                    <div className="min-w-0 flex-1">
+                                        <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded inline-block mb-1 border border-emerald-200">
+                                            Exclusive Travel Benefit
+                                        </span>
+                                        <h4 className="text-sm sm:text-base font-bold text-black leading-tight line-clamp-2">
+                                            {selectedCampaignModal.tripOffer}
+                                        </h4>
+                                        <p className="text-xs text-black/60 mt-0.5 font-light leading-snug">
+                                            Book any signature treatment below to receive your excursion voucher with your booking confirmation.
+                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -764,7 +791,9 @@ export default function Home() {
                             <div>
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-xs font-bold uppercase tracking-wider text-black">
-                                        Select Treatment to Activate Discount
+                                        {Number(selectedCampaignModal.discountPercentage) > 0 
+                                            ? 'Select Treatment to Activate Discount & Benefit' 
+                                            : 'Select Treatment to Unlock Travel Benefit'}
                                     </span>
                                     <span className="text-[10px] text-black/50 font-medium">Click to choose duration</span>
                                 </div>
@@ -775,9 +804,11 @@ export default function Home() {
                                         duration: string;
                                         option: { duration: string; price: string };
                                         discountedPriceNum: number;
+                                        hasSpaDiscount: boolean;
                                     };
                                     const cards: CardItem[] = [];
-                                    const discount = selectedCampaignModal.discountPercentage ?? 20;
+                                    const discount = Number(selectedCampaignModal.discountPercentage) || 0;
+                                    const hasSpaDiscount = discount > 0;
 
                                     if (selectedCampaignModal.selectedTreatments && selectedCampaignModal.selectedTreatments.length > 0) {
                                         selectedCampaignModal.selectedTreatments.forEach(ct => {
@@ -796,12 +827,15 @@ export default function Home() {
 
                                                 if (option) {
                                                     const originalPriceNum = parseInt(option.price.replace(/,/g, '')) || 0;
-                                                    const discountedPriceNum = Math.round(originalPriceNum * (1 - (discount / 100)));
+                                                    const discountedPriceNum = hasSpaDiscount 
+                                                        ? Math.round(originalPriceNum * (1 - (discount / 100)))
+                                                        : originalPriceNum;
                                                     cards.push({
                                                         treatment,
                                                         duration: option.duration,
                                                         option,
-                                                        discountedPriceNum
+                                                        discountedPriceNum,
+                                                        hasSpaDiscount
                                                     });
                                                 }
                                             });
@@ -813,12 +847,15 @@ export default function Home() {
                                         treatments.forEach(treatment => {
                                             treatment.options.forEach(option => {
                                                 const originalPriceNum = parseInt(option.price.replace(/,/g, '')) || 0;
-                                                const discountedPriceNum = Math.round(originalPriceNum * (1 - (discount / 100)));
+                                                const discountedPriceNum = hasSpaDiscount 
+                                                    ? Math.round(originalPriceNum * (1 - (discount / 100)))
+                                                    : originalPriceNum;
                                                 cards.push({
                                                     treatment,
                                                     duration: option.duration,
                                                     option,
-                                                    discountedPriceNum
+                                                    discountedPriceNum,
+                                                    hasSpaDiscount
                                                 });
                                             });
                                         });
@@ -826,7 +863,7 @@ export default function Home() {
 
                                     return (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {cards.map(({ treatment, duration, option, discountedPriceNum }, idx) => (
+                                            {cards.map(({ treatment, duration, option, discountedPriceNum, hasSpaDiscount }, idx) => (
                                                 <div 
                                                     key={`${treatment.id}-${duration}-${idx}`} 
                                                     className="p-5 rounded-2xl border border-black/15 hover:border-black bg-white hover:bg-black/[0.02] shadow-sm transition-all duration-300 flex flex-col justify-between cursor-pointer group"
@@ -852,9 +889,15 @@ export default function Home() {
                                                             <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-black/5 text-black border border-black/10">
                                                                 {treatment.category}
                                                             </span>
-                                                            <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
-                                                                -{discount}%
-                                                            </span>
+                                                            {hasSpaDiscount ? (
+                                                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
+                                                                    -{discount}%
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 text-black/60 border border-black/10">
+                                                                    Standard Rate
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <h4 className="text-base font-bold text-black mb-1">{treatment.title}</h4>
                                                         <p className="text-xs text-black/60 line-clamp-2 mb-4 font-light leading-relaxed">{treatment.desc}</p>
@@ -866,8 +909,14 @@ export default function Home() {
                                                                 <Clock className="w-3 h-3" /> {duration.includes('MIN') ? duration : `${duration} MINS`}
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[11px] text-black/40 line-through">Rp {option.price}</span>
-                                                                <span className="text-base font-bold text-black">Rp {discountedPriceNum.toLocaleString('en-US')}</span>
+                                                                {hasSpaDiscount ? (
+                                                                    <>
+                                                                        <span className="text-[11px] text-black/40 line-through">Rp {option.price}</span>
+                                                                        <span className="text-base font-bold text-black">Rp {discountedPriceNum.toLocaleString('en-US')}</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <span className="text-base font-bold text-black">Rp {option.price}</span>
+                                                                )}
                                                             </div>
                                                         </div>
 
