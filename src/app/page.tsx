@@ -2,10 +2,10 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, Bitcoin } from 'lucide-react';
+import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, ChevronRight, Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSpa } from '@/context/SpaContext';
+import { useSpa, Campaign } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import ServiceAreas from '@/components/ServiceAreas';
@@ -22,15 +22,41 @@ const CATEGORIES = [
 
 
 export default function Home() {
-    const { treatments, campaign, products, isLoading } = useSpa();
+    const { treatments, campaign, campaigns, products, isLoading } = useSpa();
 
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [maxPrice, setMaxPrice] = useState(1500000); // default max price
     const [isPriceFilterOpen, setIsPriceFilterOpen] = useState(false);
     const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
+    const [selectedCampaignModal, setSelectedCampaignModal] = useState<Campaign | null>(null);
+    const [currentCampaignIndex, setCurrentCampaignIndex] = useState(0);
+    const campaignCarouselRef = useRef<HTMLDivElement>(null);
     const [showStory, setShowStory] = useState(false);
     const [domain, setDomain] = useState('ubud');
+
+    const activeCampaigns = (campaigns && campaigns.length > 0)
+        ? campaigns.filter(c => c.is_published !== false)
+        : (campaign ? [campaign] : []);
+
+    const scrollCampaignCarousel = (direction: 'left' | 'right') => {
+        if (campaignCarouselRef.current) {
+            const offset = 360;
+            campaignCarouselRef.current.scrollBy({
+                left: direction === 'left' ? -offset : offset,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    const handleCarouselScroll = () => {
+        if (campaignCarouselRef.current) {
+            const scrollLeft = campaignCarouselRef.current.scrollLeft;
+            const width = campaignCarouselRef.current.offsetWidth;
+            const index = Math.round(scrollLeft / (width * 0.85));
+            setCurrentCampaignIndex(Math.min(Math.max(0, index), activeCampaigns.length - 1));
+        }
+    };
     
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -250,70 +276,141 @@ export default function Home() {
 
 
 
-                {/* Cinematic Campaign Card (Below Search) */}
-                {campaign && (
-                <div onClick={() => setIsCampaignModalOpen(true)} className="block outline-none">
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative w-full h-[260px] md:h-[380px] rounded-[28px] md:rounded-[36px] overflow-hidden shadow-xl mb-8 group cursor-pointer bg-black border border-black/20"
-                    >
-                        {/* Background Image */}
-                        <Image 
-                            src={campaign.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
-                            alt={campaign.title}
-                            fill 
-                            className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                        />
-                        
-                        {/* Cinematic Contrast Gradients */}
-                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-700"></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                        
-                        {/* Content Overlay */}
-                        <div className="absolute inset-0 p-5 md:p-10 flex flex-col justify-between z-10">
-                            
-                            {/* Top Badges */}
-                            <div className="flex items-center justify-between gap-2">
-                                <motion.span 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.2, duration: 0.6 }}
-                                    className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] md:text-[10px] font-black tracking-[0.2em] uppercase shadow-md"
+                {/* Cinematic Multi-Campaign Swipeable Carousel with Peek Effect */}
+                {activeCampaigns.length > 0 && (
+                    <div className="mb-8 w-full relative">
+                        {/* Header with Navigation Controls (when multiple campaigns exist) */}
+                        {activeCampaigns.length > 1 && (
+                            <div className="flex items-center justify-between mb-2.5 px-1">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-black animate-pulse"></span>
+                                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-black/70">
+                                        Featured Offers & Trips ({activeCampaigns.length})
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollCampaignCarousel('left')}
+                                        className="w-7 h-7 rounded-full border border-black/15 bg-white flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors shadow-sm"
+                                        aria-label="Previous Campaign"
+                                    >
+                                        <ChevronLeft size={14} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollCampaignCarousel('right')}
+                                        className="w-7 h-7 rounded-full border border-black/15 bg-white flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors shadow-sm"
+                                        aria-label="Next Campaign"
+                                    >
+                                        <ChevronRight size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Scrollable Container with Peek Effect */}
+                        <div 
+                            ref={campaignCarouselRef}
+                            onScroll={handleCarouselScroll}
+                            className={`flex gap-3 md:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory ${
+                                activeCampaigns.length > 1 
+                                    ? '-mx-6 px-6 md:mx-0 md:px-0' 
+                                    : ''
+                            }`}
+                        >
+                            {activeCampaigns.map((camp, idx) => (
+                                <div
+                                    key={camp.id || idx}
+                                    onClick={() => {
+                                        setSelectedCampaignModal(camp);
+                                        setIsCampaignModalOpen(true);
+                                    }}
+                                    className={`shrink-0 snap-start cursor-pointer block outline-none transition-transform active:scale-[0.99] ${
+                                        activeCampaigns.length > 1
+                                            ? 'w-[85vw] sm:w-[380px] md:w-[480px]'
+                                            : 'w-full'
+                                    }`}
                                 >
-                                    {campaign.label || 'SPECIAL PROMO'}
-                                </motion.span>
+                                    <div className="relative w-full h-[200px] sm:h-[230px] md:h-[260px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-md group bg-black border border-black/15">
+                                        {/* Background Image */}
+                                        <Image 
+                                            src={camp.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
+                                            alt={camp.title}
+                                            fill 
+                                            className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        />
+                                        
+                                        {/* Cinematic Contrast Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/20"></div>
+                                        
+                                        {/* Card Content */}
+                                        <div className="absolute inset-0 p-4 sm:p-5 md:p-6 flex flex-col justify-between z-10 text-white">
+                                            {/* Top Badges */}
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-black text-[9px] font-black tracking-widest uppercase shadow-sm">
+                                                    {camp.label || 'SPECIAL PROMO'}
+                                                </span>
 
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
-                                    -{campaign.discountPercentage}% OFF
-                                </span>
-                            </div>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
+                                                    -{camp.discountPercentage}% OFF
+                                                </span>
+                                            </div>
 
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                                <div className="flex flex-col text-white max-w-xl">
-                                    {campaign.tripOffer && (
-                                        <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-white/80 block mb-1">
-                                            {campaign.tripOffer}
-                                        </span>
-                                    )}
-                                    <h2 className="font-serif text-2xl md:text-5xl font-medium leading-tight tracking-tight mb-1 md:mb-2 text-white">
-                                        {campaign.title}
-                                    </h2>
-                                    <p className="text-white/80 text-xs md:text-sm line-clamp-2 max-w-lg leading-relaxed font-light hidden sm:block">
-                                        {campaign.description}
-                                    </p>
+                                            {/* Bottom Text & Action */}
+                                            <div className="flex items-end justify-between gap-3">
+                                                <div className="min-w-0 pr-2">
+                                                    {camp.tripOffer && (
+                                                        <span className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-white/80 block mb-0.5 line-clamp-1">
+                                                            {camp.tripOffer}
+                                                        </span>
+                                                    )}
+                                                    <h3 className="font-serif text-base sm:text-lg md:text-2xl font-bold leading-tight text-white line-clamp-1">
+                                                        {camp.title}
+                                                    </h3>
+                                                    <p className="text-white/80 text-[11px] md:text-xs line-clamp-1 font-light mt-0.5 hidden sm:block">
+                                                        {camp.description}
+                                                    </p>
+                                                </div>
+
+                                                <div className="px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white text-black text-[11px] md:text-xs font-black tracking-wider uppercase flex items-center gap-1.5 shrink-0 shadow-md group-hover:bg-white/90 group-hover:scale-105 transition-all">
+                                                    <span>Claim</span>
+                                                    <ArrowRight size={13} strokeWidth={2.5} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                {/* Minimal High-Contrast Button */}
-                                <div className="px-4 py-2.5 md:px-6 md:py-3.5 rounded-full bg-white text-black text-xs md:text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2 shrink-0 shadow-lg group-hover:bg-white/90 group-hover:scale-105 transition-all">
-                                    <span>Claim Discount</span>
-                                    <ArrowRight size={16} strokeWidth={2.5} />
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    </motion.div>
-                </div>
+
+                        {/* Swipe Dots Indicator (when > 1 campaign) */}
+                        {activeCampaigns.length > 1 && (
+                            <div className="flex items-center justify-center gap-1.5 mt-3">
+                                {activeCampaigns.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        onClick={() => {
+                                            if (campaignCarouselRef.current) {
+                                                const width = campaignCarouselRef.current.offsetWidth * 0.85;
+                                                campaignCarouselRef.current.scrollTo({
+                                                    left: i * width,
+                                                    behavior: 'smooth'
+                                                });
+                                            }
+                                        }}
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                                            currentCampaignIndex === i 
+                                                ? 'w-6 bg-black' 
+                                                : 'w-1.5 bg-black/20 hover:bg-black/40'
+                                        }`}
+                                        aria-label={`Go to slide ${i + 1}`}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {/* Pinned / Most Booked Treatments */}
@@ -613,7 +710,7 @@ export default function Home() {
             </div>
 
             {/* Campaign Modal */}
-            {isCampaignModalOpen && (
+            {isCampaignModalOpen && selectedCampaignModal && (
                 <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-md">
                     <motion.div 
                         initial={{ opacity: 0, y: 100 }}
@@ -626,16 +723,19 @@ export default function Home() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-black text-white text-[9px] font-bold tracking-widest uppercase">
-                                        {campaign?.label || 'EXCLUSIVE PROMO'}
+                                        {selectedCampaignModal.label || 'EXCLUSIVE PROMO'}
                                     </span>
                                     <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/5 text-black text-[9px] font-bold uppercase tracking-wider border border-black/10">
-                                        -{campaign?.discountPercentage}% OFF
+                                        -{selectedCampaignModal.discountPercentage}% OFF
                                     </span>
                                 </div>
-                                <h2 className="font-serif text-xl md:text-2xl font-bold text-black">{campaign?.title}</h2>
+                                <h2 className="font-serif text-xl md:text-2xl font-bold text-black">{selectedCampaignModal.title}</h2>
                             </div>
                             <button 
-                                onClick={() => setIsCampaignModalOpen(false)}
+                                onClick={() => {
+                                    setIsCampaignModalOpen(false);
+                                    setSelectedCampaignModal(null);
+                                }}
                                 className="w-9 h-9 rounded-full bg-black/5 flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
                             >
                                 <X size={18} />
@@ -646,14 +746,14 @@ export default function Home() {
                         <div className="p-5 md:p-7 overflow-y-auto bg-white space-y-6">
                             
                             {/* Trip Perk Unlocked Banner */}
-                            {campaign?.tripOffer && (
+                            {selectedCampaignModal.tripOffer && (
                                 <div className="p-4 rounded-2xl bg-black/5 border border-black/10 flex items-start gap-3">
                                     <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0 mt-0.5">
                                         <Sparkles size={16} />
                                     </div>
                                     <div>
                                         <span className="text-[10px] font-bold uppercase tracking-wider text-black/60 block">Claimable Trip Perk</span>
-                                        <h4 className="text-sm font-bold text-black">{campaign.tripOffer}</h4>
+                                        <h4 className="text-sm font-bold text-black">{selectedCampaignModal.tripOffer}</h4>
                                         <p className="text-xs text-black/70 mt-0.5">Select an eligible treatment below to claim this perk voucher.</p>
                                     </div>
                                 </div>
@@ -668,7 +768,7 @@ export default function Home() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {campaign?.selectedTreatments.flatMap(ct => {
+                                    {selectedCampaignModal.selectedTreatments?.flatMap(ct => {
                                         const treatment = treatments.find(t => t.id === ct.treatmentId);
                                         if (!treatment) return [];
                                         
@@ -677,7 +777,7 @@ export default function Home() {
                                             if (!option) return null;
                                             
                                             const originalPriceNum = parseInt(option.price.replace(/,/g, ''));
-                                            const discountedPriceNum = originalPriceNum * (1 - (campaign.discountPercentage / 100));
+                                            const discountedPriceNum = originalPriceNum * (1 - ((selectedCampaignModal.discountPercentage ?? 20) / 100));
                                             
                                             return (
                                                 <div 
@@ -687,14 +787,14 @@ export default function Home() {
                                                         setCartItems([{
                                                             id: Date.now().toString(),
                                                             treatmentId: treatment.id,
-                                                            campaignTitle: campaign.title,
-                                                            tripOffer: campaign.tripOffer || 'Special Trip Discount',
+                                                            campaignTitle: selectedCampaignModal.title,
+                                                            tripOffer: selectedCampaignModal.tripOffer || 'Special Trip Discount',
                                                             title: treatment.title,
                                                             duration: duration,
                                                             price: discountedPriceNum,
                                                             guests: 1,
                                                             isCampaign: true,
-                                                            discountPercentage: campaign.discountPercentage
+                                                            discountPercentage: selectedCampaignModal.discountPercentage
                                                         }]);
                                                         setIsCampaignModalOpen(false);
                                                         setIsBookingModalOpen(true);
@@ -706,7 +806,7 @@ export default function Home() {
                                                                 {treatment.category}
                                                             </span>
                                                             <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
-                                                                -{campaign.discountPercentage}%
+                                                                -{selectedCampaignModal.discountPercentage}%
                                                             </span>
                                                         </div>
                                                         <h4 className="text-base font-bold text-black mb-1">{treatment.title}</h4>

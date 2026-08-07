@@ -58,6 +58,7 @@ export default function AdminDashboard() {
     const { 
         treatments, setTreatments, 
         campaign, setCampaign, 
+        campaigns, setCampaigns,
         products, setProducts, 
         siteBrandFilter, setSiteBrandFilter, 
         therapists, setTherapists 
@@ -87,20 +88,70 @@ export default function AdminDashboard() {
     const [campaignImage, setCampaignImage] = useState<string>(campaign?.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
     const [editingCampaignId, setEditingCampaignId] = useState<string | null>(campaign?.id || null);
 
-    // Sync from context when campaign loads
-    useEffect(() => {
-        if (campaign) {
-            setCampaignTitle(campaign.title || '');
-            setCampaignLabel(campaign.label || '');
-            setCampaignDesc(campaign.description || '');
-            setCampaignTripOffer(campaign.tripOffer || '25% OFF Bali Day Trip & Fastboat');
-            setCampaignDuration(campaign.duration || '1_month');
-            setDiscountPercentage(campaign.discountPercentage || 20);
-            setCampaignTreatments(campaign.selectedTreatments || []);
-            setCampaignImage(campaign.image || '');
-            setEditingCampaignId(campaign.id || null);
+    // Sync when campaign changes
+    const loadCampaignToForm = (c: Campaign) => {
+        setCampaignTitle(c.title || '');
+        setCampaignLabel(c.label || '');
+        setCampaignDesc(c.description || '');
+        setCampaignTripOffer(c.tripOffer || '');
+        setCampaignDuration(c.duration || '1_month');
+        setDiscountPercentage(c.discountPercentage ?? 20);
+        setCampaignTreatments(c.selectedTreatments || []);
+        setCampaignImage(c.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
+        setEditingCampaignId(c.id || null);
+    };
+
+    const handleNewCampaign = () => {
+        setCampaignTitle('Bali Day Trip & Spa Combo');
+        setCampaignLabel('Exclusive Trip Deal');
+        setCampaignDesc('Book any eligible treatment below to claim your private Day Trip & Fastboat discount.');
+        setCampaignTripOffer('25% OFF Bali Day Trip & Fastboat');
+        setCampaignDuration('1_month');
+        setDiscountPercentage(20);
+        selectAllTreatments();
+        setCampaignImage('https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
+        setEditingCampaignId(null);
+    };
+
+    const handleDeleteCampaign = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this campaign?')) return;
+        try {
+            await supabase.from('campaigns').delete().eq('id', id);
+            const updated = campaigns.filter(c => c.id !== id);
+            setCampaigns(updated);
+            if (updated.length > 0) {
+                setCampaign(updated[0]);
+                if (editingCampaignId === id) loadCampaignToForm(updated[0]);
+            } else {
+                setCampaign(null);
+                handleNewCampaign();
+            }
+            try {
+                localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+                if (updated.length > 0) localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
+                else localStorage.removeItem('spa_campaign');
+            } catch(e) {}
+        } catch(e) {
+            console.error(e);
+            alert('Failed to delete campaign.');
         }
-    }, [campaign]);
+    };
+
+    const handleTogglePublishCampaign = async (camp: Campaign) => {
+        const newStatus = !(camp.is_published !== false);
+        try {
+            if (camp.id) {
+                await supabase.from('campaigns').update({ is_published: newStatus }).eq('id', camp.id);
+            }
+            const updated = campaigns.map(c => c.id === camp.id ? { ...c, is_published: newStatus } : c);
+            setCampaigns(updated);
+            try {
+                localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+            } catch(e) {}
+        } catch(e) {
+            console.error(e);
+        }
+    };
 
     const applyCampaignPreset = (preset: typeof CAMPAIGN_PRESETS[0]) => {
         setCampaignTitle(preset.title);
@@ -246,23 +297,37 @@ export default function AdminDashboard() {
                 try {
                     if (editingCampaignId) {
                         await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
-                        setCampaign({ ...campaignData, id: editingCampaignId });
+                        const updated = campaigns.map(c => c.id === editingCampaignId ? { ...campaignData, id: editingCampaignId } : c);
+                        setCampaigns(updated);
+                        setCampaign(updated[0] || null);
+                        try {
+                            localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+                            localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
+                        } catch(e) {}
                     } else {
                         const { data } = await supabase.from('campaigns').insert([campaignData]).select();
+                        let newCamp: Campaign;
                         if (data && data.length > 0) {
-                            setCampaign(data[0] as Campaign);
-                            setEditingCampaignId(data[0].id || null);
+                            newCamp = data[0] as Campaign;
                         } else {
-                            setCampaign(campaignData);
+                            newCamp = { ...campaignData, id: Date.now().toString() };
                         }
+                        const updated = [newCamp, ...campaigns.filter(c => c.id !== newCamp.id)];
+                        setCampaigns(updated);
+                        setCampaign(updated[0]);
+                        setEditingCampaignId(newCamp.id || null);
+                        try {
+                            localStorage.setItem('spa_campaigns', JSON.stringify(updated));
+                            localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
+                        } catch(e) {}
                     }
                 } catch (err) {
-                    setCampaign(campaignData);
+                    console.error(err);
+                    const localCamp = { ...campaignData, id: editingCampaignId || Date.now().toString() };
+                    const updated = editingCampaignId ? campaigns.map(c => c.id === editingCampaignId ? localCamp : c) : [localCamp, ...campaigns];
+                    setCampaigns(updated);
+                    setCampaign(updated[0]);
                 }
-
-                try {
-                    localStorage.setItem('spa_campaign', JSON.stringify(campaignData));
-                } catch (err) {}
 
                 setSuccess(true);
                 setTimeout(() => setSuccess(false), 3000);
@@ -526,38 +591,117 @@ export default function AdminDashboard() {
                     {activeTab === 'campaign' && (
                         <div className="space-y-8 animate-in fade-in duration-300">
                             
-                            {/* Header Intro */}
+                            {/* Multi-Campaign Overview List */}
                             <div className="bg-white border border-black/15 rounded-2xl p-5 md:p-6 shadow-sm">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/10 pb-4 mb-5">
                                     <div>
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-[10px] font-bold uppercase tracking-widest mb-2">
-                                            <Sparkles size={12} /> Frontend Promo Setup
+                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-[10px] font-bold uppercase tracking-widest mb-1">
+                                            <Sparkles size={12} /> Homepage Promotions
                                         </div>
-                                        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black">Campaign Card Setup</h2>
-                                        <p className="text-xs md:text-sm text-black/60 mt-1 max-w-xl">
-                                            Configure the campaign card displayed on the homepage. When a guest clicks &ldquo;Claim Discount&rdquo;, they choose an eligible massage treatment to activate the trip/promotional voucher.
+                                        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black">
+                                            All Campaigns ({campaigns.length})
+                                        </h2>
+                                        <p className="text-xs text-black/60 mt-0.5">
+                                            Manage multiple promotional cards displayed on the homepage swipeable carousel.
                                         </p>
                                     </div>
-                                    <div className="shrink-0">
-                                        <button
-                                            type="button"
-                                            onClick={handleSubmit}
-                                            disabled={isSubmitting}
-                                            className="w-full md:w-auto bg-black text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
-                                        >
-                                            {isSubmitting ? (
-                                                <>
-                                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                    Publishing...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Check size={14} /> Publish Card
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleNewCampaign}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-black text-white text-xs font-bold uppercase tracking-wider hover:bg-black/80 transition-all shadow-sm shrink-0"
+                                    >
+                                        <Plus size={14} /> + New Campaign
+                                    </button>
                                 </div>
+
+                                {campaigns.length === 0 ? (
+                                    <div className="text-center py-8 border border-dashed border-black/20 rounded-xl bg-black/[0.02]">
+                                        <p className="text-xs font-semibold text-black/60">No campaigns created yet.</p>
+                                        <p className="text-[11px] text-black/40 mt-1">Use the form below or pick a 1-click template to publish your first campaign card.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        {campaigns.map((camp, idx) => {
+                                            const isCurrentEditing = editingCampaignId === camp.id;
+                                            const isPub = camp.is_published !== false;
+                                            return (
+                                                <div 
+                                                    key={camp.id || idx}
+                                                    className={`p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 ${
+                                                        isCurrentEditing 
+                                                        ? 'bg-black/5 border-black shadow-sm ring-1 ring-black' 
+                                                        : 'bg-white border-black/15 hover:border-black/30'
+                                                    }`}
+                                                >
+                                                    <div className="flex gap-3 items-start">
+                                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/10 shrink-0 relative">
+                                                            <img 
+                                                                src={camp.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg"} 
+                                                                alt={camp.title}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-black text-white">
+                                                                    {camp.label || 'OFFER'}
+                                                                </span>
+                                                                <span className="text-[9px] font-bold text-black/60">
+                                                                    {camp.discountPercentage ?? 20}% OFF
+                                                                </span>
+                                                                {!isPub && (
+                                                                    <span className="text-[9px] font-bold text-black/40 border border-black/20 px-1 rounded">
+                                                                        Draft
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <h4 className="text-xs font-bold text-black mt-1 line-clamp-1">
+                                                                {camp.title}
+                                                            </h4>
+                                                            <p className="text-[10px] text-black/60 mt-0.5 line-clamp-1">
+                                                                {camp.tripOffer || 'Special trip perk included'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between pt-2.5 border-t border-black/10 text-xs">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => loadCampaignToForm(camp)}
+                                                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                                                                    isCurrentEditing 
+                                                                    ? 'bg-black text-white' 
+                                                                    : 'bg-black/5 hover:bg-black hover:text-white text-black'
+                                                                }`}
+                                                            >
+                                                                <Edit3 size={11} /> {isCurrentEditing ? 'Editing' : 'Edit'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleTogglePublishCampaign(camp)}
+                                                                className="px-2 py-1 rounded-lg text-[10px] font-semibold text-black/60 hover:text-black border border-black/15 hover:border-black transition-colors"
+                                                            >
+                                                                {isPub ? 'Published' : 'Hidden'}
+                                                            </button>
+                                                        </div>
+                                                        {camp.id && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDeleteCampaign(camp.id!)}
+                                                                className="p-1.5 text-black/40 hover:text-black hover:bg-black/10 rounded-lg transition-colors"
+                                                                title="Delete campaign"
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
 
                                 {/* Quick Presets Bar */}
                                 <div className="mt-6 pt-5 border-t border-black/10">
@@ -591,12 +735,12 @@ export default function AdminDashboard() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <label className="text-xs font-bold uppercase tracking-widest text-black flex items-center gap-1.5">
-                                        Live Homepage Card Preview
+                                        Live Card Preview {editingCampaignId ? '(Editing Card)' : '(New Card)'}
                                     </label>
-                                    <span className="text-[10px] font-medium text-black/50">Real-time render</span>
+                                    <span className="text-[10px] font-medium text-black/50">Compact Homepage Sizing</span>
                                 </div>
 
-                                <div className="relative w-full h-[220px] md:h-[320px] rounded-3xl overflow-hidden shadow-lg border border-black/20 bg-black group">
+                                <div className="relative w-full max-w-lg mx-auto h-[200px] md:h-[240px] rounded-2xl overflow-hidden shadow-md border border-black/20 bg-black group">
                                     <img 
                                         src={campaignImage || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
                                         alt={campaignTitle}
@@ -604,31 +748,31 @@ export default function AdminDashboard() {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                                     
-                                    <div className="absolute inset-0 p-5 md:p-8 flex flex-col justify-between z-10 text-white">
+                                    <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-between z-10 text-white">
                                         <div className="flex items-center justify-between">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] font-black tracking-widest uppercase shadow-sm">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-black text-[9px] font-black tracking-widest uppercase shadow-sm">
                                                 {campaignLabel || 'SPECIAL OFFER'}
                                             </span>
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
                                                 -{discountPercentage}% OFF
                                             </span>
                                         </div>
 
-                                        <div className="flex items-end justify-between gap-4">
-                                            <div>
-                                                <span className="text-[10px] font-bold tracking-widest uppercase text-white/70 block mb-1">
+                                        <div className="flex items-end justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <span className="text-[9px] font-bold tracking-widest uppercase text-white/70 block mb-0.5 line-clamp-1">
                                                     {campaignTripOffer || 'Special Trip Discount Included'}
                                                 </span>
-                                                <h3 className="text-xl md:text-3xl font-bold tracking-tight text-white line-clamp-1">
+                                                <h3 className="text-base md:text-xl font-bold tracking-tight text-white line-clamp-1">
                                                     {campaignTitle || 'Campaign Title'}
                                                 </h3>
-                                                <p className="text-xs text-white/80 line-clamp-2 max-w-md mt-1 font-light hidden sm:block">
+                                                <p className="text-[11px] text-white/80 line-clamp-1 font-light hidden sm:block">
                                                     {campaignDesc || 'Description of the campaign offer and discount voucher.'}
                                                 </p>
                                             </div>
 
-                                            <div className="px-4 py-2.5 rounded-xl bg-white text-black text-xs font-black tracking-wider uppercase flex items-center gap-1.5 shrink-0 shadow-md">
-                                                Claim Discount <ArrowRight size={14} />
+                                            <div className="px-3 py-2 rounded-xl bg-white text-black text-[11px] font-black tracking-wider uppercase flex items-center gap-1 shrink-0 shadow-md">
+                                                Claim <ArrowRight size={12} />
                                             </div>
                                         </div>
                                     </div>
@@ -637,9 +781,20 @@ export default function AdminDashboard() {
 
                             {/* Campaign Setup Form */}
                             <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-black border-b border-black/10 pb-3">
-                                    Card Settings & Content
-                                </h3>
+                                <div className="flex items-center justify-between border-b border-black/10 pb-3">
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-black">
+                                        {editingCampaignId ? 'Edit Campaign Details' : 'Create New Campaign Card'}
+                                    </h3>
+                                    {editingCampaignId && (
+                                        <button
+                                            type="button"
+                                            onClick={handleNewCampaign}
+                                            className="text-xs font-semibold text-black/60 hover:text-black underline"
+                                        >
+                                            + Switch to New Blank Card
+                                        </button>
+                                    )}
+                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
@@ -709,7 +864,7 @@ export default function AdminDashboard() {
 
                                 {/* Background Image Upload / URL */}
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Background Image</label>
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Background Image (Upload or URL)</label>
                                     <div className="flex flex-col sm:flex-row gap-3 items-center">
                                         <input 
                                             type="text" 
@@ -814,16 +969,25 @@ export default function AdminDashboard() {
                                 <div className="pt-4 border-t border-black/10 flex items-center justify-between">
                                     {success && (
                                         <span className="flex items-center gap-1.5 text-xs font-bold text-black uppercase tracking-wider">
-                                            <CheckCircle size={16} /> Card Saved & Published!
+                                            <CheckCircle size={16} /> Campaign Card Saved & Published!
                                         </span>
                                     )}
-                                    <div className="ml-auto">
+                                    <div className="ml-auto flex items-center gap-3">
+                                        {editingCampaignId && (
+                                            <button
+                                                type="button"
+                                                onClick={handleNewCampaign}
+                                                className="px-4 py-3 rounded-xl text-xs font-bold border border-black/20 text-black/70 hover:bg-black/5 transition-colors"
+                                            >
+                                                Cancel Edit
+                                            </button>
+                                        )}
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
                                             className="bg-black text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
                                         >
-                                            {isSubmitting ? 'Saving...' : 'Save & Publish Campaign Card'}
+                                            {isSubmitting ? 'Publishing...' : editingCampaignId ? 'Update & Publish Campaign' : 'Save & Publish New Campaign'}
                                         </button>
                                     </div>
                                 </div>

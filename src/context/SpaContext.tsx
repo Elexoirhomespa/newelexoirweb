@@ -169,6 +169,8 @@ type SpaContextType = {
     setTreatments: React.Dispatch<React.SetStateAction<Treatment[]>>;
     campaign: Campaign | null;
     setCampaign: (c: Campaign | null) => void;
+    campaigns: Campaign[];
+    setCampaigns: React.Dispatch<React.SetStateAction<Campaign[]>>;
     products: Product[];
     setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
     cartItems: CartItem[];
@@ -191,6 +193,7 @@ const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
 export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
     const [treatments, setTreatments] = useState<Treatment[]>([]);
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -205,6 +208,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
             try {
                 const cachedTreatments = localStorage.getItem('spa_treatments');
                 const cachedProducts = localStorage.getItem('spa_products');
+                const cachedCampaigns = localStorage.getItem('spa_campaigns');
                 const cachedCampaign = localStorage.getItem('spa_campaign');
 
                 if (cachedTreatments) {
@@ -215,8 +219,15 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                     setProducts(JSON.parse(cachedProducts));
                     hasCache = true;
                 }
-                if (cachedCampaign) {
-                    setCampaign(JSON.parse(cachedCampaign));
+                if (cachedCampaigns) {
+                    const parsed = JSON.parse(cachedCampaigns);
+                    setCampaigns(parsed);
+                    if (parsed.length > 0) setCampaign(parsed[0]);
+                    hasCache = true;
+                } else if (cachedCampaign) {
+                    const single = JSON.parse(cachedCampaign);
+                    setCampaign(single);
+                    setCampaigns([single]);
                     hasCache = true;
                 }
 
@@ -269,11 +280,20 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 }
 
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
-                    setCampaign(campaignsRes.data[0] as Campaign);
-                    try { localStorage.setItem('spa_campaign', JSON.stringify(campaignsRes.data[0])); } catch(e) {}
+                    const fetchedCampaigns = campaignsRes.data as Campaign[];
+                    setCampaigns(fetchedCampaigns);
+                    setCampaign(fetchedCampaigns[0]);
+                    try { 
+                        localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
+                        localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0]));
+                    } catch(e) {}
                 } else {
+                    setCampaigns([]);
                     setCampaign(null);
-                    try { localStorage.removeItem('spa_campaign'); } catch(e) {}
+                    try { 
+                        localStorage.removeItem('spa_campaigns');
+                        localStorage.removeItem('spa_campaign');
+                    } catch(e) {}
                 }
 
                 if (therapistsRes.data) {
@@ -323,7 +343,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
 
     return (
         <SpaContext.Provider value={{
-            treatments, setTreatments, campaign, setCampaign, products, setProducts,
+            treatments, setTreatments, campaign, setCampaign, campaigns, setCampaigns, products, setProducts,
             cartItems, addToCart, updateCartQuantity, removeFromCart, clearCart,
             savedProducts, toggleSavedProduct,
             isLoading,
