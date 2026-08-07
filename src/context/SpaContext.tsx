@@ -199,10 +199,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
         image: 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center',
         duration: '1_month',
         discountPercentage: 20,
-        selectedTreatments: [
-            { treatmentId: 'balinese-massage', durations: ['60 MINS', '90 MINS', '120 MINS', '60', '90', '120'] },
-            { treatmentId: 'aromatherapy-massage', durations: ['60 MINS', '90 MINS', '120 MINS', '60', '90', '120'] }
-        ],
+        selectedTreatments: [],
         tripOffer: 'Complimentary Botanical Scrub & Luxury Villa Setup',
         is_published: true,
         brand: 'elexoir'
@@ -215,26 +212,12 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
         image: 'https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center',
         duration: '1_month',
         discountPercentage: 25,
-        selectedTreatments: [
-            { treatmentId: 'balinese-massage', durations: ['60 MINS', '90 MINS', '60', '90'] }
-        ],
+        selectedTreatments: [],
         tripOffer: '25% OFF Bali Day Trip & Fastboat Transfer',
         is_published: true,
         brand: 'elexoir'
     }
 ];
-
-const mergeWithDefaults = (list: Campaign[]): Campaign[] => {
-    if (!Array.isArray(list) || list.length === 0) return DEFAULT_CAMPAIGNS;
-    const combined = [...list];
-    for (const def of DEFAULT_CAMPAIGNS) {
-        const exists = combined.some(c => c.id === def.id || (c.title && def.title && c.title.trim().toLowerCase() === def.title.trim().toLowerCase()));
-        if (!exists) {
-            combined.push(def);
-        }
-    }
-    return combined;
-};
 
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
@@ -266,27 +249,21 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                     setProducts(JSON.parse(cachedProducts));
                     hasCache = true;
                 }
-                if (cachedCampaigns) {
+                if (cachedCampaigns !== null) {
                     const parsed = JSON.parse(cachedCampaigns);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        const merged = mergeWithDefaults(parsed);
-                        setCampaigns(merged);
-                        setCampaign(merged[0]);
-                        try { localStorage.setItem('spa_campaigns', JSON.stringify(merged)); } catch(e) {}
+                    if (Array.isArray(parsed)) {
+                        setCampaigns(parsed);
+                        setCampaign(parsed[0] || null);
                         hasCache = true;
                     }
-                } else if (cachedCampaign) {
+                } else if (cachedCampaign !== null) {
                     const single = JSON.parse(cachedCampaign);
                     if (single) {
-                        const merged = mergeWithDefaults([single]);
-                        setCampaigns(merged);
-                        setCampaign(merged[0]);
-                        try { localStorage.setItem('spa_campaigns', JSON.stringify(merged)); } catch(e) {}
+                        setCampaigns([single]);
+                        setCampaign(single);
                         hasCache = true;
                     }
-                }
-
-                if (!cachedCampaigns && !cachedCampaign) {
+                } else {
                     setCampaigns(DEFAULT_CAMPAIGNS);
                     setCampaign(DEFAULT_CAMPAIGNS[0]);
                     try {
@@ -338,12 +315,11 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 // If DB has campaigns, update state and local cache
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
                     const fetchedCampaigns = campaignsRes.data as Campaign[];
-                    const merged = mergeWithDefaults(fetchedCampaigns);
-                    setCampaigns(merged);
-                    setCampaign(merged[0]);
+                    setCampaigns(fetchedCampaigns);
+                    setCampaign(fetchedCampaigns[0] || null);
                     try { 
-                        localStorage.setItem('spa_campaigns', JSON.stringify(merged));
-                        localStorage.setItem('spa_campaign', JSON.stringify(merged[0]));
+                        localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
+                        localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
                     } catch(e) {}
                 }
 
@@ -363,12 +339,11 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
         const handleSync = () => {
             try {
                 const stored = localStorage.getItem('spa_campaigns');
-                if (stored) {
+                if (stored !== null) {
                     const parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        const merged = mergeWithDefaults(parsed);
-                        setCampaigns(merged);
-                        setCampaign(merged[0]);
+                    if (Array.isArray(parsed)) {
+                        setCampaigns(parsed);
+                        setCampaign(parsed[0] || null);
                     }
                 }
             } catch (e) {}

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, ChevronRight, Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSpa, Campaign } from '@/context/SpaContext';
+import { useSpa, Campaign, Treatment } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import ServiceAreas from '@/components/ServiceAreas';
@@ -277,17 +277,12 @@ export default function Home() {
 
 
                 {/* Cinematic Multi-Campaign Swipeable Carousel with Peek Effect */}
+                {/* Cinematic Multi-Campaign Carousel */}
                 {activeCampaigns.length > 0 && (
                     <div className="mb-8 w-full relative">
-                        {/* Header with Navigation Controls (when multiple campaigns exist) */}
+                        {/* Navigation Controls (when multiple campaigns exist) */}
                         {activeCampaigns.length > 1 && (
-                            <div className="flex items-center justify-between mb-2.5 px-1">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-black animate-pulse"></span>
-                                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-black/70">
-                                        Featured Offers & Trips ({activeCampaigns.length})
-                                    </span>
-                                </div>
+                            <div className="flex items-center justify-end mb-2 px-1">
                                 <div className="flex items-center gap-1.5">
                                     <button
                                         type="button"
@@ -348,12 +343,12 @@ export default function Home() {
                                         <div className="absolute inset-0 p-4 sm:p-5 md:p-6 flex flex-col justify-between z-10 text-white">
                                             {/* Top Badge */}
                                             <div className="flex items-center justify-start">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] md:text-[10px] font-black tracking-widest uppercase shadow-md">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[8px] md:text-[9px] font-bold tracking-[0.2em] uppercase border border-white/30 text-white shadow-sm">
                                                     {camp.label || 'SPECIAL PROMO'}
                                                 </span>
                                             </div>
 
-                                            {/* Bottom Text & Action */}
+                                            {/* Bottom Text & Original Frosted Icon */}
                                             <div className="flex items-end justify-between gap-3">
                                                 <div className="min-w-0 pr-2">
                                                     {camp.tripOffer && (
@@ -371,9 +366,9 @@ export default function Home() {
                                                     )}
                                                 </div>
 
-                                                <div className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white text-black text-xs md:text-sm font-black tracking-wider uppercase flex items-center gap-1.5 shrink-0 shadow-lg group-hover:bg-white/90 group-hover:scale-105 transition-all">
-                                                    <span>Claim</span>
-                                                    <ArrowRight size={14} strokeWidth={2.5} />
+                                                {/* Original Frosted Round Icon Button */}
+                                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center shrink-0 shadow-[0_8px_32px_rgb(0,0,0,0.15)] group-hover:bg-white/30 group-hover:scale-105 group-active:scale-95 transition-all duration-500">
+                                                    <ArrowRight size={18} strokeWidth={2.5} />
                                                 </div>
                                             </div>
                                         </div>
@@ -762,28 +757,73 @@ export default function Home() {
                                     <span className="text-xs font-bold uppercase tracking-wider text-black">
                                         Select Treatment to Activate Discount
                                     </span>
-                                    <span className="text-[10px] text-black/50 font-medium">Click to book</span>
+                                    <span className="text-[10px] text-black/50 font-medium">Click to choose duration</span>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {selectedCampaignModal.selectedTreatments?.flatMap(ct => {
-                                        const treatment = treatments.find(t => t.id === ct.treatmentId);
-                                        if (!treatment) return [];
-                                        
-                                        return ct.durations.map(duration => {
-                                            const option = treatment.options.find(o => o.duration === duration);
-                                            if (!option) return null;
-                                            
-                                            const originalPriceNum = parseInt(option.price.replace(/,/g, ''));
-                                            const discountedPriceNum = originalPriceNum * (1 - ((selectedCampaignModal.discountPercentage ?? 20) / 100));
-                                            
-                                            return (
+                                {(() => {
+                                    type CardItem = {
+                                        treatment: Treatment;
+                                        duration: string;
+                                        option: { duration: string; price: string };
+                                        discountedPriceNum: number;
+                                    };
+                                    const cards: CardItem[] = [];
+                                    const discount = selectedCampaignModal.discountPercentage ?? 20;
+
+                                    if (selectedCampaignModal.selectedTreatments && selectedCampaignModal.selectedTreatments.length > 0) {
+                                        selectedCampaignModal.selectedTreatments.forEach(ct => {
+                                            const treatment = treatments.find(t => 
+                                                String(t.id).trim().toLowerCase() === String(ct.treatmentId).trim().toLowerCase() ||
+                                                t.title.trim().toLowerCase() === String(ct.treatmentId).trim().toLowerCase()
+                                            );
+                                            if (!treatment) return;
+
+                                            ct.durations.forEach(duration => {
+                                                const cleanDur = duration.replace(/MINS/gi, '').trim();
+                                                const option = treatment.options.find(o => 
+                                                    o.duration.replace(/MINS/gi, '').trim() === cleanDur ||
+                                                    o.duration.trim() === duration.trim()
+                                                ) || treatment.options[0];
+
+                                                if (option) {
+                                                    const originalPriceNum = parseInt(option.price.replace(/,/g, '')) || 0;
+                                                    const discountedPriceNum = Math.round(originalPriceNum * (1 - (discount / 100)));
+                                                    cards.push({
+                                                        treatment,
+                                                        duration: option.duration,
+                                                        option,
+                                                        discountedPriceNum
+                                                    });
+                                                }
+                                            });
+                                        });
+                                    }
+
+                                    // Fallback if no specific treatments were selected or IDs matched: show all treatments
+                                    if (cards.length === 0) {
+                                        treatments.forEach(treatment => {
+                                            treatment.options.forEach(option => {
+                                                const originalPriceNum = parseInt(option.price.replace(/,/g, '')) || 0;
+                                                const discountedPriceNum = Math.round(originalPriceNum * (1 - (discount / 100)));
+                                                cards.push({
+                                                    treatment,
+                                                    duration: option.duration,
+                                                    option,
+                                                    discountedPriceNum
+                                                });
+                                            });
+                                        });
+                                    }
+
+                                    return (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {cards.map(({ treatment, duration, option, discountedPriceNum }, idx) => (
                                                 <div 
-                                                    key={`${treatment.id}-${duration}`} 
+                                                    key={`${treatment.id}-${duration}-${idx}`} 
                                                     className="p-5 rounded-2xl border border-black/15 hover:border-black bg-white hover:bg-black/[0.02] shadow-sm transition-all duration-300 flex flex-col justify-between cursor-pointer group"
                                                     onClick={() => {
                                                         setCartItems([{
-                                                            id: Date.now().toString(),
+                                                            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                                                             treatmentId: treatment.id,
                                                             campaignTitle: selectedCampaignModal.title,
                                                             tripOffer: selectedCampaignModal.tripOffer || 'Special Trip Discount',
@@ -792,7 +832,7 @@ export default function Home() {
                                                             price: discountedPriceNum,
                                                             guests: 1,
                                                             isCampaign: true,
-                                                            discountPercentage: selectedCampaignModal.discountPercentage
+                                                            discountPercentage: discount
                                                         }]);
                                                         setIsCampaignModalOpen(false);
                                                         setIsBookingModalOpen(true);
@@ -804,7 +844,7 @@ export default function Home() {
                                                                 {treatment.category}
                                                             </span>
                                                             <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
-                                                                -{selectedCampaignModal.discountPercentage}%
+                                                                -{discount}%
                                                             </span>
                                                         </div>
                                                         <h4 className="text-base font-bold text-black mb-1">{treatment.title}</h4>
@@ -814,7 +854,7 @@ export default function Home() {
                                                     <div className="pt-3 border-t border-black/10 flex items-end justify-between">
                                                         <div>
                                                             <div className="flex items-center gap-1 text-[10px] font-bold text-black/60 uppercase mb-1">
-                                                                <Clock className="w-3 h-3" /> {duration} MINS
+                                                                <Clock className="w-3 h-3" /> {duration.includes('MIN') ? duration : `${duration} MINS`}
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-[11px] text-black/40 line-through">Rp {option.price}</span>
@@ -822,15 +862,15 @@ export default function Home() {
                                                             </div>
                                                         </div>
 
-                                                        <div className="px-3 py-1.5 rounded-lg bg-black text-white text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:scale-105 transition-all">
-                                                            Claim <ArrowRight size={12} />
+                                                        <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                                                            <ArrowRight size={15} />
                                                         </div>
                                                     </div>
                                                 </div>
-                                            );
-                                        });
-                                    })}
-                                </div>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </motion.div>

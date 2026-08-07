@@ -764,8 +764,8 @@ export default function AdminDashboard() {
                                     
                                     <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-between z-10 text-white">
                                         <div className="flex items-center justify-start">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] md:text-[10px] font-black tracking-widest uppercase shadow-md">
-                                                {campaignLabel || 'SPECIAL OFFER'}
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[8px] md:text-[9px] font-bold tracking-[0.2em] uppercase border border-white/30 text-white shadow-sm">
+                                                {campaignLabel || 'SPECIAL PROMO'}
                                             </span>
                                         </div>
 
@@ -786,8 +786,8 @@ export default function AdminDashboard() {
                                                 )}
                                             </div>
 
-                                            <div className="px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white text-black text-xs font-black tracking-wider uppercase flex items-center gap-1 shrink-0 shadow-lg">
-                                                Claim <ArrowRight size={13} strokeWidth={2.5} />
+                                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center shrink-0 shadow-[0_8px_32px_rgb(0,0,0,0.15)] group-hover:bg-white/30 group-hover:scale-105 transition-all">
+                                                <ArrowRight size={18} strokeWidth={2.5} />
                                             </div>
                                         </div>
                                     </div>
