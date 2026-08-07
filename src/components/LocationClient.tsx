@@ -105,7 +105,9 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
             const waNumber = '6285174119423';
             
             const treatmentsList = cartItems.map(item => {
-                const price = (item.price * item.guests).toLocaleString('en-US');
+                const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                const price = (item.price * multiplier).toLocaleString('en-US');
                 const itemTreatment = treatments.find(t => t.id === item.treatmentId);
                 
                 let whatsIncludedText = '';
@@ -117,16 +119,43 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                     }
                 }
 
-                if (item.isCampaign) {
+                const guestText = isCouple 
+                    ? (item.guests === 2 ? '1 COUPLE (2 PERSONS)' : `${item.guests / 2} COUPLES (${item.guests} PERSONS)`)
+                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''}`;
+
+                if (item.isCampaign && item.discountPercentage && Number(item.discountPercentage) > 0) {
                     const originalPriceNum = item.price / (1 - (item.discountPercentage / 100));
-                    const originalPrice = (originalPriceNum * item.guests).toLocaleString('en-US');
-                    return `*${item.campaignTitle.trim().toUpperCase()}*\n*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON [${item.discountPercentage}% OFF]\nIDR ${price} ~IDR ${originalPrice}~${whatsIncludedText}`;
+                    const originalPrice = (originalPriceNum * multiplier).toLocaleString('en-US');
+                    const priceText = `IDR ${price} ~IDR ${originalPrice}~ [${item.discountPercentage}% OFF SPA]`;
+                    return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText}\n${priceText}${whatsIncludedText}`;
                 }
-                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON IDR ${price}${whatsIncludedText}`;
+
+                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText}\nIDR ${price}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
             
-            const websiteSource = typeof window !== 'undefined' ? window.location.hostname : 'Unknown';
-            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${totalPrice.toLocaleString('en-US')}\n\n*CLIENT DETAILS:*\n- Name: ${formData.name}\n- Date: ${formData.date}\n- Time: ${formData.time}\n- Location/Villa: ${formData.location}\n- Room Number: ${formData.room || 'N/A'}\n\nHello! I would like to confirm this booking.`;
+            const campaignItems = cartItems.filter(item => item.isCampaign);
+            let campaignDetailsText = '';
+            if (campaignItems.length > 0) {
+                const uniqueCampaigns = Array.from(new Set(campaignItems.map(i => i.campaignTitle).filter(Boolean)));
+                const uniqueTripOffers = Array.from(new Set(campaignItems.map(i => i.tripOffer).filter(Boolean)));
+                
+                const lines: string[] = [];
+                if (uniqueCampaigns.length > 0) {
+                    lines.push(`*CAMPAIGN:* ${uniqueCampaigns.join(', ').toUpperCase()}`);
+                }
+                if (uniqueTripOffers.length > 0) {
+                    lines.push(`*TRAVEL BENEFIT:* ${uniqueTripOffers.join(', ')}`);
+                }
+                if (lines.length > 0) {
+                    campaignDetailsText = `\n\n${lines.join('\n')}`;
+                }
+            }
+
+            const rawHost = typeof window !== 'undefined' ? window.location.hostname : 'elexoirhomespaubud.com';
+            const cleanHost = rawHost.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            const websiteSource = cleanHost.startsWith('www.') ? cleanHost : `www.${cleanHost}`;
+
+            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${totalPrice.toLocaleString('en-US')}\n\n*CLIENT DETAILS:*\n• Name: ${formData.name}\n• Date: ${formData.date}\n• Time: ${formData.time}\n• Location/Villa: ${formData.location}\n• Room Number: ${formData.room || 'N/A'}${campaignDetailsText}\n\nHello! I would like to confirm this booking.`;
             
             const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(baseMessage)}`;
             if (newWindow) {

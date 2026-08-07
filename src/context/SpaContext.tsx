@@ -240,13 +240,51 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
 export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
-    const [treatments, setTreatments] = useState<Treatment[]>([]);
-    const [campaigns, setCampaigns] = useState<Campaign[]>(DEFAULT_CAMPAIGNS);
-    const [campaign, setCampaign] = useState<Campaign | null>(DEFAULT_CAMPAIGNS[0]);
-    const [products, setProducts] = useState<Product[]>([]);
+    const [treatments, setTreatments] = useState<Treatment[]>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const cached = localStorage.getItem('spa_treatments');
+                if (cached) return JSON.parse(cached);
+            } catch(e) {}
+        }
+        return [];
+    });
+    const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const cached = localStorage.getItem('spa_campaigns');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) return sortCampaigns(parsed);
+                }
+            } catch(e) {}
+        }
+        return DEFAULT_CAMPAIGNS;
+    });
+    const [campaign, setCampaign] = useState<Campaign | null>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const cached = localStorage.getItem('spa_campaign');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed) return parsed;
+                }
+            } catch(e) {}
+        }
+        return DEFAULT_CAMPAIGNS[0] || null;
+    });
+    const [products, setProducts] = useState<Product[]>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const cached = localStorage.getItem('spa_products');
+                if (cached) return JSON.parse(cached);
+            } catch(e) {}
+        }
+        return [];
+    });
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [siteBrandFilter, setSiteBrandFilter] = useState<string>(brand || process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
     const [therapists, setTherapists] = useState<Therapist[]>([]);
 

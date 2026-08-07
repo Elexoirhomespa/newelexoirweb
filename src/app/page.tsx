@@ -148,8 +148,6 @@ export default function Home() {
                 return acc + (item.price * multiplier);
             }, 0);
 
-            const treatmentsListStr = cartItems.map(item => `${item.title} (${item.duration} MINS)`).join(', ');
-
             const waNumber = '6285174119423';
             
             const treatmentsList = cartItems.map(item => {
@@ -167,22 +165,44 @@ export default function Home() {
                     }
                 }
 
-                if (item.isCampaign) {
-                    const hasSpaDiscount = item.discountPercentage && Number(item.discountPercentage) > 0;
-                    const originalPriceNum = hasSpaDiscount ? item.price / (1 - (item.discountPercentage / 100)) : item.price;
-                    const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
-                    const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                const guestText = isCouple 
+                    ? (item.guests === 2 ? '1 COUPLE (2 PERSONS)' : `${item.guests / 2} COUPLES (${item.guests} PERSONS)`)
+                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''}`;
+
+                if (item.isCampaign && item.discountPercentage && Number(item.discountPercentage) > 0) {
+                    const originalPriceNum = item.price / (1 - (item.discountPercentage / 100));
                     const originalPrice = (originalPriceNum * multiplier).toLocaleString('en-US');
-                    const discountTag = hasSpaDiscount ? ` [${item.discountPercentage}% OFF SPA]` : '';
-                    const priceText = hasSpaDiscount ? `IDR ${price} ~IDR ${originalPrice}~` : `IDR ${price}`;
-                    const tripOfferText = item.tripOffer ? `\n*TRAVEL BENEFIT:* ${item.tripOffer}` : '';
-                    return `*CAMPAIGN: ${item.campaignTitle.trim().toUpperCase()}*${tripOfferText}\n*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON${discountTag}\n${priceText}${whatsIncludedText}`;
+                    const priceText = `IDR ${price} ~IDR ${originalPrice}~ [${item.discountPercentage}% OFF SPA]`;
+                    return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText}\n${priceText}${whatsIncludedText}`;
                 }
-                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON IDR ${price}${whatsIncludedText}`;
+
+                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText}\nIDR ${price}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
             
-            const websiteSource = typeof window !== 'undefined' ? window.location.hostname : 'Unknown';
-            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${totalPrice.toLocaleString('en-US')}\n\n*CLIENT DETAILS:*\n- Name: ${formData.name}\n- Date: ${formData.date}\n- Time: ${formData.time}\n- Location/Villa: ${formData.location}\n- Room Number: ${formData.room || 'N/A'}\n\nHello! I would like to confirm this booking.`;
+            // Extract campaign info cleanly
+            const campaignItems = cartItems.filter(item => item.isCampaign);
+            let campaignDetailsText = '';
+            if (campaignItems.length > 0) {
+                const uniqueCampaigns = Array.from(new Set(campaignItems.map(i => i.campaignTitle).filter(Boolean)));
+                const uniqueTripOffers = Array.from(new Set(campaignItems.map(i => i.tripOffer).filter(Boolean)));
+                
+                const lines: string[] = [];
+                if (uniqueCampaigns.length > 0) {
+                    lines.push(`*CAMPAIGN:* ${uniqueCampaigns.join(', ').toUpperCase()}`);
+                }
+                if (uniqueTripOffers.length > 0) {
+                    lines.push(`*TRAVEL BENEFIT:* ${uniqueTripOffers.join(', ')}`);
+                }
+                if (lines.length > 0) {
+                    campaignDetailsText = `\n\n${lines.join('\n')}`;
+                }
+            }
+
+            const rawHost = typeof window !== 'undefined' ? window.location.hostname : 'elexoirhomespaubud.com';
+            const cleanHost = rawHost.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            const websiteSource = cleanHost.startsWith('www.') ? cleanHost : `www.${cleanHost}`;
+
+            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${totalPrice.toLocaleString('en-US')}\n\n*CLIENT DETAILS:*\n• Name: ${formData.name}\n• Date: ${formData.date}\n• Time: ${formData.time}\n• Location/Villa: ${formData.location}\n• Room Number: ${formData.room || 'N/A'}${campaignDetailsText}\n\nHello! I would like to confirm this booking.`;
             const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(baseMessage)}`;
             if (newWindow) {
                 newWindow.location.href = waUrl;
@@ -335,6 +355,9 @@ export default function Home() {
                                                 src={camp.image} 
                                                 alt={camp.title}
                                                 fill 
+                                                priority={idx === 0}
+                                                loading={idx === 0 ? "eager" : "lazy"}
+                                                sizes="(max-width: 768px) 90vw, 480px"
                                                 className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
                                         )}
