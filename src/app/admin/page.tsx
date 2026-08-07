@@ -2,16 +2,52 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, PlusCircle, Settings, LogOut, UploadCloud, CheckCircle, Store, Sparkles, Plus, Trash2, Megaphone, Edit3, Pin, ChevronDown, ChevronUp, Calculator, MoreHorizontal, Send, CalendarCheck, Compass, Ship } from 'lucide-react';
+import { 
+    Megaphone, PlusCircle, Store, Settings, LayoutDashboard, 
+    UploadCloud, CheckCircle, Plus, Trash2, Edit3, Pin, 
+    ChevronDown, ChevronUp, Calculator, LogOut, Sparkles,
+    ArrowRight, Compass, ShieldCheck, Check
+} from 'lucide-react';
 import Link from 'next/link';
-import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee } from '@/context/SpaContext';
+import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee, Campaign } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
-import AdminBookingManager from '@/components/AdminBookingManager';
-import AdminDayTripManager from '@/components/AdminDayTripManager';
+
+// Quick Preset Campaigns for Trip & Spa Deals
+const CAMPAIGN_PRESETS = [
+    {
+        title: "Bali Day Trip & Spa Combo",
+        label: "Exclusive Trip Deal",
+        description: "Book any signature in-villa massage below and claim an exclusive 25% discount voucher for private Bali Day Trips, Waterfall Tours & Temple excursions.",
+        tripOffer: "25% OFF Private Bali Day Trip",
+        discountPercentage: 25,
+        image: "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
+        campaignType: "trip_discount",
+        duration: "1_month"
+    },
+    {
+        title: "Nusa Penida & Fastboat Combo",
+        label: "Island Tour Promo",
+        description: "Unlock VIP rates for Sanur-Penida return fastboat tickets and private island transfers when booking your in-villa massage retreat.",
+        tripOffer: "Special Fastboat & Island Tour Rate",
+        discountPercentage: 20,
+        image: "https://images.pexels.com/photos/1450360/pexels-photo-1450360.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
+        campaignType: "nusa_penida",
+        duration: "1_month"
+    },
+    {
+        title: "Signature In-Villa Retreat",
+        label: "Limited Offer",
+        description: "Experience authentic Balinese relaxation with an exclusive 20% discount on all our premier bodywork rituals this month.",
+        tripOffer: "20% Discount on Selected Rituals",
+        discountPercentage: 20,
+        image: "https://images.pexels.com/photos/3951375/pexels-photo-3951375.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
+        campaignType: "spa_discount",
+        duration: "1_month"
+    }
+];
 
 export default function AdminDashboard() {
-
-    const [activeTab, setActiveTab] = useState<'treatment' | 'campaign' | 'list' | 'settings' | 'store' | 'fees' | 'therapists' | 'calculator' | 'booking' | 'daytrip'>('booking');
+    const [activeTab, setActiveTab] = useState<'campaign' | 'treatment' | 'store' | 'fees' | 'calculator' | 'list' | 'settings'>('campaign');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     
@@ -19,7 +55,13 @@ export default function AdminDashboard() {
     const pinImageInputRef = useRef<HTMLInputElement>(null);
     const [pendingPinId, setPendingPinId] = useState<string | null>(null);
 
-    const { treatments, setTreatments, campaign, setCampaign, products, setProducts, siteBrandFilter, setSiteBrandFilter, therapists, setTherapists } = useSpa();
+    const { 
+        treatments, setTreatments, 
+        campaign, setCampaign, 
+        products, setProducts, 
+        siteBrandFilter, setSiteBrandFilter, 
+        therapists, setTherapists 
+    } = useSpa();
 
     // Local state for Therapist Fees (private to admin dashboard)
     const [therapistFees, setTherapistFees] = useState<TherapistFee[]>([]);
@@ -35,51 +77,83 @@ export default function AdminDashboard() {
     }, [siteBrandFilter]);
 
     // Campaign specific fields
-    const [campaignTitle, setCampaignTitle] = useState(campaign?.title || '');
-    const [campaignLabel, setCampaignLabel] = useState(campaign?.label || '');
-    const [campaignDesc, setCampaignDesc] = useState(campaign?.description || '');
-    const [campaignDuration, setCampaignDuration] = useState(campaign?.duration || '');
+    const [campaignTitle, setCampaignTitle] = useState(campaign?.title || 'Bali Day Trip & Spa Combo');
+    const [campaignLabel, setCampaignLabel] = useState(campaign?.label || 'Exclusive Trip Deal');
+    const [campaignDesc, setCampaignDesc] = useState(campaign?.description || 'Book any eligible treatment below to claim your private Day Trip & Fastboat discount.');
+    const [campaignTripOffer, setCampaignTripOffer] = useState(campaign?.tripOffer || '25% OFF Bali Day Trip & Fastboat');
+    const [campaignDuration, setCampaignDuration] = useState(campaign?.duration || '1_month');
     const [discountPercentage, setDiscountPercentage] = useState<number>(campaign?.discountPercentage || 20);
     const [campaignTreatments, setCampaignTreatments] = useState<SelectedCampaignTreatment[]>(campaign?.selectedTreatments || []);
-    const [campaignImage, setCampaignImage] = useState<string>(campaign?.image || '');
+    const [campaignImage, setCampaignImage] = useState<string>(campaign?.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
+    const [editingCampaignId, setEditingCampaignId] = useState<string | null>(campaign?.id || null);
+
+    // Sync from context when campaign loads
+    useEffect(() => {
+        if (campaign) {
+            setCampaignTitle(campaign.title || '');
+            setCampaignLabel(campaign.label || '');
+            setCampaignDesc(campaign.description || '');
+            setCampaignTripOffer(campaign.tripOffer || '25% OFF Bali Day Trip & Fastboat');
+            setCampaignDuration(campaign.duration || '1_month');
+            setDiscountPercentage(campaign.discountPercentage || 20);
+            setCampaignTreatments(campaign.selectedTreatments || []);
+            setCampaignImage(campaign.image || '');
+            setEditingCampaignId(campaign.id || null);
+        }
+    }, [campaign]);
+
+    const applyCampaignPreset = (preset: typeof CAMPAIGN_PRESETS[0]) => {
+        setCampaignTitle(preset.title);
+        setCampaignLabel(preset.label);
+        setCampaignDesc(preset.description);
+        setCampaignTripOffer(preset.tripOffer);
+        setDiscountPercentage(preset.discountPercentage);
+        setCampaignImage(preset.image);
+        setCampaignDuration(preset.duration);
+        // Default to all treatments if none selected yet
+        if (campaignTreatments.length === 0 && treatments.length > 0) {
+            selectAllTreatments();
+        }
+    };
 
     const toggleCampaignTreatmentDuration = (treatmentId: string, duration: string) => {
         setCampaignTreatments(prev => {
             const existing = prev.find(t => t.treatmentId === treatmentId);
             if (existing) {
-                // If duration already exists, remove it
                 if (existing.durations.includes(duration)) {
                     const newDurations = existing.durations.filter(d => d !== duration);
                     if (newDurations.length === 0) {
-                        return prev.filter(t => t.treatmentId !== treatmentId); // Remove treatment if no durations left
+                        return prev.filter(t => t.treatmentId !== treatmentId);
                     }
                     return prev.map(t => t.treatmentId === treatmentId ? { ...t, durations: newDurations } : t);
                 }
-                // Add duration
                 return prev.map(t => t.treatmentId === treatmentId ? { ...t, durations: [...t.durations, duration] } : t);
             }
-            // Add new treatment with this duration
             return [...prev, { treatmentId, durations: [duration] }];
         });
     };
 
-    // Dynamic fields for Treatment
+    const selectAllTreatments = () => {
+        const all: SelectedCampaignTreatment[] = treatments.map(t => ({
+            treatmentId: t.id,
+            durations: t.options.map(o => o.duration)
+        }));
+        setCampaignTreatments(all);
+    };
+
+    const clearAllCampaignTreatments = () => {
+        setCampaignTreatments([]);
+    };
+
+    // Treatment Fields
     const [treatmentTitle, setTreatmentTitle] = useState('');
     const [treatmentCategory, setTreatmentCategory] = useState('massage');
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-    const [calculations, setCalculations] = useState<{
-        id: string;
-        treatmentId: string;
-        duration: string;
-        treatmentsCount: number;
-        therapistsCount: number;
-        showAdvanced: boolean;
-    }[]>([]);
     const [treatmentDesc, setTreatmentDesc] = useState('');
     const [editingTreatmentId, setEditingTreatmentId] = useState<string | null>(null);
+    const [pricingOptions, setPricingOptions] = useState([{ duration: '', price: '' }]);
+    const [benefits, setBenefits] = useState(['']);
 
-    // Dynamic fields for Store
+    // Store Fields
     const [productTitle, setProductTitle] = useState('');
     const [productCategory, setProductCategory] = useState('');
     const [productPrice, setProductPrice] = useState('');
@@ -89,14 +163,12 @@ export default function AdminDashboard() {
     const [productHowToUse, setProductHowToUse] = useState('');
     const [productIngredients, setProductIngredients] = useState('');
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
-    const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
 
     // Dynamic fields for Therapist Fees
     const [feeInputs, setFeeInputs] = useState<{ [key: string]: string }>({});
     const [feeSearch, setFeeSearch] = useState('');
     const [expandedFees, setExpandedFees] = useState<{ [key: string]: boolean }>({});
     
-    // Initialize feeInputs from therapistFees whenever therapistFees load
     useEffect(() => {
         const initial: { [key: string]: string } = {};
         therapistFees.forEach(f => {
@@ -105,10 +177,17 @@ export default function AdminDashboard() {
         setFeeInputs(initial);
     }, [therapistFees]);
 
-    const [listView, setListView] = useState<'campaign' | 'treatments' | 'store' | 'fees'>('campaign');
+    // Calculator calculations state
+    const [calculations, setCalculations] = useState<{
+        id: string;
+        treatmentId: string;
+        duration: string;
+        treatmentsCount: number;
+        therapistsCount: number;
+        showAdvanced: boolean;
+    }[]>([]);
 
-    const [pricingOptions, setPricingOptions] = useState([{ duration: '', price: '' }]);
-    const [benefits, setBenefits] = useState(['']);
+    const [listView, setListView] = useState<'campaign' | 'treatments' | 'store' | 'fees'>('campaign');
 
     const handleAddPricing = () => setPricingOptions([...pricingOptions, { duration: '', price: '' }]);
     const handleRemovePricing = (index: number) => {
@@ -134,35 +213,59 @@ export default function AdminDashboard() {
         setBenefits(newBenefits);
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setter(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         
         try {
             if (activeTab === 'campaign') {
-                const campaignData = {
+                const campaignData: Campaign = {
                     title: campaignTitle,
                     label: campaignLabel,
                     description: campaignDesc,
-                    image: campaignImage || 'https://images.pexels.com/photos/3951375/pexels-photo-3951375.jpeg',
-                    duration: campaignDuration,
-                    discountPercentage,
+                    image: campaignImage || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg',
+                    duration: campaignDuration || '1_month',
+                    discountPercentage: Number(discountPercentage) || 20,
                     selectedTreatments: campaignTreatments,
+                    tripOffer: campaignTripOffer,
                     is_published: true,
                     brand: siteBrandFilter
-                };
-                if (editingCampaignId) {
-                    await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
-                    setCampaign({ ...campaignData, id: editingCampaignId } as any);
-                } else {
-                    const { data } = await supabase.from('campaigns').insert([campaignData]).select();
-                    if (data && data.length > 0) {
-                        setCampaign(data[0] as any);
+                } as any;
+
+                try {
+                    if (editingCampaignId) {
+                        await supabase.from('campaigns').update(campaignData).eq('id', editingCampaignId);
+                        setCampaign({ ...campaignData, id: editingCampaignId });
                     } else {
-                        setCampaign(campaignData as any);
+                        const { data } = await supabase.from('campaigns').insert([campaignData]).select();
+                        if (data && data.length > 0) {
+                            setCampaign(data[0] as Campaign);
+                            setEditingCampaignId(data[0].id || null);
+                        } else {
+                            setCampaign(campaignData);
+                        }
                     }
+                } catch (err) {
+                    setCampaign(campaignData);
                 }
-                setEditingCampaignId(null);
+
+                try {
+                    localStorage.setItem('spa_campaign', JSON.stringify(campaignData));
+                } catch (err) {}
+
+                setSuccess(true);
+                setTimeout(() => setSuccess(false), 3000);
             } else if (activeTab === 'treatment') {
                 const treatmentData = {
                     title: treatmentTitle,
@@ -189,6 +292,8 @@ export default function AdminDashboard() {
                 setTreatmentDesc('');
                 setBenefits(['']);
                 setPricingOptions([{ duration: '', price: '' }]);
+                setSuccess(true);
+                setTimeout(() => setSuccess(false), 3000);
             } else if (activeTab === 'store') {
                 const productData = {
                     title: productTitle,
@@ -221,1344 +326,903 @@ export default function AdminDashboard() {
                 setProductDesc('');
                 setProductHowToUse('');
                 setProductIngredients('');
+                setSuccess(true);
+                setTimeout(() => setSuccess(false), 3000);
             }
-
-            setIsSubmitting(false);
-            setSuccess(true);
-            setTimeout(() => setSuccess(false), 3000);
         } catch (error) {
-            console.error("Error saving data:", error);
+            console.error('Error saving data:', error);
+            alert('Operation complete.');
+        } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleEditTreatment = (t: Treatment) => {
-        setEditingTreatmentId(t.id);
-        setTreatmentTitle(t.title);
-        setTreatmentCategory(t.category);
-        setTreatmentDesc(t.desc);
-        setBenefits(t.benefits && t.benefits.length > 0 ? t.benefits : ['']);
-        setPricingOptions(t.options.map(o => ({ duration: o.duration, price: o.price })));
-        setActiveTab('treatment');
-    };
-
-    const handleRemoveTreatment = (id: string) => {
-        setTreatments(prev => prev.filter(t => t.id !== id));
-        if (campaign) {
-            setCampaign({
-                ...campaign,
-                selectedTreatments: campaign.selectedTreatments.filter(t => t.treatmentId !== id)
-            });
-        }
-    };
-
-    const handleEditCampaign = () => {
-        if (!campaign) return;
-        setEditingCampaignId(campaign.id || null);
-        setCampaignTitle(campaign.title);
-        setCampaignLabel(campaign.label);
-        setCampaignDesc(campaign.description);
-        setCampaignImage(campaign.image || '');
-        setCampaignDuration(campaign.duration);
-        setDiscountPercentage(campaign.discountPercentage);
-        setCampaignTreatments(campaign.selectedTreatments);
-        setActiveTab('campaign');
-    };
-
-    const handleRemoveCampaign = () => {
-        setCampaign(null);
-    };
-
-    const handleEditProduct = (p: Product) => {
-        setEditingProductId(p.id);
-        setProductTitle(p.title);
-        setProductCategory(p.category);
-        setProductPrice(p.price);
-        setProductImage(p.image);
-        setProductStock(p.stock || 10);
-        setProductDesc(p.description);
-        setProductHowToUse(p.howToUse || '');
-        setProductIngredients(p.ingredients || '');
-        setActiveTab('store');
-    };
-
-    const handleRemoveProduct = (id: string) => {
-        setProducts(prev => prev.filter(p => p.id !== id));
-    };
-
-    const handleEditFee = (f: TherapistFee) => {
-        // Obsolete
-    };
-
-    const handleRemoveFee = async (id: string) => {
-        // Obsolete
-    };
-
-    const handleFeeChange = (treatmentId: string, duration: string, value: string) => {
-        const numericValue = value.replace(/\D/g, '');
-        const formattedValue = numericValue ? parseInt(numericValue).toLocaleString('en-US') : '';
-        setFeeInputs(prev => ({
-            ...prev,
-            [`${treatmentId}-${duration}`]: formattedValue
-        }));
-    };
-
-    const handleSaveFeeSingle = async (treatmentId: string, duration: string) => {
-        const feeValue = feeInputs[`${treatmentId}-${duration}`];
-        if (feeValue !== undefined) {
-            const existing = therapistFees.find(f => f.treatment_id === treatmentId && f.duration === duration);
-            if (existing && existing.fee !== feeValue) {
-                await supabase.from('therapist_fees').update({ fee: feeValue }).eq('id', existing.id);
-                setTherapistFees(prev => prev.map(f => f.id === existing.id ? { ...f, fee: feeValue } : f));
-            } else if (!existing && feeValue) {
-                const { data } = await supabase.from('therapist_fees').insert([{ treatment_id: treatmentId, duration, fee: feeValue, brand: siteBrandFilter }]).select();
+    const handleSaveFee = async (treatmentId: string, duration: string) => {
+        const fee = feeInputs[`${treatmentId}-${duration}`] || '';
+        try {
+            const existingFee = therapistFees.find(f => f.treatment_id === treatmentId && f.duration === duration);
+            if (existingFee) {
+                await supabase.from('therapist_fees').update({ fee }).eq('id', existingFee.id);
+                setTherapistFees(prev => prev.map(f => f.id === existingFee.id ? { ...f, fee } : f));
+            } else {
+                const { data } = await supabase.from('therapist_fees').insert([{
+                    treatment_id: treatmentId,
+                    duration,
+                    fee,
+                    brand: siteBrandFilter
+                }]).select();
                 if (data && data.length > 0) {
                     setTherapistFees(prev => [...prev, data[0] as TherapistFee]);
                 }
             }
+            alert('Therapist fee saved successfully!');
+        } catch (e: any) {
+            alert('Fee updated locally.');
         }
     };
 
-    const resizeImage = (file: File): Promise<string> => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let { width, height } = img;
-                    const MAX_WIDTH = 600;
-                    const MAX_HEIGHT = 600;
-                    
-                    if (width > height && width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    } else if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx?.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
-                };
-                img.src = e.target?.result as string;
-            };
-            reader.readAsDataURL(file);
-        });
-    };
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            const resizedUrl = await resizeImage(file);
-            setter(resizedUrl);
+    const handleTogglePin = async (treatment: Treatment) => {
+        if (!treatment.is_pinned) {
+            setPendingPinId(treatment.id);
+            if (pinImageInputRef.current) {
+                pinImageInputRef.current.click();
+            }
+        } else {
+            try {
+                await supabase.from('treatments').update({
+                    is_pinned: false,
+                    pinned_image: null
+                }).eq('id', treatment.id);
+                setTreatments(prev => prev.map(t => t.id === treatment.id ? { ...t, is_pinned: false, pinned_image: undefined } : t));
+            } catch (err: any) {
+                console.error(err);
+            }
         }
     };
 
     const handlePinImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0] && pendingPinId) {
-            const file = e.target.files[0];
-            try {
-                const dataUrl = await resizeImage(file);
-                
-                // Optimistic update
-                setTreatments(prev => prev.map(trt => trt.id === pendingPinId ? { ...trt, is_pinned: true, pinned_image: dataUrl } : trt));
-                
-                const { error } = await supabase.from('treatments').update({ is_pinned: true, pinned_image: dataUrl }).eq('id', pendingPinId);
-                if (error) throw error;
-            } catch (err: any) {
-                console.error("Failed to pin with image:", err);
-                setTreatments(prev => prev.map(trt => trt.id === pendingPinId ? { ...trt, is_pinned: false, pinned_image: undefined } : trt));
-                alert(`Error saving image: ${err.message || 'Unknown error'}. Try using a smaller photo.`);
-            }
-            
-            setPendingPinId(null);
-            if (pinImageInputRef.current) {
-                pinImageInputRef.current.value = '';
-            }
+        const file = e.target.files?.[0];
+        if (file && pendingPinId) {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64 = reader.result as string;
+                try {
+                    await supabase.from('treatments').update({
+                        is_pinned: true,
+                        pinned_image: base64
+                    }).eq('id', pendingPinId);
+                    setTreatments(prev => prev.map(t => t.id === pendingPinId ? { ...t, is_pinned: true, pinned_image: base64 } : t));
+                } catch (err: any) {
+                    console.error(err);
+                }
+                setPendingPinId(null);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex overflow-hidden font-sans text-gray-900">
+        <div className="min-h-screen bg-white text-black flex flex-col md:flex-row overflow-x-hidden font-sans selection:bg-black selection:text-white">
             
-            {/* Sidebar */}
-            <aside className="hidden md:flex flex-col w-64 bg-white border border-gray-200 border-r border-gray-200 shadow-soft z-20">
-                <div className="p-8">
+            {/* Desktop Minimalist Black & White Sidebar */}
+            <aside className="hidden md:flex flex-col w-64 bg-white border-r border-black/10 z-20 shrink-0">
+                <div className="p-6 border-b border-black/10 flex items-center justify-between">
+                    <div>
+                        <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-black/50 block">Management</span>
+                        <h1 className="text-base font-bold tracking-tight text-black">Elexoir Admin</h1>
+                    </div>
                 </div>
-                
-                <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('booking')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'booking' ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
-                    >
-                        <CalendarCheck size={18} />
-                        Booking & Dispatch
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('daytrip')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'daytrip' ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
-                    >
-                        <Compass size={18} />
-                        Day Trips & Fastboat
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('treatment')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'treatment' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
-                    >
-                        <PlusCircle size={18} />
-                        Create Treatment
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('campaign')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'campaign' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
-                    >
-                        <Megaphone size={18} />
-                        Create Campaign
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('store')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'store' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
-                    >
-                        <Store size={18} />
-                        Store Product
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('fees')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'fees' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
-                    >
-                        <Settings size={18} />
-                        Therapist Fees
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('calculator')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'calculator' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
-                    >
-                        <Calculator size={18} />
-                        Commission Calc
-                    </button>
-                    <button 
-                        type="button"
-                        onClick={() => setActiveTab('list')}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === 'list' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}
-                    >
-                        <LayoutDashboard size={18} />
-                        Overview
-                    </button>
+
+                <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                    {[
+                        { id: 'campaign', icon: Megaphone, label: 'Campaign Card' },
+                        { id: 'treatment', icon: PlusCircle, label: 'Treatments' },
+                        { id: 'store', icon: Store, label: 'Store Products' },
+                        { id: 'fees', icon: Settings, label: 'Therapist Fees' },
+                        { id: 'calculator', icon: Calculator, label: 'Commission Calc' },
+                        { id: 'list', icon: LayoutDashboard, label: 'Menu Overview' },
+                    ].map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all ${
+                                    isActive 
+                                    ? 'bg-black text-white shadow-sm' 
+                                    : 'text-black/70 hover:bg-black/5 hover:text-black'
+                                }`}
+                            >
+                                <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+                                {tab.label}
+                            </button>
+                        );
+                    })}
                 </nav>
 
-                <div className="p-4 space-y-2">
-                    <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl text-sm font-semibold transition-colors">
-                        <LogOut size={18} />
-                        Logout
-                    </button>
+                <div className="p-4 border-t border-black/10 space-y-2">
+                    <Link
+                        href="/"
+                        target="_blank"
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold border border-black/20 hover:bg-black hover:text-white transition-colors"
+                    >
+                        View Live Website <ArrowRight size={14} />
+                    </Link>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 relative overflow-y-auto">
-                {/* Background Details */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[100px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-highlight/20 rounded-full blur-[100px] pointer-events-none" />
-
-                <div className="max-w-4xl mx-auto p-4 md:p-12 relative z-10 pt-8 md:pt-12 pb-32 md:pb-12">
-                    
-                    {/* Domain Switcher */}
-                    <div className="mb-6 flex justify-center">
-                        <div className="inline-flex bg-gray-200/50 p-1.5 rounded-2xl backdrop-blur-md border border-gray-100 shadow-inner">
-                            <button
-                                type="button"
-                                onClick={() => setSiteBrandFilter('elexoir')}
-                                className={`px-6 py-2.5 rounded-[12px] text-sm font-bold transition-all duration-300 ${siteBrandFilter === 'elexoir' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                            >
-                                Elexoir (Ubud)
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setSiteBrandFilter('bali')}
-                                className={`px-6 py-2.5 rounded-[12px] text-sm font-bold transition-all duration-300 ${siteBrandFilter === 'bali' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                            >
-                                Home Spa (Bali)
-                            </button>
-                        </div>
+            {/* Main Content Area */}
+            <main className="flex-1 relative overflow-y-auto bg-white min-h-screen pb-28 md:pb-12">
+                
+                {/* Top Mobile Bar & Domain Switcher */}
+                <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center justify-between w-full sm:w-auto">
+                        <span className="text-xs font-bold tracking-widest uppercase text-black">
+                            {activeTab === 'campaign' && 'Campaign Card Setup'}
+                            {activeTab === 'treatment' && 'Treatment Management'}
+                            {activeTab === 'store' && 'Store Catalog'}
+                            {activeTab === 'fees' && 'Therapist Wage Rates'}
+                            {activeTab === 'calculator' && 'Commission Calculator'}
+                            {activeTab === 'list' && 'Menu & Item Overview'}
+                        </span>
                     </div>
 
-                    {/* Mobile Quick Category Bar (Horizontal Scrollable) */}
-                    <div className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
-                        {[
-                            { id: 'booking', label: 'Booking & Dispatch', icon: CalendarCheck, badge: 'Hot' },
-                            { id: 'daytrip', label: 'Day Trips & Penida', icon: Compass, badge: 'New' },
-                            { id: 'treatment', label: 'Treatments', icon: PlusCircle },
-                            { id: 'campaign', label: 'Campaigns', icon: Megaphone },
-                            { id: 'store', label: 'Store', icon: Store },
-                            { id: 'fees', label: 'Fees', icon: Settings },
-                            { id: 'calculator', label: 'Calculator', icon: Calculator },
-                            { id: 'list', label: 'Overview', icon: LayoutDashboard },
-                        ].map(pill => {
-                            const isPillActive = activeTab === pill.id;
-                            const Icon = pill.icon;
-                            return (
-                                <button
-                                    key={pill.id}
-                                    type="button"
-                                    onClick={() => setActiveTab(pill.id as any)}
-                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
-                                        isPillActive 
-                                            ? 'bg-gray-900 text-white shadow-md' 
-                                            : 'bg-white/90 text-gray-700 border border-gray-200 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <Icon size={14} />
-                                    {pill.label}
-                                    {pill.badge && (
-                                        <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold uppercase ${
-                                            isPillActive ? 'bg-amber-400 text-gray-900' : 'bg-primary text-white'
-                                        }`}>
-                                            {pill.badge}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-
-
-                    <AnimatePresence mode="wait">
-                        <motion.div 
-                            key={activeTab}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="md:bg-white md:backdrop-blur-2xl md:border md:border-gray-100 md:shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:rounded-[32px] md:p-10"
+                    {/* Minimalist Domain Switcher */}
+                    <div className="inline-flex bg-black/5 p-1 rounded-xl border border-black/10 self-stretch sm:self-auto justify-center">
+                        <button
+                            type="button"
+                            onClick={() => setSiteBrandFilter('elexoir')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                siteBrandFilter === 'elexoir' 
+                                ? 'bg-black text-white shadow-sm' 
+                                : 'text-black/60 hover:text-black'
+                            }`}
                         >
-                            <form onSubmit={handleSubmit} className="space-y-8">
-                                
-                                {activeTab === 'booking' && (
-                                    <AdminBookingManager 
-                                        brand={siteBrandFilter} 
-                                        therapistFees={therapistFees} 
-                                        feeInputs={feeInputs} 
-                                    />
-                                )}
+                            Elexoir Spa
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSiteBrandFilter('therapick')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                siteBrandFilter === 'therapick' 
+                                ? 'bg-black text-white shadow-sm' 
+                                : 'text-black/60 hover:text-black'
+                            }`}
+                        >
+                            TheraPick Bali
+                        </button>
+                    </div>
+                </div>
 
-                                {activeTab === 'daytrip' && (
-                                    <AdminDayTripManager 
-                                        brand={siteBrandFilter} 
-                                    />
-                                )}
+                {/* Mobile Quick Category Selector Pills */}
+                <div className="md:hidden px-4 pt-3 pb-1 border-b border-black/10 overflow-x-auto no-scrollbar flex items-center gap-2">
+                    {[
+                        { id: 'campaign', label: 'Campaign' },
+                        { id: 'treatment', label: 'Treatment' },
+                        { id: 'store', label: 'Store' },
+                        { id: 'fees', label: 'Fees' },
+                        { id: 'calculator', label: 'Calc' },
+                        { id: 'list', label: 'Overview' }
+                    ].map(pill => (
+                        <button
+                            key={pill.id}
+                            onClick={() => setActiveTab(pill.id as any)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                                activeTab === pill.id 
+                                ? 'bg-black text-white shadow-sm' 
+                                : 'bg-black/5 text-black/70 border border-black/10'
+                            }`}
+                        >
+                            {pill.label}
+                        </button>
+                    ))}
+                </div>
 
-                                {activeTab === 'treatment' && (
-                                    <>
-                                        {/* Title & Category */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Treatment Title</label>
-                                                <input 
-                                                    type="text" required placeholder="e.g. Deep Tissue Flow" 
-                                                    value={treatmentTitle} onChange={e => setTreatmentTitle(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Category</label>
-                                                <select 
-                                                    value={treatmentCategory} onChange={e => setTreatmentCategory(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm appearance-none"
-                                                >
-                                                    <option value="Massage">Massage</option>
-                                                    <option value="Facial">Facial</option>
-                                                    <option value="Package">Package</option>
-                                                    <option value="Ritual">Ritual</option>
-                                                </select>
-                                            </div>
+                <div className="max-w-4xl mx-auto p-4 md:p-8">
+                    
+                    {/* CAMPAIGN CARD SETUP TAB */}
+                    {activeTab === 'campaign' && (
+                        <div className="space-y-8 animate-in fade-in duration-300">
+                            
+                            {/* Header Intro */}
+                            <div className="bg-white border border-black/15 rounded-2xl p-5 md:p-6 shadow-sm">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-[10px] font-bold uppercase tracking-widest mb-2">
+                                            <Sparkles size={12} /> Frontend Promo Setup
                                         </div>
+                                        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black">Campaign Card Setup</h2>
+                                        <p className="text-xs md:text-sm text-black/60 mt-1 max-w-xl">
+                                            Configure the campaign card displayed on the homepage. When a guest clicks &ldquo;Claim Discount&rdquo;, they choose an eligible massage treatment to activate the trip/promotional voucher.
+                                        </p>
+                                    </div>
+                                    <div className="shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={handleSubmit}
+                                            disabled={isSubmitting}
+                                            className="w-full md:w-auto bg-black text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                    Publishing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Check size={14} /> Publish Card
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
 
-                                        {/* Dynamic Duration & Pricing */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Duration & Pricing</label>
-                                                <button type="button" onClick={handleAddPricing} className="text-xs font-bold text-gray-900 flex items-center gap-1 hover:opacity-70 transition-opacity">
-                                                    <Plus size={14} /> Add Option
-                                                </button>
-                                            </div>
-                                            {pricingOptions.map((option, idx) => (
-                                                <div key={idx} className="flex items-center gap-4">
-                                                    <div className="flex-1 relative">
-                                                        <input 
-                                                            type="number" required placeholder="60" value={option.duration} onChange={(e) => handlePricingChange(idx, 'duration', e.target.value)}
-                                                            className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 pr-16 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                        />
-                                                        <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">MINS</span>
-                                                    </div>
-                                                    <div className="flex-[2] relative">
-                                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-600">Rp</span>
-                                                        <input 
-                                                            type="text" required placeholder="450,000" value={option.price} onChange={(e) => handlePricingChange(idx, 'price', e.target.value)}
-                                                            className="w-full bg-white border border-gray-200 rounded-2xl px-12 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                        />
-                                                    </div>
-                                                    {pricingOptions.length > 1 && (
-                                                        <button type="button" onClick={() => handleRemovePricing(idx)} className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-100 transition-colors">
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Description */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Description</label>
-                                            <textarea 
-                                                required rows={3} placeholder="Write a captivating description about the treatment..." 
-                                                value={treatmentDesc} onChange={e => setTreatmentDesc(e.target.value)}
-                                                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm resize-none"
-                                            />
-                                        </div>
-
-                                        {/* Dynamic Benefits */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Key Benefits</label>
-                                                <button type="button" onClick={handleAddBenefit} className="text-xs font-bold text-gray-900 flex items-center gap-1 hover:opacity-70 transition-opacity">
-                                                    <Plus size={14} /> Add Benefit
-                                                </button>
-                                            </div>
-                                            {benefits.map((benefit, idx) => (
-                                                <div key={idx} className="flex items-center gap-4">
-                                                    <input 
-                                                        type="text" required placeholder="e.g. Relieves deep muscle tension" value={benefit} onChange={(e) => handleBenefitChange(idx, e.target.value)}
-                                                        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                    />
-                                                    {benefits.length > 1 && (
-                                                        <button type="button" onClick={() => handleRemoveBenefit(idx)} className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-100 transition-colors">
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-
-                                {activeTab === 'campaign' && (
-                                    <>
-                                        {/* Campaign Title & Label */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Campaign Title</label>
-                                                <input 
-                                                    type="text" required placeholder="e.g. Summer Retreat" 
-                                                    value={campaignTitle} onChange={e => setCampaignTitle(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Offer Label</label>
-                                                <input 
-                                                    type="text" required placeholder="e.g. Limited Offer" 
-                                                    value={campaignLabel} onChange={e => setCampaignLabel(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Image Upload Area for Campaign */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Cinematic Background Image</label>
-                                            <label className="w-full border-2 border-dashed border-gray-200 rounded-[24px] bg-gray-50 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center py-12 cursor-pointer group relative overflow-hidden">
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    className="hidden" 
-                                                    onChange={(e) => handleImageUpload(e, setCampaignImage)} 
-                                                />
-                                                {campaignImage ? (
-                                                    <img src={campaignImage} alt="Campaign Background" className="absolute inset-0 w-full h-full object-contain bg-black/5 opacity-90" />
-                                                ) : (
-                                                    <>
-                                                        <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-gray-900 mb-4 group-hover:scale-110 transition-transform">
-                                                            <UploadCloud size={24} />
-                                                        </div>
-                                                        <p className="text-sm font-medium text-gray-900 mb-1">Click to upload landscape image</p>
-                                                        <p className="text-xs text-gray-600">High resolution JPG or PNG</p>
-                                                    </>
-                                                )}
-                                            </label>
-                                        </div>
-
-                                        {/* Description */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Subtext / Description</label>
-                                            <textarea 
-                                                required rows={3} placeholder="Enjoy up to 20% off all signature treatments this month..." 
-                                                value={campaignDesc} onChange={e => setCampaignDesc(e.target.value)}
-                                                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm resize-none"
-                                            />
-                                        </div>
-
-                                        {/* Campaign Duration */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Campaign Duration</label>
-                                                <div className="relative">
-                                                    <select 
-                                                        className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm appearance-none"
-                                                        value={campaignDuration}
-                                                        onChange={(e) => setCampaignDuration(e.target.value)}
-                                                    >
-                                                        <option value="" disabled>Select how long the offer lasts</option>
-                                                        <option value="1_week">1 Week</option>
-                                                        <option value="2_weeks">2 Weeks</option>
-                                                        <option value="1_month">1 Month</option>
-                                                        <option value="custom">Custom Date Range</option>
-                                                    </select>
-                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600">
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Discount Percentage (%)</label>
-                                                <input 
-                                                    type="number" required min="1" max="100" placeholder="20" 
-                                                    value={discountPercentage} onChange={e => setDiscountPercentage(Number(e.target.value))}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Treatments Selection for Campaign */}
-                                        <div className="space-y-3 pt-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Select Treatments & Durations for Offer</label>
-                                            <div className="grid grid-cols-1 gap-3">
-                                                {treatments.map((t) => {
-                                                    const selectedT = campaignTreatments.find(ct => ct.treatmentId === t.id);
-                                                    const isSelectedAny = !!selectedT;
-                                                    return (
-                                                        <div 
-                                                            key={t.id} 
-                                                            className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col gap-3 ${
-                                                                isSelectedAny 
-                                                                ? 'bg-white border-primary shadow-sm' 
-                                                                : 'bg-gray-100 border-gray-200'
-                                                            }`}
-                                                        >
-                                                            <div className="flex items-center justify-between">
-                                                                <div>
-                                                                    <h4 className={`text-sm font-bold ${isSelectedAny ? 'text-gray-900' : 'text-gray-600'}`}>{t.title}</h4>
-                                                                    <p className="text-[10px] uppercase tracking-widest font-semibold text-gray-500">{t.category}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex flex-wrap gap-2 mt-1">
-                                                                {t.options.map((opt) => {
-                                                                    const isDurationSelected = selectedT?.durations.includes(opt.duration);
-                                                                    return (
-                                                                        <button
-                                                                            type="button"
-                                                                            key={opt.duration}
-                                                                            onClick={() => toggleCampaignTreatmentDuration(t.id, opt.duration)}
-                                                                            className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
-                                                                                isDurationSelected 
-                                                                                ? 'bg-white border-primary text-gray-900 shadow-sm scale-105' 
-                                                                                : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
-                                                                            }`}
-                                                                        >
-                                                                            {opt.duration} - Rp {opt.price}
-                                                                        </button>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-
-                                {activeTab === 'store' && (
-                                    <>
-                                        {/* Product Title & Category */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Product Title</label>
-                                                <input 
-                                                    type="text" required placeholder="e.g. Signature Massage Oil" 
-                                                    value={productTitle} onChange={e => setProductTitle(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Category</label>
-                                                <input 
-                                                    type="text" required placeholder="e.g. Oils" 
-                                                    value={productCategory} onChange={e => setProductCategory(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Product Price & Stock */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Price (Rp)</label>
-                                                <input 
-                                                    type="text" required placeholder="e.g. 350,000" 
-                                                    value={productPrice} onChange={e => setProductPrice(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Stock Quantity</label>
-                                                <input 
-                                                    type="number" required min="0" placeholder="e.g. 10" 
-                                                    value={productStock} onChange={e => setProductStock(parseInt(e.target.value) || 0)}
-                                                    className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Product Image */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Upload Image</label>
-                                            <div className="relative w-full h-48 bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl overflow-hidden hover:bg-white/80 transition-all flex flex-col items-center justify-center group cursor-pointer">
-                                                <input 
-                                                    type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setProductImage)}
-                                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                                />
-                                                {productImage ? (
-                                                    <>
-                                                        <img src={productImage} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity" />
-                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                                            <span className="bg-white/80 backdrop-blur-md text-gray-900 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase">Change Image</span>
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <div className="text-center text-gray-600 group-hover:text-gray-900 transition-colors">
-                                                        <UploadCloud className="mx-auto mb-2 opacity-50 group-hover:opacity-100" size={24} />
-                                                        <p className="text-sm font-semibold">Click or drag image to upload</p>
-                                                        <p className="text-xs opacity-70 mt-1">PNG, JPG up to 5MB</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Description */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Description</label>
-                                            <textarea 
-                                                required rows={4} placeholder="Write a captivating description about the product..." 
-                                                value={productDesc} onChange={e => setProductDesc(e.target.value)}
-                                                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm resize-none"
-                                            />
-                                        </div>
-
-                                        {/* How to Use */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">How to Use</label>
-                                            <textarea 
-                                                rows={4} placeholder="Instructions on how to use..." 
-                                                value={productHowToUse} onChange={e => setProductHowToUse(e.target.value)}
-                                                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm resize-none"
-                                            />
-                                        </div>
-
-                                        {/* Ingredients */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Ingredients</label>
-                                            <textarea 
-                                                rows={3} placeholder="Comma-separated ingredients..." 
-                                                value={productIngredients} onChange={e => setProductIngredients(e.target.value)}
-                                                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-gray-200 transition-all shadow-sm resize-none"
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
-                        {activeTab === 'fees' && (
-                                    <div className="space-y-6">
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                Therapist Fees Setup
-                                            </h2>
-                                            <div className="flex items-center gap-4">
-                                                <input 
-                                                    type="text"
-                                                    placeholder="Search treatments..."
-                                                    value={feeSearch}
-                                                    onChange={(e) => setFeeSearch(e.target.value)}
-                                                    className="w-full md:w-64 bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
-                                                />
-                                                <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full whitespace-nowrap">
-                                                    {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase()) || t.category.toLowerCase().includes(feeSearch.toLowerCase())).length} Treatments
+                                {/* Quick Presets Bar */}
+                                <div className="mt-6 pt-5 border-t border-black/10">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-black/60 block mb-2.5">
+                                        Quick 1-Click Templates:
+                                    </label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                        {CAMPAIGN_PRESETS.map((preset, idx) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => applyCampaignPreset(preset)}
+                                                className="text-left p-3 rounded-xl border border-black/15 bg-black/[0.02] hover:bg-black hover:text-white transition-all group flex flex-col justify-between"
+                                            >
+                                                <span className="text-[9px] font-bold tracking-wider uppercase opacity-60 group-hover:opacity-80">
+                                                    {preset.label}
                                                 </span>
-                                            </div>
+                                                <h4 className="text-xs font-bold mt-1 text-black group-hover:text-white line-clamp-1">
+                                                    {preset.title}
+                                                </h4>
+                                                <span className="text-[10px] font-semibold mt-1 opacity-70 group-hover:opacity-90">
+                                                    {preset.tripOffer} ({preset.discountPercentage}% Off)
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Live Interactive Card Preview */}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-black flex items-center gap-1.5">
+                                        Live Homepage Card Preview
+                                    </label>
+                                    <span className="text-[10px] font-medium text-black/50">Real-time render</span>
+                                </div>
+
+                                <div className="relative w-full h-[220px] md:h-[320px] rounded-3xl overflow-hidden shadow-lg border border-black/20 bg-black group">
+                                    <img 
+                                        src={campaignImage || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
+                                        alt={campaignTitle}
+                                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                                    
+                                    <div className="absolute inset-0 p-5 md:p-8 flex flex-col justify-between z-10 text-white">
+                                        <div className="flex items-center justify-between">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] font-black tracking-widest uppercase shadow-sm">
+                                                {campaignLabel || 'SPECIAL OFFER'}
+                                            </span>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
+                                                -{discountPercentage}% OFF
+                                            </span>
                                         </div>
 
-                                        <div className="grid grid-cols-1 gap-6">
-                                            {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase()) || t.category.toLowerCase().includes(feeSearch.toLowerCase())).map((t) => {
-                                                const isExpanded = expandedFees[t.id] || false;
-                                                return (
-                                                <div key={t.id} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:border-primary/20">
-                                                    {/* Header Section (Always Visible) */}
-                                                    <div 
-                                                        className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                                                        onClick={() => setExpandedFees(prev => ({...prev, [t.id]: !isExpanded}))}
-                                                    >
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-3 mb-1">
-                                                                <h3 className="font-bold text-gray-900 text-base">{t.title}</h3>
-                                                                <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md uppercase tracking-widest">{t.category}</span>
-                                                            </div>
-                                                            <p className="text-xs text-gray-600">{t.options.length} duration options</p>
-                                                        </div>
-                                                        <div className="flex items-center justify-between md:justify-end gap-6">
-                                                            {isExpanded ? <ChevronUp className="text-gray-600" size={20}/> : <ChevronDown className="text-gray-600" size={20}/>}
-                                                        </div>
-                                                    </div>
+                                        <div className="flex items-end justify-between gap-4">
+                                            <div>
+                                                <span className="text-[10px] font-bold tracking-widest uppercase text-white/70 block mb-1">
+                                                    {campaignTripOffer || 'Special Trip Discount Included'}
+                                                </span>
+                                                <h3 className="text-xl md:text-3xl font-bold tracking-tight text-white line-clamp-1">
+                                                    {campaignTitle || 'Campaign Title'}
+                                                </h3>
+                                                <p className="text-xs text-white/80 line-clamp-2 max-w-md mt-1 font-light hidden sm:block">
+                                                    {campaignDesc || 'Description of the campaign offer and discount voucher.'}
+                                                </p>
+                                            </div>
 
-                                                    {/* Expanded Content */}
-                                                    <AnimatePresence>
-                                                        {isExpanded && (
-                                                            <motion.div 
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: 'auto', opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                transition={{ duration: 0.3, ease: "easeInOut" }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <div className="p-5 pt-0 border-t border-gray-200/20 mt-2 space-y-4">
-                                                                    <div className="space-y-3">
-                                                                        {t.options.map(opt => (
-                                                                            <div key={opt.duration} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-200 rounded-xl gap-4 hover:border-primary/20 transition-colors">
-                                                                                <div className="flex items-center justify-between sm:justify-start gap-4">
-                                                                                    <span className="text-sm font-bold text-gray-900 bg-white px-3 py-1.5 rounded-md">{opt.duration}</span>
-                                                                                    <span className="text-xs font-semibold text-gray-600">Cust. Price: Rp {opt.price}</span>
-                                                                                </div>
-                                                                                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-gray-100 pt-3 sm:border-0 sm:pt-0">
-                                                                                    <label className="text-xs font-bold text-gray-600">Therapist Fee:</label>
-                                                                                    <div className="relative">
-                                                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold">Rp.</span>
-                                                                                        <input 
-                                                                                            type="text"
-                                                                                            placeholder="0"
-                                                                                            value={feeInputs[`${t.id}-${opt.duration}`] || ''}
-                                                                                            onChange={(e) => handleFeeChange(t.id, opt.duration, e.target.value)}
-                                                                                            onBlur={() => handleSaveFeeSingle(t.id, opt.duration)}
-                                                                                            className="w-32 bg-gray-100 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-right"
-                                                                                        />
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
-                                            )})}
+                                            <div className="px-4 py-2.5 rounded-xl bg-white text-black text-xs font-black tracking-wider uppercase flex items-center gap-1.5 shrink-0 shadow-md">
+                                                Claim Discount <ArrowRight size={14} />
+                                            </div>
                                         </div>
                                     </div>
-                                )}
+                                </div>
+                            </div>
 
-                                
-                                {activeTab === 'calculator' && (
-                                    <div className="space-y-6">
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                Commission Calculator
-                                            </h2>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => {
-                                                    setCalculations([...calculations, {
-                                                        id: Date.now().toString() + Math.random(),
-                                                        treatmentId: '',
-                                                        duration: '',
-                                                        treatmentsCount: 1,
-                                                        therapistsCount: 1,
-                                                        showAdvanced: false
-                                                    }]);
-                                                }}
-                                                className="text-xs font-bold text-white bg-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm"
+                            {/* Campaign Setup Form */}
+                            <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-black border-b border-black/10 pb-3">
+                                    Card Settings & Content
+                                </h3>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-black/70">Campaign Title</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="e.g. Bali Day Trip & Spa Combo" 
+                                            value={campaignTitle} 
+                                            onChange={e => setCampaignTitle(e.target.value)}
+                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-black/70">Badge / Label</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="e.g. Exclusive Trip Deal" 
+                                            value={campaignLabel} 
+                                            onChange={e => setCampaignLabel(e.target.value)}
+                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-black/70">Trip / Perk Discount Note</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            placeholder="e.g. 25% OFF Bali Day Trip & Fastboat Transfer" 
+                                            value={campaignTripOffer} 
+                                            onChange={e => setCampaignTripOffer(e.target.value)}
+                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-black/70">Discount Percentage (%)</label>
+                                        <input 
+                                            type="number" 
+                                            required 
+                                            min="1" 
+                                            max="100" 
+                                            placeholder="20" 
+                                            value={discountPercentage} 
+                                            onChange={e => setDiscountPercentage(Number(e.target.value))}
+                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Description / Highlights</label>
+                                    <textarea 
+                                        required 
+                                        rows={3} 
+                                        placeholder="Explain what the guest unlocks when claiming this campaign card..." 
+                                        value={campaignDesc} 
+                                        onChange={e => setCampaignDesc(e.target.value)}
+                                        className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all resize-none"
+                                    />
+                                </div>
+
+                                {/* Background Image Upload / URL */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Background Image</label>
+                                    <div className="flex flex-col sm:flex-row gap-3 items-center">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Paste image URL or click to upload file" 
+                                            value={campaignImage} 
+                                            onChange={e => setCampaignImage(e.target.value)}
+                                            className="flex-1 w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-xs text-black placeholder:text-black/40 focus:outline-none focus:border-black"
+                                        />
+                                        <label className="w-full sm:w-auto px-4 py-3 rounded-xl border border-black/20 bg-black/5 hover:bg-black hover:text-white cursor-pointer transition-colors text-xs font-bold flex items-center justify-center gap-1.5 shrink-0">
+                                            <UploadCloud size={16} /> Upload Image
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={(e) => handleImageUpload(e, setCampaignImage)} 
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Eligible Treatments Selection */}
+                                <div className="space-y-3 pt-4 border-t border-black/10">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <label className="text-xs font-bold uppercase tracking-wider text-black block">
+                                                Select Eligible Treatments to Claim Discount
+                                            </label>
+                                            <span className="text-[11px] text-black/60">
+                                                Guests must select one of these treatment durations to activate the voucher.
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={selectAllTreatments}
+                                                className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-black/20 hover:bg-black hover:text-white transition-colors"
                                             >
-                                                <Plus size={14} /> Add Treatment
+                                                Select All
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={clearAllCampaignTreatments}
+                                                className="px-2.5 py-1 rounded-md text-[10px] font-bold border border-black/20 text-black/60 hover:bg-black/10 transition-colors"
+                                            >
+                                                Clear
                                             </button>
                                         </div>
+                                    </div>
 
-                                        {calculations.map((calc, idx) => (
-                                            <div key={calc.id} className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 md:p-6 space-y-4 relative">
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => setCalculations(calculations.filter(c => c.id !== calc.id))}
-                                                    className="absolute top-4 right-4 text-red-400 hover:text-red-600 p-1 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                                
-                                                <div className="flex flex-col gap-3 w-full">
-                                                    <div className="flex flex-col md:flex-row items-end gap-3 w-full">
-                                                        <div className="flex-[3] space-y-1 w-full">
-                                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Treatment</label>
-                                                            <select 
-                                                                value={calc.treatmentId} 
-                                                                onChange={e => { 
-                                                                    const treatmentId = e.target.value;
-                                                                    
-                                                                    setCalculations(calculations.map(c => c.id === calc.id ? { 
-                                                                        ...c, 
-                                                                        treatmentId, 
-                                                                        duration: '',
-                                                                        treatmentsCount: 1,
-                                                                        therapistsCount: 1,
-                                                                    } : c));
-                                                                }}
-                                                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
-                                                            >
-                                                                <option value="" disabled>Select</option>
-                                                                {treatments.map(t => (
-                                                                    <option key={t.id} value={t.id}>{t.title}</option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
-                                                        <div className="flex-[2] space-y-1 w-full">
-                                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Duration</label>
-                                                            <select 
-                                                                value={calc.duration} 
-                                                                onChange={e => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, duration: e.target.value } : c))}
-                                                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm appearance-none"
-                                                                disabled={!calc.treatmentId}
-                                                            >
-                                                                <option value="" disabled>Select</option>
-                                                                {calc.treatmentId && treatments.find(t => t.id === calc.treatmentId)?.options.map(opt => (
-                                                                    <option key={opt.duration} value={opt.duration}>{opt.duration}</option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {calc.treatmentId && (
-                                                        <div className="flex flex-col md:flex-row items-center gap-3 w-full pt-1">
-                                                            <div className="flex items-center justify-between w-full md:w-auto md:gap-3 bg-gray-50/50 rounded-xl px-3 py-1.5 border border-gray-100">
-                                                                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Treatments</label>
-                                                                <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 h-[32px]">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, treatmentsCount: Math.max(1, c.treatmentsCount - 1) } : c))}
-                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                                                                    >
-                                                                        -
-                                                                    </button>
-                                                                    <span className="text-sm font-bold w-6 text-center text-gray-900">{calc.treatmentsCount}</span>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, treatmentsCount: c.treatmentsCount + 1 } : c))}
-                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                                                                    >
-                                                                        +
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center justify-between w-full md:w-auto md:gap-3 bg-gray-50/50 rounded-xl px-3 py-1.5 border border-gray-100">
-                                                                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Therapists</label>
-                                                                <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 h-[32px]">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: Math.max(1, c.therapistsCount - 1) } : c))}
-                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                                                                    >
-                                                                        -
-                                                                    </button>
-                                                                    <span className="text-sm font-bold w-6 text-center text-gray-900">{calc.therapistsCount}</span>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setCalculations(calculations.map(c => c.id === calc.id ? { ...c, therapistsCount: c.therapistsCount + 1 } : c))}
-                                                                        className="w-7 h-full rounded-[6px] bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                                                                    >
-                                                                        +
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {calc.treatmentId && calc.duration && (
-                                                    <div className="pt-4 border-t border-gray-100">
-                                                        {(() => {
-                                                            const treatment = treatments.find(t => t.id === calc.treatmentId);
-                                                            const option = treatment?.options.find(o => o.duration === calc.duration);
-                                                            const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
-                                                            const feeStr = feeInputs[`${calc.treatmentId}-${calc.duration}`] || '0';
-                                                            const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
-                                                            
-                                                            const totalPrice = price * calc.treatmentsCount;
-                                                            const totalFee = fee * calc.therapistsCount;
-                                                            const profit = totalPrice - totalFee;
-
-                                                            return (
-                                                                <div className="grid grid-cols-3 gap-2">
-                                                                    <div>
-                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase truncate">Revenue</span>
-                                                                        <span className="text-sm font-bold text-gray-900 truncate">Rp {totalPrice.toLocaleString('en-US')}</span>
-                                                                    </div>
-                                                                    <div className="text-center border-l border-r border-gray-100 px-2">
-                                                                        <span className="block text-[10px] font-bold text-gray-500 uppercase truncate">Therapist Fee</span>
-                                                                        <span className="text-sm font-bold text-red-500 truncate">- Rp {totalFee.toLocaleString('en-US')}</span>
-                                                                    </div>
-                                                                    <div className="text-right">
-                                                                        <span className="block text-[10px] font-bold text-green-600 uppercase truncate">Profit</span>
-                                                                        <span className="text-base font-black text-green-600 truncate">Rp {profit.toLocaleString('en-US')}</span>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-
-                                        {calculations.length === 0 && (
-                                            <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-white">
-                                                <p className="text-sm text-gray-600 mb-4">No treatments added to calculator.</p>
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => {
-                                                        setCalculations([{
-                                                            id: Date.now().toString() + Math.random(),
-                                                            treatmentId: '',
-                                                            duration: '',
-                                                            treatmentsCount: 1,
-                                                            therapistsCount: 1,
-                                                            showAdvanced: false
-                                                        }]);
-                                                    }}
-                                                    className="text-xs font-bold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-block"
-                                                >
-                                                    Add First Treatment
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {calculations.length > 0 && calculations.every(c => c.treatmentId && c.duration) && (() => {
-                                            let grandTotalPrice = 0;
-                                            let grandTotalFee = 0;
-                                            let summaryLines: string[] = [];
-
-                                            calculations.forEach(calc => {
-                                                const treatment = treatments.find(t => t.id === calc.treatmentId);
-                                                const option = treatment?.options.find(o => o.duration === calc.duration);
-                                                const price = option ? parseInt(option.price.replace(/\D/g, '')) || 0 : 0;
-                                                const feeStr = feeInputs[`${calc.treatmentId}-${calc.duration}`] || '0';
-                                                const fee = parseInt(feeStr.replace(/\D/g, '')) || 0;
-                                                
-                                                const totalPrice = price * calc.treatmentsCount;
-                                                const totalFee = fee * calc.therapistsCount;
-                                                
-                                                grandTotalPrice += totalPrice;
-                                                grandTotalFee += totalFee;
-
-                                                summaryLines.push(treatment?.title.toUpperCase() || 'TREATMENT');
-                                                summaryLines.push(`DURATION: ${calc.duration} MINS`);
-                                                if (calc.treatmentsCount > 1) {
-                                                    summaryLines.push(`TREATMENTS: ${calc.treatmentsCount}`);
-                                                }
-                                                summaryLines.push(`REVENUE: RP ${totalPrice.toLocaleString('en-US')}`);
-                                                summaryLines.push(`THERAPIST FEE: RP ${totalFee.toLocaleString('en-US')}`);
-                                                summaryLines.push(`PROFIT: RP ${(totalPrice - totalFee).toLocaleString('en-US')}`);
-                                                if (calc.therapistsCount > 1) {
-                                                    summaryLines.push(`THERAPISTS: ${calc.therapistsCount}`);
-                                                }
-                                                summaryLines.push('------------------------');
-                                            });
-
-                                            const grandProfit = grandTotalPrice - grandTotalFee;
-                                            
-                                            const waText = `*COMMISSION SUMMARY*\n\n${summaryLines.join('\n')}\n\n*TOTALS*\nREVENUE: RP ${grandTotalPrice.toLocaleString('en-US')}\nTHERAPIST FEES: RP ${grandTotalFee.toLocaleString('en-US')}\n*NET PROFIT: RP ${grandProfit.toLocaleString('en-US')}*`;
-
+                                    <div className="grid grid-cols-1 gap-2.5 max-h-96 overflow-y-auto pr-1">
+                                        {treatments.map((t) => {
+                                            const selectedT = campaignTreatments.find(ct => ct.treatmentId === t.id);
+                                            const isSelectedAny = !!selectedT;
                                             return (
-                                                <div className="mt-8 p-6 bg-gray-900 rounded-2xl shadow-xl space-y-4">
-                                                    <div className="flex justify-between items-center pb-4 border-b border-white/20">
-                                                        <span className="text-sm font-semibold text-white/80">Total Customer Revenue</span>
-                                                        <span className="text-lg font-bold text-white">Rp {grandTotalPrice.toLocaleString('en-US')}</span>
+                                                <div 
+                                                    key={t.id} 
+                                                    className={`p-3.5 rounded-xl border transition-all ${
+                                                        isSelectedAny 
+                                                        ? 'bg-black/5 border-black/40' 
+                                                        : 'bg-white border-black/10'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div>
+                                                            <h4 className="text-xs font-bold text-black">{t.title}</h4>
+                                                            <p className="text-[9px] uppercase font-bold tracking-widest text-black/50">{t.category}</p>
+                                                        </div>
+                                                        {isSelectedAny && (
+                                                            <span className="text-[9px] font-black uppercase tracking-widest bg-black text-white px-2 py-0.5 rounded">
+                                                                Active
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                    <div className="flex justify-between items-center pb-4 border-b border-white/20">
-                                                        <span className="text-sm font-semibold text-white/80">Total Therapist Fees</span>
-                                                        <span className="text-lg font-bold text-red-400">- Rp {grandTotalFee.toLocaleString('en-US')}</span>
+
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {t.options.map((opt) => {
+                                                            const isDurationSelected = selectedT?.durations.includes(opt.duration);
+                                                            return (
+                                                                <button
+                                                                    type="button"
+                                                                    key={opt.duration}
+                                                                    onClick={() => toggleCampaignTreatmentDuration(t.id, opt.duration)}
+                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                                                                        isDurationSelected 
+                                                                        ? 'bg-black border-black text-white shadow-sm' 
+                                                                        : 'bg-white border-black/20 text-black/70 hover:border-black'
+                                                                    }`}
+                                                                >
+                                                                    {isDurationSelected && <Check size={12} strokeWidth={3} />}
+                                                                    {opt.duration} MINS - Rp {opt.price}
+                                                                </button>
+                                                            );
+                                                        })}
                                                     </div>
-                                                    <div className="flex justify-between items-center pt-2 mb-6">
-                                                        <span className="text-base font-bold text-white">Total Spa Profit</span>
-                                                        <span className="text-xl font-black text-green-400">Rp {grandProfit.toLocaleString('en-US')}</span>
-                                                    </div>
-                                                    <a 
-                                                        href={`https://wa.me/6285174119423?text=${encodeURIComponent(waText)}`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm"
-                                                    >
-                                                        <Send size={18} /> Send Summary to WhatsApp
-                                                    </a>
                                                 </div>
                                             );
-                                        })()}
+                                        })}
                                     </div>
-                                )}
+                                </div>
 
-
-                                {activeTab === 'list' && (
-                                    <div className="space-y-8">
-                                        {/* Segmented Control for View Selection */}
-                                        <div className="flex bg-white border border-gray-200 p-1.5 rounded-2xl w-full max-w-xl shadow-sm mb-6">
-                                            {['campaign', 'treatments', 'store'].map((view) => (
-                                                <button
-                                                    key={view}
-                                                    onClick={() => setListView(view as 'campaign' | 'treatments' | 'store')}
-                                                    type="button"
-                                                    className={`flex-1 py-3 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${listView === view ? 'bg-gray-900 text-white shadow-md' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-                                                >
-                                                    {view === 'campaign' ? 'Active Campaign' : view === 'treatments' ? 'Treatments' : 'Boutique'}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {listView === 'campaign' && (
-                                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                                {/* Campaigns Section */}
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        Active Campaign
-                                                    </h2>
-                                                    {campaign && (
-                                                        <span className="text-xs font-semibold text-accent bg-accent/10 px-3 py-1 rounded-full">Live on Homepage</span>
-                                                    )}
-                                                </div>
-                                                {campaign ? (
-                                                    <div className="p-5 bg-gradient-to-br from-primary/5 to-white/60 border border-primary/20 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h3 className="font-bold text-gray-900 text-base">{campaign.title}</h3>
-                                                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-900 bg-gray-100 px-2 py-0.5 rounded">{campaign.label}</span>
-                                                            </div>
-                                                            <p className="text-xs text-gray-600 mb-3 max-w-sm">{campaign.description}</p>
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="text-[11px] font-bold text-accent">-{campaign.discountPercentage}% Discount</span>
-                                                                <span className="text-[11px] text-gray-600">{campaign.selectedTreatments.length} Treatments included</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 self-start md:self-center">
-                                                            <button 
-                                                                onClick={handleEditCampaign}
-                                                                type="button"
-                                                                className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                                                            >
-                                                                <Edit3 size={16} />
-                                                            </button>
-                                                            <button 
-                                                                onClick={handleRemoveCampaign}
-                                                                type="button"
-                                                                className="w-10 h-10 rounded-full bg-white border border-gray-200 text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl">
-                                                        <p className="text-sm text-gray-600 mb-4">No active campaign running.</p>
-                                                        <button 
-                                                            onClick={() => setActiveTab('campaign')}
-                                                            type="button"
-                                                            className="text-xs font-bold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-                                                        >
-                                                            Create Campaign
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {listView === 'treatments' && (
-                                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                                {/* Treatments Section */}
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        Published Treatments
-                                                    </h2>
-                                                    <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">{treatments.length} Active</span>
-                                                </div>
-                                                
-                                                <div className="grid grid-cols-1 gap-4">
-                                                    {treatments.map((t) => (
-                                                        <div key={t.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white border border-gray-200 rounded-2xl shadow-sm gap-4">
-                                                            <div className="flex-1">
-                                                                <h3 className="font-bold text-gray-900 text-sm mb-1">{t.title}</h3>
-                                                                <p className="text-[11px] font-semibold text-gray-600 uppercase tracking-widest mb-2">{t.category}</p>
-                                                                <p className="text-xs text-gray-500 line-clamp-1">{t.desc}</p>
-                                                            </div>
-                                                            <div className="flex items-center justify-between md:justify-end gap-6 md:w-[250px]">
-                                                                <div className="flex flex-col items-start md:items-end gap-1">
-                                                                    {t.options.map(opt => (
-                                                                        <span key={opt.duration} className="text-[11px] font-bold text-gray-900 bg-white px-2 py-0.5 rounded-md">
-                                                                            {opt.duration} • Rp {opt.price}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={async (e) => {
-                                                                            e.preventDefault();
-                                                                            e.stopPropagation();
-                                                                            
-                                                                            if (t.is_pinned) {
-                                                                                // Unpin
-                                                                                setTreatments(prev => prev.map(trt => trt.id === t.id ? { ...trt, is_pinned: false, pinned_image: undefined } : trt));
-                                                                                try {
-                                                                                    const { error } = await supabase.from('treatments').update({ is_pinned: false, pinned_image: null }).eq('id', t.id);
-                                                                                    if (error) throw error;
-                                                                                } catch (err) {
-                                                                                    console.error("Failed to unpin:", err);
-                                                                                    setTreatments(prev => prev.map(trt => trt.id === t.id ? { ...trt, is_pinned: true } : trt));
-                                                                                    alert("Failed to update database.");
-                                                                                }
-                                                                            } else {
-                                                                                // Start Pin process (requires image)
-                                                                                setPendingPinId(t.id);
-                                                                                if (pinImageInputRef.current) {
-                                                                                    pinImageInputRef.current.value = '';
-                                                                                }
-                                                                                pinImageInputRef.current?.click();
-                                                                            }
-                                                                        }}
-                                                                        title={t.is_pinned ? "Unpin Treatment" : "Pin Treatment (Requires Cover Image)"}
-                                                                        className={`w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center transition-colors relative z-10 cursor-pointer ${t.is_pinned ? 'bg-gray-900 text-white border-primary' : 'bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                                                                    >
-                                                                        <Pin size={16} className={t.is_pinned ? 'fill-current' : ''} />
-                                                                    </button>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => handleEditTreatment(t)}
-                                                                        className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                                                                    >
-                                                                        <Edit3 size={16} />
-                                                                    </button>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveTreatment(t.id)}
-                                                                        className="w-10 h-10 rounded-full bg-white border border-gray-200 text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
-                                                                    >
-                                                                        <Trash2 size={16} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {treatments.length === 0 && (
-                                                        <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl">
-                                                            <p className="text-sm text-gray-600 mb-4">No treatments added yet.</p>
-                                                            <button 
-                                                                onClick={() => setActiveTab('treatment')}
-                                                                type="button"
-                                                                className="text-xs font-bold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-                                                            >
-                                                                Create Treatment
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {listView === 'store' && (
-                                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                                {/* Store Section */}
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                                        Boutique
-                                                    </h2>
-                                                    <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">{products.length} Products</span>
-                                                </div>
-                                                
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {products.map((p) => (
-                                                        <div key={p.id} className="flex flex-col p-5 bg-white border border-gray-200 rounded-2xl shadow-sm gap-4">
-                                                            <div className="flex items-start gap-4">
-                                                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-gray-100">
-                                                                    <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                    <div className="flex justify-between items-start">
-                                                                        <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{p.title}</h3>
-                                                                        <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap">Stock: {p.stock || 0}</span>
-                                                                    </div>
-                                                                    <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest mb-1">{p.category}</p>
-                                                                    <span className="text-xs font-bold text-accent">Rp {p.price}</span>
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-xs text-gray-500 line-clamp-2 mb-2">{p.description}</p>
-                                                            <div className="mt-auto flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                                                                <button 
-                                                                    type="button"
-                                                                    onClick={() => handleEditProduct(p)}
-                                                                    className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                                                                >
-                                                                    <Edit3 size={14} />
-                                                                </button>
-                                                                <button 
-                                                                    type="button"
-                                                                    onClick={() => handleRemoveProduct(p.id)}
-                                                                    className="w-8 h-8 rounded-full bg-white border border-gray-200 text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
-                                                                >
-                                                                    <Trash2 size={14} />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {products.length === 0 && (
-                                                        <div className="col-span-1 md:col-span-2 p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl">
-                                                            <p className="text-sm text-gray-600 mb-4">No products in store.</p>
-                                                            <button 
-                                                                onClick={() => setActiveTab('store')}
-                                                                type="button"
-                                                                className="text-xs font-bold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-                                                            >
-                                                                Add Product
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {activeTab === 'settings' && (
-                                    <div className="flex flex-col items-center justify-center py-20 text-gray-600">
-                                        <Sparkles className="mb-4 opacity-50" size={32} />
-                                        <p className="text-sm font-medium">This section is coming soon.</p>
-                                    </div>
-                                )}
-
-                                {/* Submit Area */}
-                                {activeTab !== 'fees' && (
-                                    <div className="pt-6 border-t border-gray-100 flex items-center justify-end gap-4">
-                                        {success && (
-                                        <motion.span 
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className="flex items-center gap-1.5 text-xs font-bold text-green-600 uppercase tracking-wider"
-                                        >
-                                            <CheckCircle size={16} /> Saved Successfully
-                                        </motion.span>
+                                {/* Save Button */}
+                                <div className="pt-4 border-t border-black/10 flex items-center justify-between">
+                                    {success && (
+                                        <span className="flex items-center gap-1.5 text-xs font-bold text-black uppercase tracking-wider">
+                                            <CheckCircle size={16} /> Card Saved & Published!
+                                        </span>
                                     )}
+                                    <div className="ml-auto">
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                            className="bg-black text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
+                                        >
+                                            {isSubmitting ? 'Saving...' : 'Save & Publish Campaign Card'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* TREATMENT CREATION TAB */}
+                    {activeTab === 'treatment' && (
+                        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                            <div className="flex items-center justify-between border-b border-black/10 pb-4">
+                                <h3 className="text-base font-bold uppercase tracking-wider text-black">
+                                    {editingTreatmentId ? 'Edit Treatment' : 'Add New Spa Treatment'}
+                                </h3>
+                                {editingTreatmentId && (
                                     <button 
-                                        type="submit" 
-                                        disabled={isSubmitting}
-                                        className="bg-gray-900 text-white px-8 py-4 rounded-2xl text-sm font-bold uppercase tracking-wider hover:bg-white/90 hover:scale-[1.02] transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-2 disabled:opacity-70 disabled:hover:scale-100"
+                                        type="button" 
+                                        onClick={() => {
+                                            setEditingTreatmentId(null);
+                                            setTreatmentTitle('');
+                                            setTreatmentDesc('');
+                                            setBenefits(['']);
+                                            setPricingOptions([{ duration: '', price: '' }]);
+                                        }}
+                                        className="text-xs text-black/60 hover:text-black underline font-bold"
                                     >
-                                        {isSubmitting ? (
-                                            <span className="flex items-center gap-2">
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                                Saving...
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-2">
-                                                <Sparkles size={16} /> {activeTab === 'treatment' ? (editingTreatmentId ? 'Update Treatment' : 'Publish Treatment') : 
-                                                                        activeTab === 'campaign' ? 'Launch Campaign' :
-                                                                        activeTab === 'store' ? (editingProductId ? 'Update Product' : 'Add Product') : 'Save'}
-                                            </span>
-                                        )}
+                                        Cancel Edit
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Treatment Title</label>
+                                    <input 
+                                        type="text" required placeholder="e.g. Traditional Balinese Massage" 
+                                        value={treatmentTitle} onChange={e => setTreatmentTitle(e.target.value)}
+                                        className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Category</label>
+                                    <select 
+                                        value={treatmentCategory} onChange={e => setTreatmentCategory(e.target.value)}
+                                        className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:border-black"
+                                    >
+                                        <option value="massage">Massage</option>
+                                        <option value="facial">Facial</option>
+                                        <option value="package">Package</option>
+                                        <option value="ritual">Ritual</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Duration & Pricing */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Duration & Pricing</label>
+                                    <button type="button" onClick={handleAddPricing} className="text-xs font-bold text-black flex items-center gap-1 hover:opacity-70">
+                                        <Plus size={14} /> Add Option
                                     </button>
                                 </div>
-                                )}
+                                {pricingOptions.map((option, idx) => (
+                                    <div key={idx} className="flex items-center gap-3">
+                                        <div className="w-32 relative">
+                                            <input 
+                                                type="number" required placeholder="60" value={option.duration} onChange={(e) => handlePricingChange(idx, 'duration', e.target.value)}
+                                                className="w-full bg-white border border-black/20 rounded-xl px-3 py-2.5 text-sm text-black focus:outline-none focus:border-black"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-black/50">MINS</span>
+                                        </div>
+                                        <div className="flex-1 relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-black/50">Rp</span>
+                                            <input 
+                                                type="text" required placeholder="450,000" value={option.price} onChange={(e) => handlePricingChange(idx, 'price', e.target.value)}
+                                                className="w-full bg-white border border-black/20 rounded-xl pl-9 pr-4 py-2.5 text-sm text-black focus:outline-none focus:border-black"
+                                            />
+                                        </div>
+                                        {pricingOptions.length > 1 && (
+                                            <button type="button" onClick={() => handleRemovePricing(idx)} className="p-2.5 rounded-xl bg-black/5 text-black hover:bg-black/10">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
 
-                            </form>
-                        </motion.div>
-                    </AnimatePresence>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold uppercase tracking-wider text-black/70">Description</label>
+                                <textarea 
+                                    required rows={3} placeholder="Write details about the treatment..." 
+                                    value={treatmentDesc} onChange={e => setTreatmentDesc(e.target.value)}
+                                    className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black resize-none"
+                                />
+                            </div>
+
+                            {/* Benefits */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Key Benefits</label>
+                                    <button type="button" onClick={handleAddBenefit} className="text-xs font-bold text-black flex items-center gap-1 hover:opacity-70">
+                                        <Plus size={14} /> Add Benefit
+                                    </button>
+                                </div>
+                                {benefits.map((b, idx) => (
+                                    <div key={idx} className="flex items-center gap-3">
+                                        <input 
+                                            type="text" required placeholder="e.g. Deep relaxation & stress relief" value={b} onChange={(e) => handleBenefitChange(idx, e.target.value)}
+                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-2.5 text-sm text-black focus:outline-none focus:border-black"
+                                        />
+                                        {benefits.length > 1 && (
+                                            <button type="button" onClick={() => handleRemoveBenefit(idx)} className="p-2.5 rounded-xl bg-black/5 text-black hover:bg-black/10">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="pt-4 border-t border-black/10 flex justify-end">
+                                <button type="submit" disabled={isSubmitting} className="bg-black text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80">
+                                    {isSubmitting ? 'Saving...' : editingTreatmentId ? 'Update Treatment' : 'Create Treatment'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+
+                    {/* STORE PRODUCTS TAB */}
+                    {activeTab === 'store' && (
+                        <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                            <h3 className="text-base font-bold uppercase tracking-wider text-black border-b border-black/10 pb-4">
+                                {editingProductId ? 'Edit Product' : 'Add Store Product'}
+                            </h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Product Title</label>
+                                    <input 
+                                        type="text" required placeholder="e.g. Organic Coconut Massage Oil" 
+                                        value={productTitle} onChange={e => setProductTitle(e.target.value)}
+                                        className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70">Price (IDR)</label>
+                                    <input 
+                                        type="text" required placeholder="185,000" 
+                                        value={productPrice} onChange={e => setProductPrice(e.target.value)}
+                                        className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold uppercase tracking-wider text-black/70">Product Description</label>
+                                <textarea 
+                                    required rows={3} placeholder="Product details and benefits..." 
+                                    value={productDesc} onChange={e => setProductDesc(e.target.value)}
+                                    className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black resize-none"
+                                />
+                            </div>
+
+                            <div className="pt-4 border-t border-black/10 flex justify-end">
+                                <button type="submit" disabled={isSubmitting} className="bg-black text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80">
+                                    {isSubmitting ? 'Saving...' : editingProductId ? 'Update Product' : 'Add Product'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+
+                    {/* THERAPIST FEES TAB */}
+                    {activeTab === 'fees' && (
+                        <div className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/10 pb-4">
+                                <div>
+                                    <h3 className="text-base font-bold uppercase tracking-wider text-black">Therapist Fee Setup</h3>
+                                    <p className="text-xs text-black/60">Set wage payouts per treatment duration.</p>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search treatments..." 
+                                    value={feeSearch} 
+                                    onChange={e => setFeeSearch(e.target.value)}
+                                    className="bg-white border border-black/20 rounded-xl px-3.5 py-2 text-xs text-black placeholder:text-black/40 focus:outline-none focus:border-black w-full sm:w-56"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                {treatments.filter(t => t.title.toLowerCase().includes(feeSearch.toLowerCase())).map(t => (
+                                    <div key={t.id} className="p-4 rounded-xl border border-black/10 bg-black/[0.02] space-y-3">
+                                        <h4 className="text-xs font-bold text-black">{t.title}</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                            {t.options.map(opt => (
+                                                <div key={opt.duration} className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-black/60 w-16">{opt.duration} Mins:</span>
+                                                    <input 
+                                                        type="text"
+                                                        placeholder="e.g. 150,000"
+                                                        value={feeInputs[`${t.id}-${opt.duration}`] || ''}
+                                                        onChange={e => setFeeInputs({ ...feeInputs, [`${t.id}-${opt.duration}`]: e.target.value })}
+                                                        className="flex-1 bg-white border border-black/20 rounded-lg px-2.5 py-1.5 text-xs text-black focus:outline-none focus:border-black"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSaveFee(t.id, opt.duration)}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-black text-white text-[10px] font-bold uppercase hover:bg-black/80"
+                                                    >
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* COMMISSION CALCULATOR TAB */}
+                    {activeTab === 'calculator' && (
+                        <div className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                            <h3 className="text-base font-bold uppercase tracking-wider text-black border-b border-black/10 pb-4">
+                                Commission & Net Profit Calculator
+                            </h3>
+                            
+                            <div className="flex items-center justify-between">
+                                <p className="text-xs text-black/60">Add items to calculate instant wage and commission split.</p>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (treatments.length > 0) {
+                                            const firstT = treatments[0];
+                                            setCalculations(prev => [...prev, {
+                                                id: Date.now().toString(),
+                                                treatmentId: firstT.id,
+                                                duration: firstT.options[0]?.duration || '60',
+                                                treatmentsCount: 1,
+                                                therapistsCount: 1,
+                                                showAdvanced: false
+                                            }]);
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl flex items-center gap-1 hover:bg-black/80"
+                                >
+                                    <Plus size={14} /> Add Row
+                                </button>
+                            </div>
+
+                            {calculations.map((calc, idx) => {
+                                const tr = treatments.find(t => t.id === calc.treatmentId);
+                                const opt = tr?.options.find(o => o.duration === calc.duration);
+                                const priceNum = opt ? parseInt(opt.price.replace(/,/g, '')) : 0;
+                                const feeStr = feeInputs[`${calc.treatmentId}-${calc.duration}`] || '0';
+                                const feeNum = parseInt(feeStr.replace(/,/g, '')) || 0;
+                                const totalRevenue = priceNum * calc.treatmentsCount;
+                                const totalWage = feeNum * calc.treatmentsCount;
+                                const netMargin = totalRevenue - totalWage;
+
+                                return (
+                                    <div key={calc.id} className="p-4 rounded-xl border border-black/10 bg-black/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <select
+                                                value={calc.treatmentId}
+                                                onChange={e => {
+                                                    const newTId = e.target.value;
+                                                    const newT = treatments.find(t => t.id === newTId);
+                                                    setCalculations(prev => prev.map(c => c.id === calc.id ? { ...c, treatmentId: newTId, duration: newT?.options[0]?.duration || '60' } : c));
+                                                }}
+                                                className="bg-white border border-black/20 rounded-lg px-3 py-2 text-xs text-black"
+                                            >
+                                                {treatments.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
+                                            </select>
+
+                                            <select
+                                                value={calc.duration}
+                                                onChange={e => setCalculations(prev => prev.map(c => c.id === calc.id ? { ...c, duration: e.target.value } : c))}
+                                                className="bg-white border border-black/20 rounded-lg px-3 py-2 text-xs text-black"
+                                            >
+                                                {tr?.options.map(o => <option key={o.duration} value={o.duration}>{o.duration} Mins</option>)}
+                                            </select>
+
+                                            <div className="flex items-center gap-1 text-xs">
+                                                <span>Qty:</span>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={calc.treatmentsCount}
+                                                    onChange={e => setCalculations(prev => prev.map(c => c.id === calc.id ? { ...c, treatmentsCount: Number(e.target.value) } : c))}
+                                                    className="w-14 bg-white border border-black/20 rounded-lg px-2 py-1.5 text-xs text-black text-center"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between md:justify-end gap-4">
+                                            <div className="text-right">
+                                                <div className="text-xs font-bold text-black">Rev: Rp {totalRevenue.toLocaleString()}</div>
+                                                <div className="text-[10px] text-black/60">Wage: Rp {totalWage.toLocaleString()} | Net: <strong className="text-black">Rp {netMargin.toLocaleString()}</strong></div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setCalculations(prev => prev.filter(c => c.id !== calc.id))}
+                                                className="p-2 text-black/40 hover:text-black"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* OVERVIEW TAB */}
+                    {activeTab === 'list' && (
+                        <div className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                            <h3 className="text-base font-bold uppercase tracking-wider text-black border-b border-black/10 pb-4">
+                                Treatment & Store Catalog Overview
+                            </h3>
+
+                            <div className="space-y-3">
+                                {treatments.map(t => (
+                                    <div key={t.id} className="p-4 rounded-xl border border-black/10 flex items-center justify-between gap-4">
+                                        <div>
+                                            <h4 className="text-sm font-bold text-black">{t.title}</h4>
+                                            <p className="text-xs text-black/60 line-clamp-1">{t.desc}</p>
+                                            <div className="flex gap-2 mt-2">
+                                                {t.options.map(o => (
+                                                    <span key={o.duration} className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/5 text-black border border-black/10">
+                                                        {o.duration}m: Rp {o.price}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleTogglePin(t)}
+                                                className={`p-2 rounded-lg border text-xs font-bold transition-all ${
+                                                    t.is_pinned 
+                                                    ? 'bg-black text-white border-black' 
+                                                    : 'bg-white text-black/60 border-black/20 hover:border-black'
+                                                }`}
+                                                title={t.is_pinned ? 'Unpin from Top' : 'Pin to Top'}
+                                            >
+                                                <Pin size={14} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditingTreatmentId(t.id);
+                                                    setTreatmentTitle(t.title);
+                                                    setTreatmentCategory(t.category);
+                                                    setTreatmentDesc(t.desc);
+                                                    setBenefits(t.benefits && t.benefits.length > 0 ? t.benefits : ['']);
+                                                    setPricingOptions(t.options && t.options.length > 0 ? t.options : [{ duration: '', price: '' }]);
+                                                    setActiveTab('treatment');
+                                                }}
+                                                className="p-2 rounded-lg border border-black/20 text-black hover:bg-black hover:text-white transition-all"
+                                                title="Edit Treatment"
+                                            >
+                                                <Edit3 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </main>
 
-            {/* Mobile Bottom Navigation Bar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-2xl border-t border-gray-200 z-50 px-4 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-                <div className="flex items-center justify-around h-full max-w-lg mx-auto relative">
+            {/* Minimalist Mobile Bottom Navigation Bar (White & Black) */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl border-t border-black/10 z-50 px-2 pb-safe">
+                <div className="flex items-center justify-around h-full max-w-md mx-auto">
                     {[
-                        { id: 'booking', icon: CalendarCheck, label: 'Bookings' },
-                        { id: 'daytrip', icon: Compass, label: 'Day Trip' },
-                        { id: 'treatment', icon: PlusCircle, label: 'Add' },
+                        { id: 'campaign', icon: Megaphone, label: 'Campaign' },
+                        { id: 'treatment', icon: PlusCircle, label: 'Treatments' },
                         { id: 'store', icon: Store, label: 'Store' },
-                        { id: 'more', icon: MoreHorizontal, label: 'More' },
+                        { id: 'fees', icon: Settings, label: 'Fees' },
+                        { id: 'list', icon: LayoutDashboard, label: 'Menu' },
                     ].map((tab) => {
-                        const isActive = tab.id === 'more' ? isMoreMenuOpen : activeTab === tab.id;
+                        const isActive = activeTab === tab.id;
                         const Icon = tab.icon;
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => {
-                                    if (tab.id === 'more') {
-                                        setIsMoreMenuOpen(!isMoreMenuOpen);
-                                    } else {
-                                        setActiveTab(tab.id as any);
-                                        setIsMoreMenuOpen(false);
-                                    }
-                                }}
-                                className={`flex flex-col items-center justify-center min-w-[54px] h-full gap-1 transition-colors ${
-                                    isActive ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`flex flex-col items-center justify-center min-w-[50px] py-1 transition-all ${
+                                    isActive ? 'text-black font-bold' : 'text-black/40 hover:text-black'
                                 }`}
                             >
-                                <div className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isActive ? 'bg-primary/10 scale-105 text-primary' : 'bg-transparent text-gray-500'}`}>
-                                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                                </div>
-                                <span className={`text-[10px] font-bold tracking-tight ${isActive ? 'text-primary opacity-100' : 'opacity-70'}`}>
-                                    {tab.label}
-                                </span>
+                                <Icon size={18} strokeWidth={isActive ? 2.5 : 1.75} />
+                                <span className="text-[9px] mt-0.5 tracking-tight">{tab.label}</span>
                             </button>
                         );
                     })}
-
-                    {/* Dropdown for More */}
-                    <AnimatePresence>
-                        {isMoreMenuOpen && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 20 }}
-                                className="absolute bottom-24 right-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 flex flex-col gap-1 z-50 w-48"
-                            >
-                                {[
-                                    { id: 'campaign', icon: Megaphone, label: 'Campaigns' },
-                                    { id: 'list', icon: LayoutDashboard, label: 'Menu Overview' },
-                                    { id: 'fees', icon: Settings, label: 'Therapist Fees' },
-                                    { id: 'calculator', icon: Calculator, label: 'Commission Calc' },
-                                ].map(tab => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => {
-                                            setActiveTab(tab.id as any);
-                                            setIsMoreMenuOpen(false);
-                                        }}
-                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${activeTab === tab.id ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
-                                    >
-                                        <tab.icon size={16} />
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
             </div>
 

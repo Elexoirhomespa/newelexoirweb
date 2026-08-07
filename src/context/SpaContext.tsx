@@ -60,6 +60,8 @@ export type Campaign = {
     duration: string; // e.g., "1_month"
     discountPercentage: number;
     selectedTreatments: SelectedCampaignTreatment[];
+    tripOffer?: string; // e.g. "25% OFF Bali Day Trip & Fastboat"
+    campaignType?: string; // "trip_discount" | "spa_discount" | "nusa_penida"
     is_published?: boolean;
     created_at?: string;
     updated_at?: string;

@@ -143,7 +143,8 @@ export default function Home() {
                     const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
                     const multiplier = isCouple ? (item.guests / 2) : item.guests;
                     const originalPrice = (originalPriceNum * multiplier).toLocaleString('en-US');
-                    return `*${item.campaignTitle.trim().toUpperCase()}*\n*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON [${item.discountPercentage}% OFF]\nIDR ${price} ~IDR ${originalPrice}~${whatsIncludedText}`;
+                    const tripOfferText = item.tripOffer ? `\n*CLAIMED PERK:* ${item.tripOffer}` : '';
+                    return `*CAMPAIGN: ${item.campaignTitle.trim().toUpperCase()}*${tripOfferText}\n*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON [${item.discountPercentage}% OFF]\nIDR ${price} ~IDR ${originalPrice}~${whatsIncludedText}`;
                 }
                 return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON IDR ${price}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
@@ -256,48 +257,58 @@ export default function Home() {
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative w-full h-[240px] md:h-[420px] rounded-[32px] md:rounded-[40px] overflow-hidden shadow-[0_20px_40px_rgb(0,0,0,0.12)] mb-8 group cursor-pointer bg-primary"
+                        className="relative w-full h-[260px] md:h-[380px] rounded-[28px] md:rounded-[36px] overflow-hidden shadow-xl mb-8 group cursor-pointer bg-black border border-black/20"
                     >
                         {/* Background Image */}
                         <Image 
                             src={campaign.image || "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center"} 
                             alt={campaign.title}
                             fill 
-                            className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                            className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
                         />
                         
-                        {/* Cinematic Vignette & Gradients (Apple-like depth) */}
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-1000"></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        {/* Cinematic Contrast Gradients */}
+                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-700"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                         
                         {/* Content Overlay */}
-                        <div className="absolute inset-0 p-6 md:p-12 flex flex-col justify-between z-10">
+                        <div className="absolute inset-0 p-5 md:p-10 flex flex-col justify-between z-10">
                             
-                            {/* Top Label */}
-                            <div className="flex justify-start">
+                            {/* Top Badges */}
+                            <div className="flex items-center justify-between gap-2">
                                 <motion.span 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2, duration: 0.6 }}
-                                    className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[8px] md:text-[9px] font-bold tracking-[0.2em] uppercase border border-white/30 text-white shadow-sm"
+                                    className="inline-flex items-center px-3 py-1 rounded-full bg-white text-black text-[9px] md:text-[10px] font-black tracking-[0.2em] uppercase shadow-md"
                                 >
-                                    {campaign.label}
+                                    {campaign.label || 'SPECIAL PROMO'}
                                 </motion.span>
+
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-black/80 border border-white/30 text-[10px] font-bold text-white backdrop-blur-md">
+                                    -{campaign.discountPercentage}% OFF
+                                </span>
                             </div>
 
-                            <div className="flex items-end justify-between">
-                                <div className="flex flex-col text-white pr-4">
-                                    <h2 className="font-serif text-4xl md:text-6xl font-medium leading-tight tracking-tight mb-2 opacity-95 drop-shadow-lg max-w-[220px] md:max-w-[500px]">
+                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                                <div className="flex flex-col text-white max-w-xl">
+                                    {campaign.tripOffer && (
+                                        <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-white/80 block mb-1">
+                                            {campaign.tripOffer}
+                                        </span>
+                                    )}
+                                    <h2 className="font-serif text-2xl md:text-5xl font-medium leading-tight tracking-tight mb-1 md:mb-2 text-white">
                                         {campaign.title}
                                     </h2>
-                                    <p className="text-white/80 text-[13px] md:text-base hidden md:block max-w-md leading-relaxed font-light drop-shadow-md">
+                                    <p className="text-white/80 text-xs md:text-sm line-clamp-2 max-w-lg leading-relaxed font-light hidden sm:block">
                                         {campaign.description}
                                     </p>
                                 </div>
 
-                                {/* Minimal Apple-style Frosted Button */}
-                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center shrink-0 shadow-[0_8px_32px_rgb(0,0,0,0.15)] group-hover:bg-white/30 group-hover:scale-105 group-active:scale-95 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                                    <ArrowRight size={20} strokeWidth={2.5} />
+                                {/* Minimal High-Contrast Button */}
+                                <div className="px-4 py-2.5 md:px-6 md:py-3.5 rounded-full bg-white text-black text-xs md:text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2 shrink-0 shadow-lg group-hover:bg-white/90 group-hover:scale-105 transition-all">
+                                    <span>Claim Discount</span>
+                                    <ArrowRight size={16} strokeWidth={2.5} />
                                 </div>
                             </div>
                         </div>
@@ -603,89 +614,125 @@ export default function Home() {
 
             {/* Campaign Modal */}
             {isCampaignModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-md">
                     <motion.div 
                         initial={{ opacity: 0, y: 100 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
-                        className="bg-[#FDFBF7] w-full h-[90dvh] md:h-auto md:max-h-[85vh] md:max-w-3xl md:rounded-[40px] rounded-t-[40px] shadow-2xl relative overflow-hidden flex flex-col"
+                        className="bg-white w-full h-[90dvh] md:h-auto md:max-h-[85vh] md:max-w-3xl md:rounded-[32px] rounded-t-[32px] shadow-2xl relative overflow-hidden flex flex-col border border-black/10 text-black font-sans"
                     >
                         {/* Modal Header */}
-                        <div className="p-6 md:p-8 flex items-center justify-between border-b border-border/50 bg-white shrink-0">
+                        <div className="p-5 md:p-7 flex items-center justify-between border-b border-black/10 bg-white shrink-0">
                             <div>
-                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-[9px] font-bold tracking-widest uppercase text-primary mb-2">
-                                    {campaign?.title}
+                                <div className="flex items-center gap-2 mb-1.5">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-black text-white text-[9px] font-bold tracking-widest uppercase">
+                                        {campaign?.label || 'EXCLUSIVE PROMO'}
+                                    </span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-black/5 text-black text-[9px] font-bold uppercase tracking-wider border border-black/10">
+                                        -{campaign?.discountPercentage}% OFF
+                                    </span>
                                 </div>
-                                <h2 className="font-serif text-2xl text-primary">{campaign?.label}</h2>
+                                <h2 className="font-serif text-xl md:text-2xl font-bold text-black">{campaign?.title}</h2>
                             </div>
                             <button 
                                 onClick={() => setIsCampaignModalOpen(false)}
-                                className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-primary hover:bg-border transition-colors"
+                                className="w-9 h-9 rounded-full bg-black/5 flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
                             >
-                                <X size={20} />
+                                <X size={18} />
                             </button>
                         </div>
                         
                         {/* Modal Content (Campaign Treatments) */}
-                        <div className="p-6 md:p-8 overflow-y-auto bg-[#FDFBF7]">
-                            <p className="text-sm text-text-muted mb-6">{campaign?.description}</p>
+                        <div className="p-5 md:p-7 overflow-y-auto bg-white space-y-6">
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {campaign?.selectedTreatments.flatMap(ct => {
-                                    const treatment = treatments.find(t => t.id === ct.treatmentId);
-                                    if (!treatment) return [];
-                                    
-                                    return ct.durations.map(duration => {
-                                        const option = treatment.options.find(o => o.duration === duration);
-                                        if (!option) return null;
+                            {/* Trip Perk Unlocked Banner */}
+                            {campaign?.tripOffer && (
+                                <div className="p-4 rounded-2xl bg-black/5 border border-black/10 flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0 mt-0.5">
+                                        <Sparkles size={16} />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-black/60 block">Claimable Trip Perk</span>
+                                        <h4 className="text-sm font-bold text-black">{campaign.tripOffer}</h4>
+                                        <p className="text-xs text-black/70 mt-0.5">Select an eligible treatment below to claim this perk voucher.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-black">
+                                        Select Treatment to Activate Discount
+                                    </span>
+                                    <span className="text-[10px] text-black/50 font-medium">Click to book</span>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {campaign?.selectedTreatments.flatMap(ct => {
+                                        const treatment = treatments.find(t => t.id === ct.treatmentId);
+                                        if (!treatment) return [];
                                         
-                                        const originalPriceNum = parseInt(option.price.replace(/,/g, ''));
-                                        const discountedPriceNum = originalPriceNum * (1 - (campaign.discountPercentage / 100));
-                                        
-                                        return (
-                                            <div key={`${treatment.id}-${duration}`} className="block group outline-none cursor-pointer" onClick={() => {
-                                                setCartItems([{
-                                                    id: Date.now().toString(),
-                                                    treatmentId: treatment.id,
-                                                    campaignTitle: campaign.title,
-                                                    title: treatment.title,
-                                                    duration: duration,
-                                                    price: discountedPriceNum,
-                                                    guests: 1,
-                                                    isCampaign: true,
-                                                    discountPercentage: campaign.discountPercentage
-                                                }]);
-                                                setIsBookingModalOpen(true);
-                                            }}>
-                                                <div className="rounded-[32px] p-6 bg-white border border-border/40 shadow-sm hover:shadow-md transition-all duration-500 flex flex-col h-full relative overflow-hidden group-hover:-translate-y-1">
-                                                    <div className="mb-4 flex items-start justify-between">
-                                                        <div className="bg-primary/5 border border-primary/10 text-primary px-3 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase shadow-sm">
-                                                            {treatment.category}
+                                        return ct.durations.map(duration => {
+                                            const option = treatment.options.find(o => o.duration === duration);
+                                            if (!option) return null;
+                                            
+                                            const originalPriceNum = parseInt(option.price.replace(/,/g, ''));
+                                            const discountedPriceNum = originalPriceNum * (1 - (campaign.discountPercentage / 100));
+                                            
+                                            return (
+                                                <div 
+                                                    key={`${treatment.id}-${duration}`} 
+                                                    className="p-5 rounded-2xl border border-black/15 hover:border-black bg-white hover:bg-black/[0.02] shadow-sm transition-all duration-300 flex flex-col justify-between cursor-pointer group"
+                                                    onClick={() => {
+                                                        setCartItems([{
+                                                            id: Date.now().toString(),
+                                                            treatmentId: treatment.id,
+                                                            campaignTitle: campaign.title,
+                                                            tripOffer: campaign.tripOffer || 'Special Trip Discount',
+                                                            title: treatment.title,
+                                                            duration: duration,
+                                                            price: discountedPriceNum,
+                                                            guests: 1,
+                                                            isCampaign: true,
+                                                            discountPercentage: campaign.discountPercentage
+                                                        }]);
+                                                        setIsCampaignModalOpen(false);
+                                                        setIsBookingModalOpen(true);
+                                                    }}
+                                                >
+                                                    <div>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-black/5 text-black border border-black/10">
+                                                                {treatment.category}
+                                                            </span>
+                                                            <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black text-white">
+                                                                -{campaign.discountPercentage}%
+                                                            </span>
                                                         </div>
-                                                        <div className="bg-primary text-white px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest shadow-sm">
-                                                            -{campaign.discountPercentage}%
-                                                        </div>
+                                                        <h4 className="text-base font-bold text-black mb-1">{treatment.title}</h4>
+                                                        <p className="text-xs text-black/60 line-clamp-2 mb-4 font-light leading-relaxed">{treatment.desc}</p>
                                                     </div>
-                                                    <h4 className="font-serif text-xl font-medium text-primary mb-2 leading-tight">{treatment.title}</h4>
-                                                    <p className="text-xs text-text-muted leading-relaxed font-light mb-6 flex-grow">{treatment.desc}</p>
-                                                    
-                                                    <div className="mt-auto pt-4 border-t border-border/50">
-                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-text-muted mb-2.5 uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> {duration} MINS</div>
-                                                        <div className="flex items-end justify-between">
-                                                            <div>
-                                                                <span className="text-[10px] text-text-muted line-through mr-2">Rp {option.price}</span>
-                                                                <span className="font-serif text-lg text-primary">Rp {discountedPriceNum.toLocaleString('en-US')}</span>
+
+                                                    <div className="pt-3 border-t border-black/10 flex items-end justify-between">
+                                                        <div>
+                                                            <div className="flex items-center gap-1 text-[10px] font-bold text-black/60 uppercase mb-1">
+                                                                <Clock className="w-3 h-3" /> {duration} MINS
                                                             </div>
-                                                            <button className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                                <ArrowRight size={16} />
-                                                            </button>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[11px] text-black/40 line-through">Rp {option.price}</span>
+                                                                <span className="text-base font-bold text-black">Rp {discountedPriceNum.toLocaleString('en-US')}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="px-3 py-1.5 rounded-lg bg-black text-white text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:scale-105 transition-all">
+                                                            Claim <ArrowRight size={12} />
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    });
-                                })}
+                                            );
+                                        });
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -814,9 +861,16 @@ export default function Home() {
                                                 <div className="flex items-start justify-between mb-4 pr-6">
                                                     <div>
                                                         {item.isCampaign && (
-                                                            <div className="bg-primary text-white px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest inline-flex items-center gap-1 whitespace-nowrap mb-1.5 shadow-sm">
-                                                                <span>{item.campaignTitle}</span>
-                                                                <span className="opacity-90">(-{item.discountPercentage}%)</span>
+                                                            <div className="space-y-1 mb-2">
+                                                                <div className="bg-primary text-white px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest inline-flex items-center gap-1 whitespace-nowrap shadow-sm">
+                                                                    <span>{item.campaignTitle}</span>
+                                                                    <span className="opacity-90">(-{item.discountPercentage}%)</span>
+                                                                </div>
+                                                                {item.tripOffer && (
+                                                                    <div className="text-[10px] font-bold text-primary flex items-center gap-1">
+                                                                        <span>🎁 Perk:</span> {item.tripOffer}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
                                                         <h3 className="font-bold text-sm text-primary leading-tight">{item.title}</h3>
