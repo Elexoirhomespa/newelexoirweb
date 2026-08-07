@@ -224,6 +224,18 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
     }
 ];
 
+const mergeWithDefaults = (list: Campaign[]): Campaign[] => {
+    if (!Array.isArray(list) || list.length === 0) return DEFAULT_CAMPAIGNS;
+    const combined = [...list];
+    for (const def of DEFAULT_CAMPAIGNS) {
+        const exists = combined.some(c => c.id === def.id || (c.title && def.title && c.title.trim().toLowerCase() === def.title.trim().toLowerCase()));
+        if (!exists) {
+            combined.push(def);
+        }
+    }
+    return combined;
+};
+
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
 export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
@@ -257,15 +269,19 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 if (cachedCampaigns) {
                     const parsed = JSON.parse(cachedCampaigns);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        setCampaigns(parsed);
-                        setCampaign(parsed[0]);
+                        const merged = mergeWithDefaults(parsed);
+                        setCampaigns(merged);
+                        setCampaign(merged[0]);
+                        try { localStorage.setItem('spa_campaigns', JSON.stringify(merged)); } catch(e) {}
                         hasCache = true;
                     }
                 } else if (cachedCampaign) {
                     const single = JSON.parse(cachedCampaign);
                     if (single) {
-                        setCampaign(single);
-                        setCampaigns([single]);
+                        const merged = mergeWithDefaults([single]);
+                        setCampaigns(merged);
+                        setCampaign(merged[0]);
+                        try { localStorage.setItem('spa_campaigns', JSON.stringify(merged)); } catch(e) {}
                         hasCache = true;
                     }
                 }
@@ -322,11 +338,12 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 // If DB has campaigns, update state and local cache
                 if (campaignsRes.data && campaignsRes.data.length > 0) {
                     const fetchedCampaigns = campaignsRes.data as Campaign[];
-                    setCampaigns(fetchedCampaigns);
-                    setCampaign(fetchedCampaigns[0]);
+                    const merged = mergeWithDefaults(fetchedCampaigns);
+                    setCampaigns(merged);
+                    setCampaign(merged[0]);
                     try { 
-                        localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
-                        localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0]));
+                        localStorage.setItem('spa_campaigns', JSON.stringify(merged));
+                        localStorage.setItem('spa_campaign', JSON.stringify(merged[0]));
                     } catch(e) {}
                 }
 
@@ -349,8 +366,9 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 if (stored) {
                     const parsed = JSON.parse(stored);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        setCampaigns(parsed);
-                        setCampaign(parsed[0]);
+                        const merged = mergeWithDefaults(parsed);
+                        setCampaigns(merged);
+                        setCampaign(merged[0]);
                     }
                 }
             } catch (e) {}

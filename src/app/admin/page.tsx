@@ -102,14 +102,14 @@ export default function AdminDashboard() {
     };
 
     const handleNewCampaign = () => {
-        setCampaignTitle('Bali Day Trip & Spa Combo');
-        setCampaignLabel('Exclusive Trip Deal');
-        setCampaignDesc('Book any eligible treatment below to claim your private Day Trip & Fastboat discount.');
-        setCampaignTripOffer('25% OFF Bali Day Trip & Fastboat');
+        setCampaignTitle('');
+        setCampaignLabel('SPECIAL PROMO');
+        setCampaignDesc('Book any eligible treatment below to claim your exclusive perk & discount.');
+        setCampaignTripOffer('Exclusive Voucher Perk');
         setCampaignDuration('1_month');
         setDiscountPercentage(20);
         selectAllTreatments();
-        setCampaignImage('https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
+        setCampaignImage('https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center');
         setEditingCampaignId(null);
     };
 
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
             setCampaigns(updated);
             if (updated.length > 0) {
                 setCampaign(updated[0]);
-                if (editingCampaignId === id) loadCampaignToForm(updated[0]);
+                if (editingCampaignId === id) setEditingCampaignId(null);
             } else {
                 setCampaign(null);
                 handleNewCampaign();
@@ -138,13 +138,12 @@ export default function AdminDashboard() {
                 console.warn("Supabase delete failed (using local sync)", e);
             }
         } catch(e) {
-            console.error(e);
-            alert('Failed to delete campaign.');
+            console.error('Failed to delete campaign', e);
         }
     };
 
     const handleTogglePublishCampaign = async (camp: Campaign) => {
-        const newStatus = !(camp.is_published !== false);
+        const newStatus = camp.is_published === false ? true : false;
         const updated = campaigns.map(c => c.id === camp.id ? { ...c, is_published: newStatus } : c);
         setCampaigns(updated);
         try {
@@ -169,10 +168,8 @@ export default function AdminDashboard() {
         setDiscountPercentage(preset.discountPercentage);
         setCampaignImage(preset.image);
         setCampaignDuration(preset.duration);
-        // Default to all treatments if none selected yet
-        if (campaignTreatments.length === 0 && treatments.length > 0) {
-            selectAllTreatments();
-        }
+        setEditingCampaignId(null); // CRITICAL: creating a new card from preset
+        selectAllTreatments();
     };
 
     const toggleCampaignTreatmentDuration = (treatmentId: string, duration: string) => {
@@ -702,6 +699,21 @@ export default function AdminDashboard() {
                                                 </div>
                                             );
                                         })}
+
+                                        {/* Quick Add Another Card button in grid */}
+                                        <button
+                                            type="button"
+                                            onClick={handleNewCampaign}
+                                            className="p-5 rounded-xl border border-dashed border-black/25 bg-black/[0.02] hover:bg-black hover:text-white transition-all flex flex-col items-center justify-center gap-2 group text-center min-h-[140px]"
+                                        >
+                                            <div className="w-10 h-10 rounded-full border border-black/20 flex items-center justify-center group-hover:border-white">
+                                                <Plus size={18} />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs font-bold uppercase tracking-wider">Add Another Campaign</h4>
+                                                <p className="text-[11px] text-black/50 group-hover:text-white/70 mt-0.5">Click to configure & publish a new card</p>
+                                            </div>
+                                        </button>
                                     </div>
                                 )}
 
@@ -785,16 +797,23 @@ export default function AdminDashboard() {
                             {/* Campaign Setup Form */}
                             <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
                                 <div className="flex items-center justify-between border-b border-black/10 pb-3">
-                                    <h3 className="text-sm font-bold uppercase tracking-wider text-black">
-                                        {editingCampaignId ? 'Edit Campaign Details' : 'Create New Campaign Card'}
-                                    </h3>
+                                    <div>
+                                        <h3 className="text-sm font-bold uppercase tracking-wider text-black">
+                                            {editingCampaignId ? 'Edit Campaign Details' : 'Create New Campaign Card'}
+                                        </h3>
+                                        <p className="text-[11px] text-black/60 mt-0.5">
+                                            {editingCampaignId 
+                                                ? `Currently editing existing card. Click below if you want to create a new card instead.`
+                                                : `Creating a brand new card. It will appear on the homepage alongside other active campaigns.`}
+                                        </p>
+                                    </div>
                                     {editingCampaignId && (
                                         <button
                                             type="button"
                                             onClick={handleNewCampaign}
-                                            className="text-xs font-semibold text-black/60 hover:text-black underline"
+                                            className="px-3 py-1.5 rounded-lg bg-black text-white text-xs font-bold hover:bg-black/80 transition-colors shrink-0"
                                         >
-                                            + Switch to New Blank Card
+                                            + Create New Card Instead
                                         </button>
                                     )}
                                 </div>
@@ -805,7 +824,7 @@ export default function AdminDashboard() {
                                         <input 
                                             type="text" 
                                             required 
-                                            placeholder="e.g. Bali Day Trip & Spa Combo" 
+                                            placeholder="e.g. Nusa Penida & Spa Combo" 
                                             value={campaignTitle} 
                                             onChange={e => setCampaignTitle(e.target.value)}
                                             className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
