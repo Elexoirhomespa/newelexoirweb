@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch / test scripts
+check_*.js
+test*.js
+get_image*.js
+modify_admin.py
