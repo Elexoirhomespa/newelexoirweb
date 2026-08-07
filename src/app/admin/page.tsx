@@ -9,7 +9,7 @@ import {
     ArrowRight, ArrowUp, ArrowDown, Compass, ShieldCheck, Check
 } from 'lucide-react';
 import Link from 'next/link';
-import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee, Campaign, sortCampaigns } from '@/context/SpaContext';
+import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee, Campaign, sortCampaigns, DEFAULT_CAMPAIGNS } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
 
 // Quick Preset Campaigns for Trip & Spa Deals
@@ -91,6 +91,42 @@ export default function AdminDashboard() {
     const [campaignImage, setCampaignImage] = useState<string>(campaign?.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
     const [editingCampaignId, setEditingCampaignId] = useState<string | null>(campaign?.id || null);
 
+    // Treatment selection helpers for campaigns (must be declared before handlers)
+    const selectAllTreatments = () => {
+        const all: SelectedCampaignTreatment[] = treatments.map(t => ({
+            treatmentId: t.id,
+            durations: t.options.map(o => o.duration)
+        }));
+        setCampaignTreatments(all);
+    };
+
+    const clearAllCampaignTreatments = () => {
+        setCampaignTreatments([]);
+    };
+
+    const toggleCampaignTreatmentDuration = (treatmentId: string, duration: string) => {
+        setCampaignTreatments(prev => {
+            const existing = prev.find(t => t.treatmentId === treatmentId);
+            if (existing) {
+                if (existing.durations.includes(duration)) {
+                    const newDurations = existing.durations.filter(d => d !== duration);
+                    if (newDurations.length === 0) {
+                        return prev.filter(t => t.treatmentId !== treatmentId);
+                    }
+                    return prev.map(t => t.treatmentId === treatmentId ? { ...t, durations: newDurations } : t);
+                }
+                return prev.map(t => t.treatmentId === treatmentId ? { ...t, durations: [...t.durations, duration] } : t);
+            }
+            return [...prev, { treatmentId, durations: [duration] }];
+        });
+    };
+
+    const scrollToCampaignForm = () => {
+        setTimeout(() => {
+            document.getElementById('campaign-form')?.scrollIntoView({ behavior: 'smooth' });
+        }, 50);
+    };
+
     // Sync when campaign changes
     const loadCampaignToForm = (c: Campaign) => {
         setCampaignTitle(c.title || '');
@@ -99,23 +135,37 @@ export default function AdminDashboard() {
         setCampaignTripOffer(c.tripOffer || '');
         setCampaignDuration(c.duration || '1_month');
         setDiscountPercentage(c.discountPercentage ?? 20);
-        setCampaignTreatments(c.selectedTreatments || []);
+        setCampaignTreatments(c.selectedTreatments && c.selectedTreatments.length > 0 ? c.selectedTreatments : treatments.map(t => ({ treatmentId: t.id, durations: t.options.map(o => o.duration) })));
         setCampaignImage(c.image || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg');
         setCampaignOrder(c.order ?? (campaigns.findIndex(item => item.id === c.id) + 1));
         setEditingCampaignId(c.id || null);
+        scrollToCampaignForm();
     };
 
     const handleNewCampaign = () => {
         setCampaignTitle('');
-        setCampaignLabel('SPECIAL PROMO');
-        setCampaignDesc('Book any eligible treatment below to claim your exclusive perk & discount.');
-        setCampaignTripOffer('Exclusive Voucher Perk');
+        setCampaignLabel('EXCLUSIVE OFFER');
+        setCampaignDesc('Book any eligible treatment below to claim your exclusive perk & special discount.');
+        setCampaignTripOffer('25% OFF Day Trip & Voucher Perk');
         setCampaignDuration('1_month');
-        setDiscountPercentage(20);
+        setDiscountPercentage(25);
         selectAllTreatments();
-        setCampaignImage('https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center');
+        setCampaignImage('https://images.pexels.com/photos/3865676/pexels-photo-3865676.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center');
         setCampaignOrder(campaigns.length + 1);
         setEditingCampaignId(null);
+        scrollToCampaignForm();
+    };
+
+    const handleRestoreDefaultCampaigns = () => {
+        if (!confirm('Load the 2 standard campaigns (Summer Retreat + Bali Day Trip)? Existing cards will be updated.')) return;
+        setCampaigns(DEFAULT_CAMPAIGNS);
+        setCampaign(DEFAULT_CAMPAIGNS[0]);
+        loadCampaignToForm(DEFAULT_CAMPAIGNS[0]);
+        try {
+            localStorage.setItem('spa_campaigns', JSON.stringify(DEFAULT_CAMPAIGNS));
+            localStorage.setItem('spa_campaign', JSON.stringify(DEFAULT_CAMPAIGNS[0]));
+            if (typeof window !== 'undefined') window.dispatchEvent(new Event('spa_campaigns_updated'));
+        } catch(e) {}
     };
 
     const handleMoveCampaign = async (index: number, direction: 'up' | 'down') => {
@@ -210,35 +260,6 @@ export default function AdminDashboard() {
         selectAllTreatments();
     };
 
-    const toggleCampaignTreatmentDuration = (treatmentId: string, duration: string) => {
-        setCampaignTreatments(prev => {
-            const existing = prev.find(t => t.treatmentId === treatmentId);
-            if (existing) {
-                if (existing.durations.includes(duration)) {
-                    const newDurations = existing.durations.filter(d => d !== duration);
-                    if (newDurations.length === 0) {
-                        return prev.filter(t => t.treatmentId !== treatmentId);
-                    }
-                    return prev.map(t => t.treatmentId === treatmentId ? { ...t, durations: newDurations } : t);
-                }
-                return prev.map(t => t.treatmentId === treatmentId ? { ...t, durations: [...t.durations, duration] } : t);
-            }
-            return [...prev, { treatmentId, durations: [duration] }];
-        });
-    };
-
-    const selectAllTreatments = () => {
-        const all: SelectedCampaignTreatment[] = treatments.map(t => ({
-            treatmentId: t.id,
-            durations: t.options.map(o => o.duration)
-        }));
-        setCampaignTreatments(all);
-    };
-
-    const clearAllCampaignTreatments = () => {
-        setCampaignTreatments([]);
-    };
-
     // Treatment Fields
     const [treatmentTitle, setTreatmentTitle] = useState('');
     const [treatmentCategory, setTreatmentCategory] = useState('massage');
@@ -325,16 +346,18 @@ export default function AdminDashboard() {
         try {
             if (activeTab === 'campaign') {
                 const targetId = editingCampaignId || `camp-${Date.now()}`;
-                const targetOrder = Number(campaignOrder) || 1;
+                const targetOrder = Number(campaignOrder) || (editingCampaignId ? 1 : campaigns.length + 1);
                 const campaignData: Campaign = {
                     id: targetId,
-                    title: campaignTitle,
-                    label: campaignLabel,
-                    description: campaignDesc,
+                    title: campaignTitle.trim() || 'Special Spa Campaign',
+                    label: campaignLabel.trim() || 'EXCLUSIVE OFFER',
+                    description: campaignDesc.trim() || 'Book any eligible treatment below to claim your exclusive perk & special discount.',
                     image: campaignImage || 'https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg',
                     duration: campaignDuration || '1_month',
                     discountPercentage: Number(discountPercentage) || 20,
-                    selectedTreatments: campaignTreatments,
+                    selectedTreatments: campaignTreatments.length > 0 
+                        ? campaignTreatments 
+                        : treatments.map(t => ({ treatmentId: t.id, durations: t.options.map(o => o.duration) })),
                     tripOffer: campaignTripOffer,
                     order: targetOrder,
                     is_published: true,
@@ -345,7 +368,7 @@ export default function AdminDashboard() {
                 if (editingCampaignId) {
                     updatedList = campaigns.map(c => c.id === editingCampaignId ? campaignData : c);
                 } else {
-                    updatedList = [...campaigns.filter(c => c.id !== campaignData.id), campaignData];
+                    updatedList = [...campaigns.filter(c => c.id !== targetId), campaignData];
                 }
 
                 const updated = sortCampaigns(updatedList);
@@ -355,9 +378,15 @@ export default function AdminDashboard() {
 
                 try {
                     localStorage.setItem('spa_campaigns', JSON.stringify(updated));
-                    localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
-                    if (typeof window !== 'undefined') window.dispatchEvent(new Event('spa_campaigns_updated'));
-                } catch(e) {}
+                    if (updated.length > 0) {
+                        localStorage.setItem('spa_campaign', JSON.stringify(updated[0]));
+                    }
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new Event('spa_campaigns_updated'));
+                    }
+                } catch(e) {
+                    console.error("Failed to save to localStorage:", e);
+                }
 
                 try {
                     if (editingCampaignId) {
@@ -370,7 +399,7 @@ export default function AdminDashboard() {
                 }
 
                 setSuccess(true);
-                setTimeout(() => setSuccess(false), 3000);
+                setTimeout(() => setSuccess(false), 3500);
             } else if (activeTab === 'treatment') {
                 const treatmentData = {
                     title: treatmentTitle,
@@ -794,15 +823,27 @@ export default function AdminDashboard() {
 
                                 {/* Quick Presets Bar */}
                                 <div className="mt-6 pt-5 border-t border-black/10">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-black/60 block mb-2.5">
-                                        Quick 1-Click Templates:
-                                    </label>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/60">
+                                            Quick 1-Click Templates:
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={handleRestoreDefaultCampaigns}
+                                            className="text-[10px] font-bold uppercase tracking-wider text-black/60 hover:text-black underline transition-colors"
+                                        >
+                                            Reset / Load 2 Standard Cards
+                                        </button>
+                                    </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                                         {CAMPAIGN_PRESETS.map((preset, idx) => (
                                             <button
                                                 key={idx}
                                                 type="button"
-                                                onClick={() => applyCampaignPreset(preset)}
+                                                onClick={() => {
+                                                    applyCampaignPreset(preset);
+                                                    scrollToCampaignForm();
+                                                }}
                                                 className="text-left p-3 rounded-xl border border-black/15 bg-black/[0.02] hover:bg-black hover:text-white transition-all group flex flex-col justify-between"
                                             >
                                                 <span className="text-[9px] font-bold tracking-wider uppercase opacity-60 group-hover:opacity-80">
@@ -870,25 +911,37 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Campaign Setup Form */}
-                            <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
-                                <div className="flex items-center justify-between border-b border-black/10 pb-3">
+                            <form id="campaign-form" onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm scroll-mt-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/10 pb-4">
                                     <div>
-                                        <h3 className="text-sm font-bold uppercase tracking-wider text-black">
-                                            {editingCampaignId ? 'Edit Campaign Details' : 'Create New Campaign Card'}
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
+                                                editingCampaignId 
+                                                ? 'bg-black text-white' 
+                                                : 'bg-emerald-600 text-white'
+                                            }`}>
+                                                {editingCampaignId ? 'Edit Mode' : '+ New Card Mode'}
+                                            </span>
+                                            <span className="text-xs font-bold text-black/60">
+                                                Position #{campaignOrder || (editingCampaignId ? 1 : campaigns.length + 1)}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-black">
+                                            {editingCampaignId ? `Editing: ${campaignTitle || 'Existing Campaign'}` : 'Create Brand New Campaign Card'}
                                         </h3>
                                         <p className="text-[11px] text-black/60 mt-0.5">
                                             {editingCampaignId 
-                                                ? `Currently editing existing card. Click below if you want to create a new card instead.`
-                                                : `Creating a brand new card. It will appear on the homepage alongside other active campaigns.`}
+                                                ? 'Changes will update this existing card. Click "+ New Card Instead" to create another one.'
+                                                : 'Fill out this form and click "Save & Publish" to add a new card to your homepage carousel.'}
                                         </p>
                                     </div>
                                     {editingCampaignId && (
                                         <button
                                             type="button"
                                             onClick={handleNewCampaign}
-                                            className="px-3 py-1.5 rounded-lg bg-black text-white text-xs font-bold hover:bg-black/80 transition-colors shrink-0"
+                                            className="px-3.5 py-2 rounded-xl bg-black text-white text-xs font-bold hover:bg-black/80 transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
                                         >
-                                            + Create New Card Instead
+                                            <Plus size={13} /> + Create New Card Instead
                                         </button>
                                     )}
                                 </div>
