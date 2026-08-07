@@ -973,13 +973,13 @@ export default function Home() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm overflow-x-hidden overflow-y-auto w-full max-w-[100vw]"
+                        className="fixed inset-0 z-[110] overflow-y-auto overflow-x-hidden bg-black/60 backdrop-blur-sm flex justify-center items-start p-0 sm:p-4 md:p-6"
                     >
                         <motion.div 
-                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            initial={{ opacity: 0, scale: 0.96, y: 15 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                            className="bg-white rounded-none sm:rounded-[28px] p-5 sm:p-7 md:p-8 w-full max-w-full sm:max-w-lg min-h-[100dvh] sm:min-h-0 sm:max-h-[90vh] shadow-2xl relative overflow-y-auto overflow-x-hidden no-scrollbar flex flex-col justify-between box-border"
+                            exit={{ opacity: 0, scale: 0.96, y: 15 }}
+                            className="bg-white w-full max-w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:my-auto sm:rounded-[28px] rounded-none p-5 sm:p-7 md:p-8 shadow-2xl relative flex flex-col box-border"
                         >
                             <button 
                                 onClick={() => setIsBookingModalOpen(false)}
@@ -997,7 +997,7 @@ export default function Home() {
                                         <h2 className="font-serif text-2xl text-primary">Select Treatment</h2>
                                     </div>
                                     
-                                    <div className="space-y-3 max-h-[calc(100dvh-110px)] md:max-h-[70vh] overflow-y-auto pr-2 pb-16 no-scrollbar">
+                                    <div className="space-y-3 max-h-[calc(100dvh-140px)] sm:max-h-[70vh] overflow-y-auto pr-1 pb-12 no-scrollbar">
                                         {treatments.map(t => (
                                             <div 
                                                 key={t.id} 
@@ -1070,14 +1070,16 @@ export default function Home() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="animate-in fade-in slide-in-from-left-4 duration-300">
-                                    <h2 className="font-serif text-2xl text-primary mb-1 pr-8">Complete Booking</h2>
-                                    <p className="text-xs text-text-muted mb-6">Your request will be sent securely via WhatsApp.</p>
+                                <div className="animate-in fade-in slide-in-from-left-4 duration-300 flex flex-col">
+                                    <div className="mb-5 pr-8">
+                                        <h2 className="font-serif text-2xl sm:text-3xl text-primary font-medium tracking-tight mb-1">Complete Booking</h2>
+                                        <p className="text-xs text-text-muted">Your request will be sent securely via WhatsApp.</p>
+                                    </div>
 
                                     {/* Cart Items List */}
-                                    <div className="space-y-3 mb-4 max-h-[40vh] overflow-y-auto pr-1 no-scrollbar">
+                                    <div className="space-y-3 mb-5">
                                         {cartItems.map(item => (
-                                            <div key={item.id} className="bg-surface border border-border/50 rounded-2xl p-4 shadow-sm relative">
+                                            <div key={item.id} className="bg-surface border border-border/60 rounded-2xl p-4 shadow-sm relative">
                                                 {cartItems.length > 1 && (
                                                     <button 
                                                         onClick={() => setCartItems(cartItems.filter(i => i.id !== item.id))}
@@ -1154,12 +1156,12 @@ export default function Home() {
                                     <button 
                                         type="button"
                                         onClick={() => setIsSelectingMore(true)}
-                                        className="w-full bg-transparent text-primary border border-border/50 px-6 py-3 rounded-xl text-xs font-bold hover:bg-surface transition-colors mb-6 tracking-widest"
+                                        className="w-full bg-transparent text-primary border border-border/70 px-6 py-3 rounded-xl text-xs font-bold hover:bg-surface transition-colors mb-6 tracking-widest uppercase"
                                     >
-                                        + ADD ANOTHER TREATMENT
+                                        + Add Another Treatment
                                     </button>
 
-                                    <form className="space-y-5 pb-8 md:pb-0">
+                                    <form className="space-y-5 pb-8 sm:pb-0">
                                         <div className="space-y-1.5">
                                             <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Guest Name</label>
                                             <input 
