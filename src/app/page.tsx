@@ -357,6 +357,7 @@ export default function Home() {
                                                 fill 
                                                 priority={idx < 3}
                                                 loading="eager"
+                                                unoptimized={Boolean(camp.image?.startsWith('data:') || camp.image?.includes('supabase.co'))}
                                                 sizes="(max-width: 768px) 90vw, 480px"
                                                 className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
