@@ -617,9 +617,9 @@ export default function AdminDashboard() {
             {/* Main Content Area */}
             <main className="flex-1 relative overflow-y-auto bg-white min-h-screen pb-28 md:pb-12">
                 
-                {/* Top Mobile Bar & Domain Switcher */}
-                <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center justify-between w-full sm:w-auto">
+                {/* Top Mobile Bar */}
+                <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-black/10 px-4 md:px-8 py-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                         <span className="text-xs font-bold tracking-widest uppercase text-black">
                             {activeTab === 'campaign' && 'Campaign Card Setup'}
                             {activeTab === 'treatment' && 'Treatment Management'}
@@ -628,32 +628,6 @@ export default function AdminDashboard() {
                             {activeTab === 'calculator' && 'Commission Calculator'}
                             {activeTab === 'list' && 'Menu & Item Overview'}
                         </span>
-                    </div>
-
-                    {/* Minimalist Domain Switcher */}
-                    <div className="inline-flex bg-black/5 p-1 rounded-xl border border-black/10 self-stretch sm:self-auto justify-center">
-                        <button
-                            type="button"
-                            onClick={() => setSiteBrandFilter('elexoir')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                siteBrandFilter === 'elexoir' 
-                                ? 'bg-black text-white shadow-sm' 
-                                : 'text-black/60 hover:text-black'
-                            }`}
-                        >
-                            Elexoir Spa
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSiteBrandFilter('therapick')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                siteBrandFilter === 'therapick' 
-                                ? 'bg-black text-white shadow-sm' 
-                                : 'text-black/60 hover:text-black'
-                            }`}
-                        >
-                            TheraPick Bali
-                        </button>
                     </div>
                 </div>
 
@@ -1142,8 +1116,8 @@ export default function AdminDashboard() {
                                             </div>
                                             <div className="text-[11px] opacity-80 mt-0.5">
                                                 {discountPercentage === 0 
-                                                    ? 'Spa treatments will display their standard price (e.g. Rp 900,000) with a "Standard Rate" badge and no strikethrough. Perfect for Trip voucher campaigns!'
-                                                    : `Treatments will automatically display strikethrough original prices and -${discountPercentage}% reduced prices (e.g. Rp 900,000 → Rp ${(Math.round(900000 * (1 - discountPercentage / 100))).toLocaleString('en-US')}).`
+                                                    ? 'Spa treatments will display their standard price (e.g. IDR 900,000) with a "Standard Rate" badge and no strikethrough. Perfect for Trip voucher campaigns!'
+                                                    : `Treatments will automatically display strikethrough original prices and -${discountPercentage}% reduced prices (e.g. IDR 900,000 → IDR ${(Math.round(900000 * (1 - discountPercentage / 100))).toLocaleString('en-US')}).`
                                                 }
                                             </div>
                                         </div>

@@ -213,7 +213,7 @@ export default function Home() {
             <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24 md:pt-36">
                 
                 {/* Slogan */}
-                <div className="md:hidden mt-4 mb-6 px-2">
+                <div className="md:hidden mt-4 mb-6">
                     <h1 className="font-serif text-3xl text-primary font-medium tracking-tight">
                         {domain === 'bali' ? (
                             <>
@@ -230,8 +230,8 @@ export default function Home() {
                 </div>
 
                 {/* Search Bar (Mobile Only - Above Campaign) */}
-                <div className="md:hidden relative w-full mb-6 z-20 px-2">
-                    <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none h-[54px]">
+                <div className="md:hidden relative w-full mb-6 z-20">
+                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none h-[54px]">
                         <Search className="h-5 w-5 text-text-muted" />
                     </div>
                     <input 
@@ -239,12 +239,12 @@ export default function Home() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search your favourite treatment..." 
-                        className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl h-[54px] pl-12 pr-12 text-sm text-primary shadow-soft focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-text-muted"
+                        className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl h-[54px] pl-11 pr-12 text-sm text-primary shadow-soft focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-text-muted"
                     />
                     <button 
                         onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
                         title="Filter by price"
-                        className={`absolute top-2 right-4 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isPriceFilterOpen ? 'bg-primary text-white shadow-md' : 'bg-secondary/30 text-primary hover:bg-secondary/50'}`}
+                        className={`absolute top-2 right-2 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isPriceFilterOpen ? 'bg-primary text-white shadow-md' : 'bg-secondary/30 text-primary hover:bg-secondary/50'}`}
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                     </button>
@@ -255,11 +255,11 @@ export default function Home() {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="absolute top-full right-2 mt-3 w-64 md:w-72 bg-white/95 backdrop-blur-xl border border-white/50 rounded-2xl p-5 shadow-[0_20px_40px_rgb(0,0,0,0.12)] z-30"
+                                className="absolute top-full right-0 mt-3 w-64 md:w-72 bg-white/95 backdrop-blur-xl border border-white/50 rounded-2xl p-5 shadow-[0_20px_40px_rgb(0,0,0,0.12)] z-30"
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Max Price</span>
-                                    <span className="text-sm font-serif text-primary font-medium">Rp {maxPrice.toLocaleString('en-US')}</span>
+                                    <span className="text-sm font-serif text-primary font-medium">IDR {maxPrice.toLocaleString('en-US')}</span>
                                 </div>
                                 <input 
                                     type="range" 
@@ -279,9 +279,6 @@ export default function Home() {
                     </AnimatePresence>
                 </div>
 
-
-
-                {/* Cinematic Multi-Campaign Swipeable Carousel with Peek Effect */}
                 {/* Cinematic Multi-Campaign Carousel */}
                 {activeCampaigns.length > 0 && (
                     <div className="mb-8 w-full relative">
@@ -313,7 +310,7 @@ export default function Home() {
                         <div 
                             ref={campaignCarouselRef}
                             onScroll={handleCarouselScroll}
-                            className={`flex gap-3 md:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory ${
+                            className={`flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory ${
                                 activeCampaigns.length > 1 
                                     ? '-mx-6 px-6 md:mx-0 md:px-0' 
                                     : ''
@@ -911,11 +908,17 @@ export default function Home() {
                                                             <div className="flex items-center gap-2">
                                                                 {hasSpaDiscount ? (
                                                                     <>
-                                                                        <span className="text-[11px] text-black/40 line-through">Rp {option.price}</span>
-                                                                        <span className="text-base font-bold text-black">Rp {discountedPriceNum.toLocaleString('en-US')}</span>
+                                                                        <span className="text-[11px] text-black/40 line-through font-medium">
+                                                                            IDR {parseInt(String(option.price).replace(/[^0-9]/g, '') || '0', 10).toLocaleString('en-US')}
+                                                                        </span>
+                                                                        <span className="text-base font-bold text-black">
+                                                                            IDR {discountedPriceNum.toLocaleString('en-US')}
+                                                                        </span>
                                                                     </>
                                                                 ) : (
-                                                                    <span className="text-base font-bold text-black">Rp {option.price}</span>
+                                                                    <span className="text-base font-bold text-black">
+                                                                        IDR {parseInt(String(option.price).replace(/[^0-9]/g, '') || '0', 10).toLocaleString('en-US')}
+                                                                    </span>
                                                                 )}
                                                             </div>
                                                         </div>
