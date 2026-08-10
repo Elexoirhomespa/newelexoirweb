@@ -212,14 +212,10 @@ export default function Home() {
             let campaignDetailsText = '';
             if (campaignItems.length > 0) {
                 const uniqueCampaigns = Array.from(new Set(campaignItems.map(i => i.campaignTitle).filter(Boolean)));
-                const uniqueTripOffers = Array.from(new Set(campaignItems.map(i => i.tripOffer).filter(Boolean)));
                 
                 const lines: string[] = [];
                 if (uniqueCampaigns.length > 0) {
                     lines.push(`*CAMPAIGN:* ${uniqueCampaigns.join(', ').toUpperCase()}`);
-                }
-                if (uniqueTripOffers.length > 0) {
-                    lines.push(`*TRAVEL BENEFIT:* ${uniqueTripOffers.join(', ')}`);
                 }
                 if (lines.length > 0) {
                     campaignDetailsText = `\n\n${lines.join('\n')}`;
@@ -450,11 +446,6 @@ export default function Home() {
                                             {/* Bottom Text & Original Frosted Icon */}
                                             <div className="flex items-end justify-between gap-3">
                                                 <div className="min-w-0 pr-2">
-                                                    {camp.tripOffer && (
-                                                        <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-0.5 drop-shadow-sm line-clamp-1">
-                                                            {camp.tripOffer}
-                                                        </span>
-                                                    )}
                                                     <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold leading-tight text-white drop-shadow-md tracking-tight line-clamp-1">
                                                         {camp.title}
                                                     </h3>
@@ -821,10 +812,6 @@ export default function Home() {
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-black/5 text-black text-[9px] font-bold uppercase tracking-wider border border-black/10">
                                             -{selectedCampaignModal.discountPercentage}% OFF SPA
                                         </span>
-                                    ) : selectedCampaignModal.tripOffer ? (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[9px] font-bold uppercase tracking-wider border border-emerald-200">
-                                            Travel Benefit Included
-                                        </span>
                                     ) : null}
                                 </div>
                                 <button 
@@ -849,40 +836,12 @@ export default function Home() {
                         <div className="p-5 md:p-7 overflow-y-auto bg-white space-y-6">
                             
                             {/* Travel Benefit / Tour Voucher Banner */}
-                            {selectedCampaignModal.tripOffer && (
-                                <div className="p-4 rounded-2xl bg-[#faf9f6] border border-black/10 flex items-center gap-3.5 shadow-sm">
-                                    {/* Small image for travel perk without generic icon overlay */}
-                                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-black/10 bg-black/5 shadow-inner">
-                                        <img 
-                                            src={
-                                                selectedCampaignModal.tripImage ||
-                                                selectedCampaignModal.image ||
-                                                'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=300&q=80'
-                                            }
-                                            alt="Bali Travel Privilege"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded inline-block mb-1 border border-emerald-200">
-                                            Exclusive Travel Benefit
-                                        </span>
-                                        <h4 className="text-sm sm:text-base font-bold text-black leading-tight line-clamp-2">
-                                            {selectedCampaignModal.tripOffer}
-                                        </h4>
-                                        <p className="text-xs text-black/60 mt-0.5 font-light leading-snug">
-                                            Book any signature treatment below to receive your excursion voucher with your booking confirmation.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
                             <div>
                                 <div className="mb-3">
                                     <span className="text-xs font-bold uppercase tracking-wider text-black">
                                         {Number(selectedCampaignModal.discountPercentage) > 0 
-                                            ? 'Select Treatment to Activate Discount & Benefit' 
-                                            : 'Select Treatment to Unlock Travel Benefit'}
+                                            ? 'Select Treatment to Activate Discount' 
+                                            : 'Select Treatment'}
                                     </span>
                                 </div>
 
@@ -953,7 +912,6 @@ export default function Home() {
                                                         id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                                                         treatmentId: treatment.id,
                                                         campaignTitle: selectedCampaignModal.title,
-                                                        tripOffer: selectedCampaignModal.tripOffer || '',
                                                         title: treatment.title,
                                                         duration: activeOption.duration,
                                                         price: discountedPriceNum,

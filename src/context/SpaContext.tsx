@@ -57,12 +57,9 @@ export type Campaign = {
     label: string;
     description: string;
     image?: string;
-    tripImage?: string;
     duration: string; // e.g., "1_month"
     discountPercentage: number;
     selectedTreatments: SelectedCampaignTreatment[];
-    tripOffer?: string; // e.g. "25% OFF Bali Day Trip & Fastboat"
-    campaignType?: string; // "trip_discount" | "spa_discount" | "combo"
     order?: number; // 1, 2, 3...
     is_published?: boolean;
     brand?: string;
@@ -230,45 +227,10 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
         label: 'LIMITED 10% OFF',
         description: 'Enjoy a luxurious summer escape with exclusive spa treatments and limited-time discounts.',
         image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
-        tripImage: '',
         duration: '1_month',
         discountPercentage: 10,
         selectedTreatments: [],
-        tripOffer: '',
-        campaignType: 'spa_discount',
         order: 1,
-        is_published: true,
-        brand: 'elexoir'
-    },
-    {
-        id: 'a0000000-0000-0000-0000-000000000002',
-        title: 'Island Escape',
-        label: 'EXCLUSIVE TRIP DEAL',
-        description: 'Book any signature in-villa massage below and claim an exclusive 10% discount voucher for private Bali tours & excursions.',
-        image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80',
-        tripImage: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=300&q=80',
-        duration: '1_month',
-        discountPercentage: 0,
-        selectedTreatments: [],
-        tripOffer: 'Save 10% on Tours',
-        campaignType: 'trip_discount',
-        order: 2,
-        is_published: true,
-        brand: 'elexoir'
-    },
-    {
-        id: 'a0000000-0000-0000-0000-000000000003',
-        title: 'Bali Day Trip & Spa Combo',
-        label: 'VIP COMBO',
-        description: 'Experience pure bliss in your villa plus an exclusive 25% discount voucher for private Bali Day Trips, Waterfall Tours & Temple excursions.',
-        image: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=1200&q=80',
-        tripImage: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=300&q=80',
-        duration: '1_month',
-        discountPercentage: 0,
-        selectedTreatments: [],
-        tripOffer: '25% OFF Private Bali Day Trip & Waterfalls',
-        campaignType: 'trip_discount',
-        order: 3,
         is_published: true,
         brand: 'elexoir'
     }

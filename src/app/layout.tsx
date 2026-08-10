@@ -17,14 +17,20 @@ const newsreader = Newsreader({
   subsets: ["latin"],
 });
 
-export const viewport: Viewport = {
-  themeColor: "#D2F34C",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-};
+export async function generateViewport(): Promise<Viewport> {
+  const headersList = await headers();
+  const host = headersList.get("host") || "www.elexoirhomespaubud.com";
+  const isBaliDomain = (host.includes("homespaubud") || host.includes("ubudhomespa")) && !host.includes("elexoir");
+  
+  return {
+    themeColor: isBaliDomain ? "#FFFFFF" : "#D2F34C",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+  };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();

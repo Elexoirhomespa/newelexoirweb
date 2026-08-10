@@ -15,33 +15,11 @@ import { supabase } from '@/lib/supabase';
 // Quick Preset Campaigns for Trip & Spa Deals
 const CAMPAIGN_PRESETS = [
     {
-        title: "Bali Day Trip & Spa Combo",
-        label: "Exclusive Trip Deal",
-        description: "Book any signature in-villa massage below and claim an exclusive 25% discount voucher for private Bali Day Trips, Waterfall Tours & Temple excursions.",
-        tripOffer: "25% OFF Private Bali Day Trip",
-        discountPercentage: 25,
-        image: "https://images.pexels.com/photos/3757952/pexels-photo-3757952.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
-        campaignType: "trip_discount",
-        duration: "1_month"
-    },
-    {
-        title: "Nusa Penida & Fastboat Combo",
-        label: "Island Tour Promo",
-        description: "Unlock VIP rates for Sanur-Penida return fastboat tickets and private island transfers when booking your in-villa massage retreat.",
-        tripOffer: "Free Fastboat & Island Tour Pass",
-        discountPercentage: 20,
-        image: "https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
-        campaignType: "nusa_penida",
-        duration: "1_month"
-    },
-    {
         title: "Summer Retreat & Spa Package",
-        label: "Limited 20% OFF",
+        label: "Limited 10% OFF",
         description: "Relax deeply with customized flower baths, traditional Balinese massage, and organic botanical body wraps in the comfort of your villa.",
-        tripOffer: "Complimentary Botanical Scrub & Setup",
-        discountPercentage: 20,
+        discountPercentage: 10,
         image: "https://images.pexels.com/photos/3865712/pexels-photo-3865712.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop&crop=center",
-        campaignType: "spa_discount",
         duration: "1_month"
     }
 ];
@@ -93,12 +71,9 @@ export default function AdminDashboard() {
     const [selectedBrand, setSelectedBrand] = useState(siteBrandFilter);
 
     // Campaign specific fields
-    const [campaignTitle, setCampaignTitle] = useState(campaign?.title || 'Bali Day Trip & Spa Combo');
-    const [campaignLabel, setCampaignLabel] = useState(campaign?.label || 'Exclusive Trip Deal');
-    const [campaignDesc, setCampaignDesc] = useState(campaign?.description || 'Book any eligible treatment below to claim your private Day Trip & Fastboat discount.');
-    const [campaignTripOffer, setCampaignTripOffer] = useState(campaign?.tripOffer || '25% OFF Private Bali Day Trip & Waterfalls');
-    const [campaignTripImage, setCampaignTripImage] = useState<string>(campaign?.tripImage || '');
-    const [campaignType, setCampaignType] = useState<string>(campaign?.campaignType || 'trip_discount');
+    const [campaignTitle, setCampaignTitle] = useState(campaign?.title || 'Summer Retreat & Spa Package');
+    const [campaignLabel, setCampaignLabel] = useState(campaign?.label || 'LIMITED 10% OFF');
+    const [campaignDesc, setCampaignDesc] = useState(campaign?.description || 'Relax deeply with customized flower baths, traditional Balinese massage, and organic botanical body wraps in the comfort of your villa.');
     const [campaignDuration, setCampaignDuration] = useState(campaign?.duration || '1_month');
     const [discountPercentage, setDiscountPercentage] = useState<number>(campaign?.discountPercentage ?? 0);
     const [campaignOrder, setCampaignOrder] = useState<number>(campaign?.order || 1);
@@ -147,9 +122,6 @@ export default function AdminDashboard() {
         setCampaignTitle(c.title || '');
         setCampaignLabel(c.label || '');
         setCampaignDesc(c.description || '');
-        setCampaignTripOffer(c.tripOffer || '');
-        setCampaignTripImage(c.tripImage || '');
-        setCampaignType(c.campaignType || (c.discountPercentage === 0 ? 'trip_discount' : 'spa_discount'));
         setCampaignDuration(c.duration || '1_month');
         setDiscountPercentage(c.discountPercentage ?? 0);
         setCampaignTreatments(c.selectedTreatments && c.selectedTreatments.length > 0 ? c.selectedTreatments : treatments.map(t => ({ treatmentId: t.id, durations: t.options.map(o => o.duration) })));
@@ -162,10 +134,7 @@ export default function AdminDashboard() {
     const handleNewCampaign = () => {
         setCampaignTitle('');
         setCampaignLabel('EXCLUSIVE OFFER');
-        setCampaignDesc('Book any eligible treatment below to claim your exclusive private excursion voucher.');
-        setCampaignTripOffer('25% OFF Private Bali Day Trip & Waterfalls');
-        setCampaignTripImage('');
-        setCampaignType('trip_discount');
+        setCampaignDesc('Relax deeply with customized treatments in the comfort of your villa.');
         setCampaignDuration('1_month');
         setDiscountPercentage(0);
         selectAllTreatments();
@@ -270,7 +239,6 @@ export default function AdminDashboard() {
         setCampaignTitle(preset.title);
         setCampaignLabel(preset.label);
         setCampaignDesc(preset.description);
-        setCampaignTripOffer(preset.tripOffer);
         setDiscountPercentage(preset.discountPercentage);
         setCampaignImage(preset.image);
         setCampaignDuration(preset.duration);
@@ -422,14 +390,11 @@ export default function AdminDashboard() {
                     label: campaignLabel.trim() || 'EXCLUSIVE OFFER',
                     description: campaignDesc.trim() || 'Book any eligible treatment below to claim your exclusive perk & special discount.',
                     image: campaignImage || '',
-                    tripImage: campaignTripImage || '',
                     duration: campaignDuration || '1_month',
                     discountPercentage: Number(discountPercentage) || 0,
                     selectedTreatments: campaignTreatments.length > 0 
                         ? campaignTreatments 
                         : treatments.map(t => ({ treatmentId: t.id, durations: t.options.map(o => o.duration) })),
-                    tripOffer: campaignTripOffer.trim(),
-                    campaignType: campaignType,
                     order: targetOrder,
                     is_published: true,
                     brand: siteBrandFilter
@@ -799,9 +764,6 @@ export default function AdminDashboard() {
                                                             <h4 className="text-xs font-bold text-black mt-1 line-clamp-1">
                                                                 {camp.title}
                                                             </h4>
-                                                            <p className="text-[10px] text-black/60 mt-0.5 line-clamp-1">
-                                                                {camp.tripOffer || 'Special trip perk included'}
-                                                            </p>
                                                         </div>
                                                     </div>
 
@@ -915,7 +877,7 @@ export default function AdminDashboard() {
                                                     {preset.title}
                                                 </h4>
                                                 <span className="text-[10px] font-semibold mt-1 opacity-70 group-hover:opacity-90">
-                                                    {preset.tripOffer} ({preset.discountPercentage}% Off)
+                                                    ({preset.discountPercentage}% Off)
                                                 </span>
                                             </button>
                                         ))}
@@ -951,11 +913,6 @@ export default function AdminDashboard() {
 
                                         <div className="flex items-end justify-between gap-3">
                                             <div className="min-w-0">
-                                                {campaignTripOffer && (
-                                                    <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-white/90 block mb-0.5 drop-shadow-sm line-clamp-1">
-                                                        {campaignTripOffer}
-                                                    </span>
-                                                )}
                                                 <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-md line-clamp-1">
                                                     {campaignTitle || 'Summer Retreat'}
                                                 </h3>
@@ -1010,75 +967,6 @@ export default function AdminDashboard() {
                                     )}
                                 </div>
 
-                                {/* Quick Preset Mode Selector */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-black/70 block">
-                                        Campaign Benefit Type
-                                    </label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setCampaignType('trip_discount');
-                                                setDiscountPercentage(0);
-                                                if (!campaignTripOffer) setCampaignTripOffer('25% OFF Private Bali Day Trip & Waterfalls');
-                                            }}
-                                            className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                                                discountPercentage === 0 && Boolean(campaignTripOffer)
-                                                    ? 'border-black bg-black text-white shadow-sm ring-1 ring-black'
-                                                    : 'border-black/15 bg-white text-black hover:border-black/40'
-                                            }`}
-                                        >
-                                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
-                                                Trip Perk Only
-                                            </div>
-                                            <p className={`text-[10px] leading-snug ${discountPercentage === 0 && Boolean(campaignTripOffer) ? 'text-white/80' : 'text-black/60'}`}>
-                                                Massage at standard regular rate. Guest claims Day Trip voucher perk.
-                                            </p>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setCampaignType('spa_discount');
-                                                if (discountPercentage === 0) setDiscountPercentage(20);
-                                            }}
-                                            className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                                                discountPercentage > 0 && !campaignTripOffer
-                                                    ? 'border-black bg-black text-white shadow-sm ring-1 ring-black'
-                                                    : 'border-black/15 bg-white text-black hover:border-black/40'
-                                            }`}
-                                        >
-                                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
-                                                Spa Discount Only
-                                            </div>
-                                            <p className={`text-[10px] leading-snug ${discountPercentage > 0 && !campaignTripOffer ? 'text-white/80' : 'text-black/60'}`}>
-                                                Slashes massage prices automatically (-{discountPercentage || 20}%).
-                                            </p>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setCampaignType('combo');
-                                                if (discountPercentage === 0) setDiscountPercentage(20);
-                                                if (!campaignTripOffer) setCampaignTripOffer('25% OFF Private Bali Day Trip & Waterfalls');
-                                            }}
-                                            className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                                                discountPercentage > 0 && Boolean(campaignTripOffer)
-                                                    ? 'border-black bg-black text-white shadow-sm ring-1 ring-black'
-                                                    : 'border-black/15 bg-white text-black hover:border-black/40'
-                                            }`}
-                                        >
-                                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
-                                                Combo (Spa + Trip)
-                                            </div>
-                                            <p className={`text-[10px] leading-snug ${discountPercentage > 0 && Boolean(campaignTripOffer) ? 'text-white/80' : 'text-black/60'}`}>
-                                                Both slashed massage prices (-{discountPercentage || 20}%) AND travel perk.
-                                            </p>
-                                        </button>
-                                    </div>
-                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
@@ -1114,7 +1002,7 @@ export default function AdminDashboard() {
                                                 Spa Treatment Price Discount (%)
                                             </label>
                                             <p className="text-[11px] text-black/60 font-light">
-                                                Set to <b>0%</b> if this campaign only provides trip discounts with standard massage rates.
+                                                Set to <b>0%</b> if this campaign uses standard rates without discounts.
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -1171,7 +1059,7 @@ export default function AdminDashboard() {
                                             </div>
                                             <div className="text-[11px] opacity-80 mt-0.5">
                                                 {discountPercentage === 0 
-                                                    ? 'Spa treatments will display their standard price (e.g. IDR 900,000) with a "Standard Rate" badge and no strikethrough. Perfect for Trip voucher campaigns!'
+                                                    ? 'Spa treatments will display their standard price (e.g. IDR 900,000) with a "Standard Rate" badge and no strikethrough.'
                                                     : `Treatments will automatically display strikethrough original prices and -${discountPercentage}% reduced prices (e.g. IDR 900,000 → IDR ${(Math.round(900000 * (1 - discountPercentage / 100))).toLocaleString('en-US')}).`
                                                 }
                                             </div>
@@ -1179,76 +1067,6 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                {/* Day Trip / Travel Excursion Perk Section */}
-                                <div className="p-4 rounded-2xl bg-black/[0.02] border border-black/10 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <label className="text-xs font-bold uppercase tracking-wider text-black block">
-                                                Exclusive Travel Privilege / Trip Perk
-                                            </label>
-                                            <p className="text-[11px] text-black/60 font-light">
-                                                Highlight the special travel excursion benefit unlocked by this campaign.
-                                            </p>
-                                        </div>
-                                        {campaignTripOffer && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setCampaignTripOffer('');
-                                                    setCampaignTripImage('');
-                                                }}
-                                                className="text-[10px] font-bold text-red-600 hover:underline"
-                                            >
-                                                Clear Benefit
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <input 
-                                            type="text" 
-                                            placeholder="e.g. 25% OFF Private Bali Day Trip & Waterfalls" 
-                                            value={campaignTripOffer} 
-                                            onChange={e => setCampaignTripOffer(e.target.value)}
-                                            className="w-full bg-white border border-black/20 rounded-xl px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                                        />
-                                    </div>
-
-                                    {/* Travel Benefit Thumbnail Image */}
-                                    <div className="space-y-1.5 pt-1">
-                                        <label className="text-[11px] font-bold uppercase tracking-wider text-black/70 flex items-center justify-between">
-                                            <span>Travel Benefit Thumbnail Image (Optional)</span>
-                                            <span className="text-[10px] text-black/40 font-normal">Shows beside the travel perk in modal</span>
-                                        </label>
-                                        <div className="flex flex-col sm:flex-row gap-2.5 items-center">
-                                            {campaignTripImage ? (
-                                                <div className="w-12 h-12 rounded-xl overflow-hidden bg-black/5 border border-black/20 shrink-0 relative">
-                                                    <img src={campaignTripImage} alt="Trip Perk" className="w-full h-full object-cover" />
-                                                </div>
-                                            ) : (
-                                                <div className="w-12 h-12 rounded-xl bg-black/5 border border-dashed border-black/20 shrink-0 flex items-center justify-center text-[10px] font-bold text-black/30 tracking-wider uppercase">
-                                                    IMAGE
-                                                </div>
-                                            )}
-                                            <input 
-                                                type="text" 
-                                                placeholder="Paste image URL for the travel benefit (optional)" 
-                                                value={campaignTripImage} 
-                                                onChange={e => setCampaignTripImage(e.target.value)}
-                                                className="flex-1 w-full bg-white border border-black/20 rounded-xl px-3.5 py-2.5 text-xs text-black placeholder:text-black/40 focus:outline-none focus:border-black"
-                                            />
-                                            <label className="w-full sm:w-auto px-3 py-2.5 rounded-xl border border-black/20 bg-white hover:bg-black hover:text-white cursor-pointer transition-colors text-xs font-bold flex items-center justify-center gap-1.5 shrink-0">
-                                                <UploadCloud size={14} /> Upload
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    className="hidden" 
-                                                    onChange={(e) => handleImageUpload(e, setCampaignTripImage)} 
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
