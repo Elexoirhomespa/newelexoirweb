@@ -61,7 +61,7 @@ async function migrateImages() {
 
     // 2. Fetch all campaigns
     console.log("🔍 Fetching campaigns...");
-    const { data: campaigns, error: fetchError } = await supabase.from('campaigns').select('id, image, "tripImage", image_url, trip_image_url');
+    const { data: campaigns, error: fetchError } = await supabase.from('campaigns').select('id, image, image_url');
     
     if (fetchError) {
         console.error("❌ Failed to fetch campaigns:", fetchError);
@@ -98,31 +98,6 @@ async function migrateImages() {
             }
         } else if (campaign.image_url) {
             console.log(`  -> Main image already migrated for ${campaign.id}`);
-        }
-
-        // Process trip image
-        if (campaign.tripImage && campaign.tripImage.startsWith('data:') && !campaign.trip_image_url) {
-            console.log(`  -> Processing trip image for campaign: ${campaign.id}`);
-            const parsed = parseBase64(campaign.tripImage);
-            if (parsed) {
-                const ext = getExtension(parsed.type);
-                const path = `campaigns/${campaign.id}/trip-image.${ext}`;
-                
-                const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(path, parsed.data, {
-                    contentType: parsed.type,
-                    upsert: true
-                });
-
-                if (uploadError) {
-                    console.error(`     ❌ Failed to upload trip image:`, uploadError.message);
-                } else {
-                    const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
-                    updates.trip_image_url = publicUrlData.publicUrl;
-                    console.log(`     ✅ Uploaded to: ${updates.trip_image_url}`);
-                }
-            }
-        } else if (campaign.trip_image_url) {
-            console.log(`  -> Trip image already migrated for ${campaign.id}`);
         }
 
         // Update database if we have new URLs
