@@ -373,7 +373,11 @@ export default function Home() {
                 </div>
 
                 {/* Cinematic Multi-Campaign Carousel */}
-                {activeCampaigns.length > 0 && (
+                {isLoading ? (
+                    <div className="mb-8 w-full flex justify-center items-center h-[220px] sm:h-[250px] md:h-[280px]">
+                        <div className="w-8 h-8 border-4 border-[#1D1D1F]/10 border-t-[#1D1D1F] rounded-full animate-spin"></div>
+                    </div>
+                ) : activeCampaigns.length > 0 && (
                     <div className="mb-8 w-full relative">
                         {/* Section Title matching 'Most Booked' styling */}
                         <div className="flex items-center justify-between mb-3">
@@ -622,10 +626,8 @@ export default function Home() {
                     </button>
 
                     {isLoading ? (
-                        <div className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar">
-                            {[1,2,3].map((skeleton) => (
-                                <div key={skeleton} className="w-72 md:w-80 h-96 shrink-0 rounded-[32px] md:rounded-[40px] bg-border/40 animate-pulse"></div>
-                            ))}
+                        <div className="flex justify-center items-center h-96 w-full pb-10">
+                            <div className="w-8 h-8 border-4 border-[#1D1D1F]/10 border-t-[#1D1D1F] rounded-full animate-spin"></div>
                         </div>
                     ) : treatments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden rounded-[40px] bg-[#F5F5F7] mx-6 md:mx-0">

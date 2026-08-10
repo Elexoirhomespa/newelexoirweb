@@ -5,7 +5,6 @@ import "./globals.css";
 import TopNav from "@/components/TopNav";
 import { SpaProvider } from "@/context/SpaContext";
 import { headers } from "next/headers";
-import { supabase } from "@/lib/supabase";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -117,31 +116,6 @@ export default async function RootLayout({
   const isBaliDomain = (host.includes("homespaubud") || host.includes("ubudhomespa")) && !host.includes("elexoir");
   const brand = isBaliDomain ? 'bali' : 'elexoir';
 
-  let [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
-      supabase.from('treatments').select('*').eq('is_published', true).eq('brand', brand).order('created_at', { ascending: false }),
-      supabase.from('products').select('*').eq('is_published', true).eq('brand', brand).order('created_at', { ascending: false }),
-      supabase.from('campaigns').select('*').eq('is_published', true).order('created_at', { ascending: false }),
-      supabase.from('therapists').select('*').eq('is_active', true).eq('brand', brand).order('created_at', { ascending: false })
-  ]);
-
-  if (brand !== 'elexoir' && (!treatmentsRes.data || treatmentsRes.data.length === 0)) {
-      const fallbackRes = await Promise.all([
-          supabase.from('treatments').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
-          supabase.from('products').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
-          supabase.from('therapists').select('*').eq('is_active', true).eq('brand', 'elexoir').order('created_at', { ascending: false })
-      ]);
-      treatmentsRes = fallbackRes[0];
-      productsRes = fallbackRes[1];
-      therapistsRes = fallbackRes[2];
-  }
-
-  const initialData = {
-      treatments: treatmentsRes.data || [],
-      products: productsRes.data || [],
-      campaigns: campaignsRes.data || [],
-      therapists: therapistsRes.data || []
-  };
-
   const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
   
@@ -167,7 +141,7 @@ export default async function RootLayout({
         data-domain={isBaliDomain ? "bali" : "ubud"}
         className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
       >
-        <SpaProvider brand={brand} initialData={initialData}>
+        <SpaProvider brand={brand}>
           <div className="flex flex-col min-h-screen w-full relative">
             <TopNav />
             <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">

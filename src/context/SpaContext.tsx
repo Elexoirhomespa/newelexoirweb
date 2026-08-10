@@ -238,9 +238,8 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
 
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
-export function SpaProvider({ children, brand, initialData }: { children: ReactNode, brand?: string, initialData?: any }) {
+export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
     const [treatments, setTreatments] = useState<Treatment[]>(() => {
-        if (initialData?.treatments && initialData.treatments.length > 0) return initialData.treatments;
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_treatments');
@@ -250,7 +249,6 @@ export function SpaProvider({ children, brand, initialData }: { children: ReactN
         return [];
     });
     const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
-        if (initialData?.campaigns && initialData.campaigns.length > 0) return sortCampaigns(initialData.campaigns);
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_campaigns');
@@ -263,7 +261,6 @@ export function SpaProvider({ children, brand, initialData }: { children: ReactN
         return [];
     });
     const [campaign, setCampaign] = useState<Campaign | null>(() => {
-        if (initialData?.campaigns && initialData.campaigns.length > 0) return sortCampaigns(initialData.campaigns)[0];
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_campaign');
@@ -276,7 +273,6 @@ export function SpaProvider({ children, brand, initialData }: { children: ReactN
         return null;
     });
     const [products, setProducts] = useState<Product[]>(() => {
-        if (initialData?.products && initialData.products.length > 0) return initialData.products;
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_products');
@@ -287,25 +283,104 @@ export function SpaProvider({ children, brand, initialData }: { children: ReactN
     });
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(!initialData);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [siteBrandFilter, setSiteBrandFilter] = useState<string>(brand || process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
-    const [therapists, setTherapists] = useState<Therapist[]>(initialData?.therapists || []);
+    const [therapists, setTherapists] = useState<Therapist[]>([]);
 
     useEffect(() => {
-        if (initialData) {
+        async function loadData() {
+            let hasCache = false;
             try {
-                if (initialData.treatments?.length > 0) localStorage.setItem('spa_treatments', JSON.stringify(initialData.treatments));
-                if (initialData.products?.length > 0) localStorage.setItem('spa_products', JSON.stringify(initialData.products));
-                if (initialData.campaigns?.length > 0) {
-                    const sorted = sortCampaigns(initialData.campaigns);
-                    localStorage.setItem('spa_campaigns', JSON.stringify(sorted));
-                    localStorage.setItem('spa_campaign', JSON.stringify(sorted[0] || null));
+                const cachedTreatments = localStorage.getItem('spa_treatments');
+                const cachedProducts = localStorage.getItem('spa_products');
+                const cachedCampaigns = localStorage.getItem('spa_campaigns');
+                const cachedCampaign = localStorage.getItem('spa_campaign');
+
+                if (cachedTreatments) {
+                    setTreatments(JSON.parse(cachedTreatments));
+                    hasCache = true;
                 }
+                if (cachedProducts) {
+                    setProducts(JSON.parse(cachedProducts));
+                    hasCache = true;
+                }
+                if (cachedCampaigns !== null) {
+                    const parsed = JSON.parse(cachedCampaigns);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        const sorted = sortCampaigns(parsed);
+                        setCampaigns(sorted);
+                        setCampaign(sorted[0] || null);
+                        hasCache = true;
+                    }
+                } else if (cachedCampaign !== null) {
+                    const single = JSON.parse(cachedCampaign);
+                    if (single) {
+                        setCampaigns([single]);
+                        setCampaign(single);
+                        hasCache = true;
+                    }
+                }
+
             } catch (e) {
-                console.warn("Cache full");
+                console.error("Error reading from localStorage", e);
             }
-            if (initialData.therapists?.length > 0) setTherapists(initialData.therapists);
+
+
+
+            try {
+                const siteBrand = siteBrandFilter;
+                // Query campaigns directly across brands or fallback smoothly in parallel
+                let [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
+                    supabase.from('treatments').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('products').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
+                    supabase.from('campaigns').select('*').eq('is_published', true).order('created_at', { ascending: false }),
+                    supabase.from('therapists').select('*').eq('is_active', true).eq('brand', siteBrand).order('created_at', { ascending: false })
+                ]);
+
+                // Fallback to 'elexoir' if current brand has no treatments
+                if (siteBrand !== 'elexoir' && (!treatmentsRes.data || treatmentsRes.data.length === 0)) {
+                    const fallbackRes = await Promise.all([
+                        supabase.from('treatments').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+                        supabase.from('products').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+                        supabase.from('therapists').select('*').eq('is_active', true).eq('brand', 'elexoir').order('created_at', { ascending: false })
+                    ]);
+                    treatmentsRes = fallbackRes[0];
+                    productsRes = fallbackRes[1];
+                    therapistsRes = fallbackRes[2];
+                }
+
+                if (treatmentsRes.data && treatmentsRes.data.length > 0) {
+                    setTreatments(treatmentsRes.data);
+                    try { localStorage.setItem('spa_treatments', JSON.stringify(treatmentsRes.data)); } catch (e) { console.warn("Cache full"); }
+                }
+
+                if (productsRes.data && productsRes.data.length > 0) {
+                    setProducts(productsRes.data);
+                    try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch (e) { console.warn("Cache full"); }
+                }
+
+                // If DB has campaigns, update state and local cache
+                if (campaignsRes.data && campaignsRes.data.length > 0) {
+                    const fetchedCampaigns = sortCampaigns(campaignsRes.data as Campaign[]);
+                    setCampaigns(fetchedCampaigns);
+                    setCampaign(fetchedCampaigns[0] || null);
+                    try { 
+                        localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
+                        localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
+                    } catch(e) {}
+                }
+
+                if (therapistsRes.data) {
+                    setTherapists(therapistsRes.data);
+                }
+            } catch (error) {
+                console.error("Error fetching data from Supabase:", error);
+            } finally {
+                setIsLoading(false);
+            }
         }
+
+        loadData();
 
         // Listen for realtime sync across tabs or admin updates
         const handleSync = () => {
