@@ -321,13 +321,18 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                     }
                 }
 
-                // Wait for Supabase to finish before dismissing loader
-                // if (hasCache) {
-                //     setIsLoading(false);
-                // }
+                // If we have cached data, instantly dismiss loader
+                if (hasCache) {
+                    setIsLoading(false);
+                }
             } catch (e) {
                 console.error("Error reading from localStorage", e);
             }
+
+            // Prevent loader from getting stuck if Supabase takes too long or is blocked
+            const fetchTimeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 4000);
 
             try {
                 const siteBrand = siteBrandFilter;
@@ -378,6 +383,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
             } catch (error) {
                 console.error("Error fetching data from Supabase:", error);
             } finally {
+                clearTimeout(fetchTimeout);
                 setIsLoading(false);
             }
         }
