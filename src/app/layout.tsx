@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
 import { SpaProvider } from "@/context/SpaContext";
+import GlobalLoader from "@/components/GlobalLoader";
 import { headers } from "next/headers";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -142,6 +143,7 @@ export default async function RootLayout({
         className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
       >
         <SpaProvider brand={brand}>
+          <GlobalLoader />
           <div className="flex flex-col min-h-screen w-full relative">
             <TopNav />
             <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">

@@ -373,30 +373,7 @@ export default function Home() {
                 </div>
 
                 {/* Cinematic Multi-Campaign Carousel */}
-                {isLoading ? (
-                    <div className="mb-8 w-full relative">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="bg-black/10 rounded w-24 h-4 animate-pulse"></div>
-                        </div>
-                        <div className="flex gap-4 overflow-hidden w-full pb-1">
-                            {[1, 2].map((i) => (
-                                <div key={i} className="shrink-0 w-[88vw] sm:w-[380px] md:w-[480px]">
-                                    <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg bg-neutral-900 border border-black/15 animate-pulse">
-                                        <div className="absolute inset-0 bg-stone-800/50"></div>
-                                        <div className="absolute inset-0 p-5 md:p-7 flex flex-col justify-between z-10">
-                                            <div className="w-24 h-6 bg-white/20 rounded-full"></div>
-                                            <div>
-                                                <div className="w-3/4 h-8 bg-white/20 rounded-lg mb-3"></div>
-                                                <div className="w-full h-4 bg-white/20 rounded mb-2"></div>
-                                                <div className="w-5/6 h-4 bg-white/20 rounded"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : activeCampaigns.length > 0 && (
+                {activeCampaigns.length > 0 && (
                     <div className="mb-8 w-full relative">
                         {/* Section Title matching 'Most Booked' styling */}
                         <div className="flex items-center justify-between mb-3">
@@ -522,24 +499,11 @@ export default function Home() {
                 )}
 
                 {/* Pinned / Most Booked Treatments */}
-                {(isLoading || showPinnedTreatments) && (
+                {showPinnedTreatments && (
                     <div className="mb-8 w-full relative z-20">
                         <h3 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Most Booked</h3>
                         <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 pb-4 snap-x snap-mandatory">
-                            {isLoading ? (
-                                [1, 2, 3].map((i) => (
-                                    <div key={i} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 outline-none animate-pulse">
-                                        <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full relative">
-                                            <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]"></div>
-                                            <div className="flex flex-col flex-grow px-2 pt-3 pb-2 gap-2">
-                                                <div className="w-24 h-3 bg-gray-200 rounded-full"></div>
-                                                <div className="w-full h-5 bg-gray-200 rounded-md"></div>
-                                                <div className="w-16 h-4 bg-gray-200 rounded-md mt-auto"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : treatments.filter(t => t.is_pinned).map(treatment => (
+                            {treatments.filter(t => t.is_pinned).map(treatment => (
                                 <Link href={`/rituals/${treatment.id}`} key={treatment.id} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 snap-center md:snap-align-none outline-none">
                                     <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
                                         <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
@@ -671,24 +635,7 @@ export default function Home() {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
 
-                    {isLoading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[1, 2, 3, 4, 5, 6].map(i => (
-                                <div key={i} className="bg-white rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row gap-4 border border-[#E5E7EB] shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-pulse">
-                                    <div className="w-full md:w-[140px] h-[180px] md:h-[140px] shrink-0 bg-[#F5F5F7] rounded-[20px]"></div>
-                                    <div className="flex-grow flex flex-col py-1 gap-3">
-                                        <div className="w-16 h-4 bg-gray-200 rounded-full"></div>
-                                        <div className="w-3/4 h-6 bg-gray-200 rounded-md"></div>
-                                        <div className="w-full h-4 bg-gray-200 rounded-md"></div>
-                                        <div className="flex gap-2 mt-auto">
-                                            <div className="w-20 h-8 bg-gray-200 rounded-full"></div>
-                                            <div className="w-20 h-8 bg-gray-200 rounded-full"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : treatments.length === 0 ? (
+                    {treatments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden rounded-[40px] bg-[#F5F5F7] mx-6 md:mx-0">
                             <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/0 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center">
