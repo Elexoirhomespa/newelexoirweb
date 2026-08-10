@@ -290,13 +290,17 @@ export default function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] relative overflow-hidden font-sans text-text">
+        <div className={`min-h-screen relative overflow-hidden font-sans text-text ${domain === 'bali' ? 'bg-white' : 'bg-[#FDFBF7]'}`}>
             
             {/* Top Gradient Background */}
-            <div className="absolute top-0 left-0 right-0 h-[600px] md:h-[800px] bg-gradient-to-b from-[#D2F34C] via-[#D2F34C] to-[#FDFBF7] z-0 pointer-events-none"></div>
+            {domain === 'ubud' && (
+                <div className="absolute top-0 left-0 right-0 h-[600px] md:h-[800px] bg-gradient-to-b from-[#D2F34C] via-[#D2F34C] to-[#FDFBF7] z-0 pointer-events-none"></div>
+            )}
 
             {/* Luxurious Ambient Background */}
-            <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[120%] md:w-[800px] h-[600px] bg-secondary/30 blur-[120px] rounded-full z-0 pointer-events-none opacity-60 mix-blend-multiply" />
+            {domain === 'ubud' && (
+                <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[120%] md:w-[800px] h-[600px] bg-secondary/30 blur-[120px] rounded-full z-0 pointer-events-none opacity-60 mix-blend-multiply" />
+            )}
             <div className="absolute top-[10%] right-[-10%] w-[500px] h-[500px] bg-accent/20 blur-[100px] rounded-full z-0 pointer-events-none opacity-50" />
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24 md:pt-36">
@@ -435,30 +439,25 @@ export default function Home() {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/20"></div>
                                         
                                         {/* Card Content */}
-                                        <div className="absolute inset-0 p-4 sm:p-5 md:p-6 flex flex-col justify-between z-10 text-white">
+                                        <div className="absolute inset-0 p-5 md:p-7 flex flex-col justify-between z-10 text-white">
                                             {/* Top Badge */}
                                             <div className="flex items-center justify-start">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[8px] md:text-[9px] font-bold tracking-[0.2em] uppercase border border-white/30 text-white shadow-sm">
+                                                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase border border-white/30 text-white shadow-sm">
                                                     {camp.label || 'SPECIAL PROMO'}
                                                 </span>
                                             </div>
 
-                                            {/* Bottom Text & Original Frosted Icon */}
-                                            <div className="flex items-end justify-between gap-3">
+                                            {/* Bottom Text & Icon */}
+                                            <div className="flex items-end justify-between gap-4 w-full">
                                                 <div className="min-w-0 pr-2">
-                                                    <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold leading-tight text-white drop-shadow-md tracking-tight line-clamp-1">
+                                                    <h3 className="font-sans text-4xl md:text-5xl font-medium leading-[1.1] text-white drop-shadow-md tracking-tight">
                                                         {camp.title}
                                                     </h3>
-                                                    {camp.description && (
-                                                        <p className="text-white/85 text-[11px] sm:text-xs line-clamp-2 font-light mt-1 drop-shadow-sm leading-snug">
-                                                            {camp.description}
-                                                        </p>
-                                                    )}
                                                 </div>
 
-                                                {/* Original Frosted Round Icon Button */}
-                                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center shrink-0 shadow-[0_8px_32px_rgb(0,0,0,0.15)] group-hover:bg-white/30 group-hover:scale-105 group-active:scale-95 transition-all duration-500">
-                                                    <ArrowRight size={18} strokeWidth={2.5} />
+                                                {/* Arrow Button */}
+                                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-black/60 backdrop-blur-xl border border-white/30 text-white flex items-center justify-center shrink-0 shadow-[0_8px_32px_rgb(0,0,0,0.15)] group-hover:bg-black/80 group-hover:scale-105 group-active:scale-95 transition-all duration-500">
+                                                    <ArrowRight size={24} strokeWidth={2} />
                                                 </div>
                                             </div>
                                         </div>

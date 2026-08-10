@@ -258,7 +258,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 }
             } catch(e) {}
         }
-        return DEFAULT_CAMPAIGNS;
+        return [];
     });
     const [campaign, setCampaign] = useState<Campaign | null>(() => {
         if (typeof window !== 'undefined') {
@@ -270,7 +270,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 }
             } catch(e) {}
         }
-        return DEFAULT_CAMPAIGNS[0] || null;
+        return null;
     });
     const [products, setProducts] = useState<Product[]>(() => {
         if (typeof window !== 'undefined') {
@@ -321,9 +321,10 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                     }
                 }
 
-                if (hasCache) {
-                    setIsLoading(false);
-                }
+                // Wait for Supabase to finish before dismissing loader
+                // if (hasCache) {
+                //     setIsLoading(false);
+                // }
             } catch (e) {
                 console.error("Error reading from localStorage", e);
             }
