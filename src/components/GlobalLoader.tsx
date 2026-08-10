@@ -7,18 +7,46 @@ import { useSpa } from '@/context/SpaContext';
 export default function GlobalLoader() {
     const { isLoading, siteBrandFilter } = useSpa();
     const [showLoader, setShowLoader] = useState(true);
+    const [progress, setProgress] = useState(1);
 
-    // Add a slight delay before unmounting the loader to ensure a smooth transition
-    // and wait for the rest of the application to render.
     useEffect(() => {
-        if (!isLoading) {
-            const timer = setTimeout(() => {
-                setShowLoader(false);
-            }, 500); // 500ms extra padding for hydration and image rendering
-            return () => clearTimeout(timer);
-        } else {
+        let interval: NodeJS.Timeout;
+        
+        if (isLoading) {
             setShowLoader(true);
+            setProgress(1);
+            // While loading, increment progress up to 90%
+            interval = setInterval(() => {
+                setProgress(prev => {
+                    // Slow down as it gets closer to 90
+                    const increment = prev < 50 ? 3 : prev < 80 ? 2 : 1;
+                    if (prev >= 90) {
+                        clearInterval(interval);
+                        return 90;
+                    }
+                    return prev + increment;
+                });
+            }, 30);
+        } else {
+            // When isLoading becomes false, quickly animate to 100
+            interval = setInterval(() => {
+                setProgress(prev => {
+                    if (prev >= 100) {
+                        clearInterval(interval);
+                        
+                        // Wait a tiny bit at 100% before hiding
+                        setTimeout(() => {
+                            setShowLoader(false);
+                        }, 500);
+                        
+                        return 100;
+                    }
+                    return prev + 5;
+                });
+            }, 15);
         }
+
+        return () => clearInterval(interval);
     }, [isLoading]);
 
     return (
@@ -27,42 +55,42 @@ export default function GlobalLoader() {
                 <motion.div
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     className="fixed inset-0 z-[99999] bg-[#0A0A0A] flex flex-col items-center justify-center overflow-hidden"
                 >
-                    <div className="flex flex-col items-center gap-10">
-                        {/* Elegant spinning loading animation */}
-                        <div className="relative flex items-center justify-center">
-                            <motion.div 
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                className="w-16 h-16 border-2 border-white/10 border-t-[#D2F34C] rounded-full absolute"
-                            />
-                            <motion.div 
-                                animate={{ rotate: -360 }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                className="w-12 h-12 border border-white/5 border-b-white/50 rounded-full absolute"
-                            />
-                        </div>
-
-                        {/* Premium Copy */}
-                        <div className="flex flex-col items-center gap-3 mt-8">
+                    <div className="flex flex-col items-center justify-center w-full max-w-sm px-8">
+                        <div className="flex flex-col items-center gap-10 w-full">
+                            
                             <motion.h1 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.8 }}
-                                className="text-white font-serif tracking-[0.3em] md:tracking-[0.4em] text-xl md:text-2xl uppercase"
+                                transition={{ duration: 0.8 }}
+                                className="text-white font-serif tracking-[0.3em] md:tracking-[0.4em] text-xl md:text-2xl uppercase text-center"
                             >
                                 {siteBrandFilter === 'bali' ? 'Home Spa Ubud' : 'Elexoir'}
                             </motion.h1>
-                            <motion.p 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5, duration: 0.8 }}
-                                className="text-white/60 text-[10px] md:text-xs tracking-[0.25em] uppercase font-sans font-light"
-                            >
-                                Preparing Your Sanctuary
-                            </motion.p>
+
+                            {/* Progress Section */}
+                            <div className="w-full">
+                                <div className="flex justify-between items-end mb-4">
+                                    <span className="text-white/60 text-[10px] md:text-xs tracking-[0.25em] uppercase font-sans font-light">
+                                        Preparing Sanctuary
+                                    </span>
+                                    <span className="text-white font-mono text-xs md:text-sm tracking-widest font-light">
+                                        {progress}%
+                                    </span>
+                                </div>
+                                
+                                {/* Thin Line Progress Bar */}
+                                <div className="w-full h-[1px] bg-white/10 relative overflow-hidden">
+                                    <motion.div 
+                                        className="absolute top-0 left-0 h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                        initial={{ width: "1%" }}
+                                        animate={{ width: `${progress}%` }}
+                                        transition={{ duration: 0.1, ease: "linear" }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
