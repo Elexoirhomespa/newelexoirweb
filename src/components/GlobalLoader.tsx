@@ -18,13 +18,13 @@ export default function GlobalLoader() {
             // While loading, slowly increment progress so it doesn't get stuck early
             interval = setInterval(() => {
                 setProgress(prev => {
-                    const increment = prev < 30 ? 2 : prev < 70 ? 1 : 0.5;
-                    if (prev >= 98) {
-                        return 98; // Wait at 98% instead of 90%
+                    if (prev >= 99) {
+                        return 99; // Only cap at 99 after 25 seconds
                     }
-                    return prev + increment;
+                    // Steady increment of 1 every 250ms
+                    return prev + 1;
                 });
-            }, 60); // Slower interval (60ms instead of 30ms)
+            }, 250); // 250ms * 99 = ~24.7 seconds to reach 99%
         } else {
             // When isLoading becomes false, quickly animate to 100
             interval = setInterval(() => {
