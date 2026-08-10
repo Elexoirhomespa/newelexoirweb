@@ -694,7 +694,7 @@ export default function Home() {
                         </div>
                         <Link href="/store" className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-xs font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap shrink-0">
                             Shop Now
-                        </a>
+                        </Link>
                     </div>
                     
                     {/* Swipeable Products */}
