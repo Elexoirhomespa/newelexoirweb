@@ -6,6 +6,7 @@ import { ChevronLeft, Share, MapPin, Clock, Calendar, Sparkles, Plus, Minus, X, 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useSpa } from '@/context/SpaContext';
+import { supabase } from '@/lib/supabase';
 
 export default function RitualsDetails() {
     const params = useParams();
@@ -27,6 +28,13 @@ export default function RitualsDetails() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     
+    // Promo Code State
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<any>(null);
+    const [isPromoLoading, setIsPromoLoading] = useState(false);
+    const [promoError, setPromoError] = useState('');
+    const [promoSuccess, setPromoSuccess] = useState('');
+    
     // Initialize date and time
     const getInitialDateTime = () => {
         const now = new Date();
@@ -45,11 +53,21 @@ export default function RitualsDetails() {
     const isCoupleTreatment = ['couple', 'four hand'].some(k => treatment.title.toLowerCase().includes(k));
 
     // Calculate smart price
-    const totalPrice = cartItems.reduce((acc, item) => {
+    const subtotalPrice = cartItems.reduce((acc, item) => {
         const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
         const multiplier = isCouple ? (item.guests / 2) : item.guests;
         return acc + (item.price * multiplier);
     }, 0);
+
+    let discountAmount = 0;
+    if (appliedPromo) {
+        if (appliedPromo.discount_type === 'percentage') {
+            discountAmount = subtotalPrice * (appliedPromo.discount_value / 100);
+        } else {
+            discountAmount = appliedPromo.discount_value;
+        }
+    }
+    const totalPrice = Math.max(0, subtotalPrice - discountAmount);
     const formattedTotalPrice = totalPrice.toLocaleString('en-US');
 
     const handleBooking = async (e: React.FormEvent, ) => {
@@ -58,6 +76,15 @@ export default function RitualsDetails() {
         if (!formData.name || !formData.date || !formData.time || !formData.location) {
             alert('Please fill in all required fields (Name, Date, Time, Location).');
             return;
+        }
+
+        // Apply promo usages
+        if (appliedPromo) {
+            try {
+                await supabase.rpc('increment_promo_use', { promo_id: appliedPromo.id });
+            } catch (e) {
+                console.error('Failed to increment promo use', e);
+            }
         }
 
         // Open window synchronously to bypass popup blockers
@@ -87,8 +114,16 @@ export default function RitualsDetails() {
                 return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON IDR ${price}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
             
-            const websiteSource = typeof window !== 'undefined' ? window.location.hostname : 'Unknown';
-            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${formattedTotalPrice}\n\n*CLIENT DETAILS:*\n- Name: ${formData.name}\n- Date: ${formData.date}\n- Time: ${formData.time}\n- Location/Villa: ${formData.location}\n- Room Number: ${formData.room || 'N/A'}\n\nHello! I would like to confirm this booking.`;
+            const rawHost = typeof window !== 'undefined' ? window.location.hostname : 'elexoirhomespaubud.com';
+            const cleanHost = rawHost.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            const websiteSource = cleanHost.startsWith('www.') ? cleanHost : `www.${cleanHost}`;
+            
+            let promoDetailsText = '';
+            if (appliedPromo) {
+                promoDetailsText = `\n\n*PROMO APPLIED:*\n• Code: ${appliedPromo.code}\n• Discount: ${appliedPromo.discount_type === 'percentage' ? appliedPromo.discount_value + '%' : 'IDR ' + appliedPromo.discount_value.toLocaleString('en-US')}\n• Subtotal: IDR ${subtotalPrice.toLocaleString('en-US')}`;
+            }
+
+            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${formattedTotalPrice}${promoDetailsText}\n\n*CLIENT DETAILS:*\n- Name: ${formData.name}\n- Date: ${formData.date}\n- Time: ${formData.time}\n- Location/Villa: ${formData.location}\n- Room Number: ${formData.room || 'N/A'}\n\nHello! I would like to confirm this booking.`;
             
             const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(baseMessage)}`;
             if (newWindow) {
@@ -105,6 +140,45 @@ export default function RitualsDetails() {
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const handleApplyPromo = async () => {
+        if (!promoCodeInput.trim()) return;
+        setIsPromoLoading(true);
+        setPromoError('');
+        setPromoSuccess('');
+        try {
+            const { data, error } = await supabase
+                .from('promo_codes')
+                .select('*')
+                .eq('code', promoCodeInput.trim().toUpperCase())
+                .eq('is_active', true)
+                .single();
+            
+            if (error || !data) {
+                setPromoError('Invalid or expired promo code');
+                setAppliedPromo(null);
+            } else {
+                if (data.max_uses > 0 && data.current_uses >= data.max_uses) {
+                    setPromoError('Promo code usage limit reached');
+                    setAppliedPromo(null);
+                } else {
+                    setAppliedPromo(data);
+                    setPromoSuccess('Promo code applied successfully!');
+                }
+            }
+        } catch (err) {
+            setPromoError('Error verifying promo code');
+        } finally {
+            setIsPromoLoading(false);
+        }
+    };
+
+    const handleRemovePromo = () => {
+        setAppliedPromo(null);
+        setPromoCodeInput('');
+        setPromoSuccess('');
+        setPromoError('');
     };
 
     const handleInitialBook = () => {
@@ -550,7 +624,38 @@ export default function RitualsDetails() {
                                     />
                                 </div>
 
+                                <div className="space-y-1.5 pt-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Promo Code</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" placeholder="Enter code"
+                                            value={promoCodeInput} onChange={e => setPromoCodeInput(e.target.value.toUpperCase())}
+                                            disabled={!!appliedPromo || isPromoLoading}
+                                            className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all uppercase"
+                                        />
+                                        {appliedPromo ? (
+                                            <button type="button" onClick={handleRemovePromo} className="px-5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors uppercase tracking-wider whitespace-nowrap">
+                                                Remove
+                                            </button>
+                                        ) : (
+                                            <button type="button" onClick={handleApplyPromo} disabled={!promoCodeInput.trim() || isPromoLoading} className="px-5 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider whitespace-nowrap">
+                                                {isPromoLoading ? 'Applying...' : 'Apply'}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {promoError && <p className="text-xs text-red-500 ml-1">{promoError}</p>}
+                                    {promoSuccess && <p className="text-xs text-emerald-600 ml-1">{promoSuccess}</p>}
+                                </div>
+
                                 <div className="mt-8 pt-6 border-t border-border/50">
+                                    {appliedPromo && (
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Subtotal</span>
+                                            <span className="text-sm font-serif text-text-muted line-through">
+                                                IDR {subtotalPrice.toLocaleString('en-US')}
+                                            </span>
+                                        </div>
+                                    )}
                                     <div className="flex items-end justify-between mb-6">
                                         <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Total Price</span>
                                         <span className="text-2xl font-serif text-primary">IDR {formattedTotalPrice}</span>

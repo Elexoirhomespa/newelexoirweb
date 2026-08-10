@@ -15,18 +15,16 @@ export default function GlobalLoader() {
         if (isLoading) {
             setShowLoader(true);
             setProgress(1);
-            // While loading, increment progress up to 90%
+            // While loading, slowly increment progress so it doesn't get stuck early
             interval = setInterval(() => {
                 setProgress(prev => {
-                    // Slow down as it gets closer to 90
-                    const increment = prev < 50 ? 3 : prev < 80 ? 2 : 1;
-                    if (prev >= 90) {
-                        clearInterval(interval);
-                        return 90;
+                    const increment = prev < 30 ? 2 : prev < 70 ? 1 : 0.5;
+                    if (prev >= 98) {
+                        return 98; // Wait at 98% instead of 90%
                     }
                     return prev + increment;
                 });
-            }, 30);
+            }, 60); // Slower interval (60ms instead of 30ms)
         } else {
             // When isLoading becomes false, quickly animate to 100
             interval = setInterval(() => {
@@ -37,13 +35,13 @@ export default function GlobalLoader() {
                         // Wait a tiny bit at 100% before hiding
                         setTimeout(() => {
                             setShowLoader(false);
-                        }, 500);
+                        }, 400);
                         
                         return 100;
                     }
-                    return prev + 5;
+                    return prev + 2; // Smooth fast zoom to 100
                 });
-            }, 15);
+            }, 10);
         }
 
         return () => clearInterval(interval);

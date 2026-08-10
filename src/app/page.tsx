@@ -442,7 +442,7 @@ export default function Home() {
                                         <div className="absolute inset-0 p-5 md:p-7 flex flex-col justify-between z-10 text-white">
                                             {/* Top Badge */}
                                             <div className="flex items-center justify-start">
-                                                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase border border-white/30 text-white shadow-sm">
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-[8px] md:text-[9px] font-bold tracking-[0.25em] uppercase border border-white/30 text-white shadow-sm">
                                                     {camp.label || 'SPECIAL PROMO'}
                                                 </span>
                                             </div>
