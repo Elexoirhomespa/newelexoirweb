@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export const revalidate = 60; // Cache on Vercel Edge/Server for 60 seconds
+export const revalidate = 604800; // Cache for 7 days (604800 seconds)
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -32,6 +32,10 @@ export async function GET(request: Request) {
             products: productsRes.data || [],
             campaigns: campaignsRes.data || [],
             therapists: therapistsRes.data || []
+        }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=604800, stale-while-revalidate=86400',
+            }
         });
     } catch (error) {
         console.error("API error fetching spa data:", error);

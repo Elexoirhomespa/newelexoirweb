@@ -25,6 +25,14 @@ const CAMPAIGN_PRESETS = [
 ];
 
 export default function AdminDashboard() {
+    const triggerRevalidation = async () => {
+        try {
+            await fetch('/api/revalidate', { method: 'POST', body: JSON.stringify({ action: 'revalidate' }) });
+        } catch(e) {
+            console.error('Revalidation failed:', e);
+        }
+    };
+
     const { 
         treatments, setTreatments, 
         campaign, setCampaign,
@@ -372,6 +380,7 @@ export default function AdminDashboard() {
             });
             if (error) throw error;
             setSuccess(true);
+                triggerRevalidation();
             setTimeout(() => setSuccess(false), 3000);
             setPromoForm({ code: '', discount_type: 'percentage', discount_value: 0, max_uses: 0 });
             // re-fetch
@@ -503,6 +512,7 @@ export default function AdminDashboard() {
                 }
 
                 setSuccess(true);
+                triggerRevalidation();
                 setTimeout(() => setSuccess(false), 3500);
             } else if (activeTab === 'treatment') {
                 const treatmentData = {
@@ -531,6 +541,7 @@ export default function AdminDashboard() {
                 setBenefits(['']);
                 setPricingOptions([{ duration: '', price: '' }]);
                 setSuccess(true);
+                triggerRevalidation();
                 setTimeout(() => setSuccess(false), 3000);
             } else if (activeTab === 'store') {
                 const productData = {
@@ -565,6 +576,7 @@ export default function AdminDashboard() {
                 setProductHowToUse('');
                 setProductIngredients('');
                 setSuccess(true);
+                triggerRevalidation();
                 setTimeout(() => setSuccess(false), 3000);
             }
         } catch (error) {
@@ -594,6 +606,7 @@ export default function AdminDashboard() {
                 }
             }
             alert('Therapist fee saved successfully!');
+            triggerRevalidation();
         } catch (e: any) {
             alert('Fee updated locally.');
         }
