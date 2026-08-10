@@ -375,12 +375,38 @@ export default function Home() {
                 {/* Cinematic Multi-Campaign Carousel */}
                 {activeCampaigns.length > 0 && (
                     <div className="mb-8 w-full relative">
-                            {/* Section Title matching 'Most Booked' styling */}
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Special Offers</h3>
-                            </div>
+                        {/* Section Title matching 'Most Booked' styling */}
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Special Offers</h3>
+                            {/* Navigation Controls (when multiple campaigns exist) */}
+                            {activeCampaigns.length > 1 && (
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollCampaignCarousel('left')}
+                                        className="w-7 h-7 rounded-full border border-black/15 bg-white flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors shadow-sm"
+                                        aria-label="Previous Campaign"
+                                    >
+                                        <ChevronLeft size={14} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollCampaignCarousel('right')}
+                                        className="w-7 h-7 rounded-full border border-black/15 bg-white flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors shadow-sm"
+                                        aria-label="Next Campaign"
+                                    >
+                                        <ChevronRight size={14} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full pb-1">
+                        {/* Scrollable Container with Peek Effect */}
+                        <div 
+                            ref={campaignCarouselRef}
+                            onScroll={handleCarouselScroll}
+                            className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory w-full pb-1"
+                        >
                             {activeCampaigns.map((camp, idx) => (
                                 <div
                                     key={camp.id || idx}
@@ -388,7 +414,11 @@ export default function Home() {
                                         setSelectedCampaignModal(camp);
                                         setIsCampaignModalOpen(true);
                                     }}
-                                    className="cursor-pointer block outline-none transition-transform active:scale-[0.99] w-full"
+                                    className={`shrink-0 snap-start cursor-pointer block outline-none transition-transform active:scale-[0.99] ${
+                                        activeCampaigns.length > 1
+                                            ? 'w-[88vw] sm:w-[380px] md:w-[480px]'
+                                            : 'w-full'
+                                    }`}
                                 >
                                     <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-gradient-to-br from-neutral-900 via-stone-900 to-black border border-black/15">
                                         {/* Background Image (if available) */}
@@ -436,16 +466,42 @@ export default function Home() {
                             ))}
                         </div>
 
-                        </div>
+                        {/* Swipe Dots Indicator (when > 1 campaign) */}
+                        {activeCampaigns.length > 1 && (
+                            <div className="flex items-center justify-center gap-1.5 mt-3">
+                                {activeCampaigns.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        onClick={() => {
+                                            if (campaignCarouselRef.current) {
+                                                const width = campaignCarouselRef.current.offsetWidth * 0.85;
+                                                campaignCarouselRef.current.scrollTo({
+                                                    left: i * width,
+                                                    behavior: 'smooth'
+                                                });
+                                            }
+                                        }}
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                                            currentCampaignIndex === i 
+                                                ? 'w-6 bg-black' 
+                                                : 'w-1.5 bg-black/20 hover:bg-black/40'
+                                        }`}
+                                        aria-label={`Go to slide ${i + 1}`}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {/* Pinned / Most Booked Treatments */}
                 {showPinnedTreatments && (
                     <div className="mb-8 w-full relative z-20">
                         <h3 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Most Booked</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                        <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 pb-4 snap-x snap-mandatory">
                             {treatments.filter(t => t.is_pinned).map(treatment => (
-                                <Link href={`/rituals/${treatment.id}`} key={treatment.id} className="w-full outline-none block h-full">
+                                <Link href={`/rituals/${treatment.id}`} key={treatment.id} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 snap-center md:snap-align-none outline-none">
                                     <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
                                         <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
                                             {treatment.pinned_image ? (
@@ -976,7 +1032,7 @@ export default function Home() {
                             initial={{ opacity: 0, scale: 0.96, y: 15 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.96, y: 15 }}
-                            className="bg-white w-full max-w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:my-auto sm:rounded-[28px] rounded-none p-5 sm:p-7 md:p-8 shadow-2xl relative flex flex-col box-border"
+                            className="bg-white w-full max-w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:my-auto sm:rounded-[28px] rounded-none p-5 sm:p-7 md:p-8 shadow-2xl relative flex flex-col box-border overflow-x-hidden"
                         >
                             <button 
                                 onClick={() => setIsBookingModalOpen(false)}
@@ -1067,7 +1123,7 @@ export default function Home() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="animate-in fade-in slide-in-from-left-4 duration-300 flex flex-col max-h-[85vh] sm:max-h-[70vh] overflow-y-auto no-scrollbar pb-4 pr-1">
+                                <div className="animate-in fade-in slide-in-from-left-4 duration-300 flex flex-col max-h-[85vh] sm:max-h-[70vh] overflow-y-auto overflow-x-hidden no-scrollbar pb-4 pr-1">
                                     <div className="mb-5 pr-8">
                                         <h2 className="font-serif text-2xl sm:text-3xl text-primary font-medium tracking-tight mb-1">Complete Booking</h2>
                                         <p className="text-xs text-text-muted">Your request will be sent securely via WhatsApp.</p>
