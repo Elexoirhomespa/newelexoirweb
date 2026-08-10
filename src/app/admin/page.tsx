@@ -333,6 +333,10 @@ export default function AdminDashboard() {
     const handleCampaignImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            if (!file.type.startsWith('image/')) {
+                alert("Please select a valid image file.");
+                return;
+            }
             if (file.size > 5 * 1024 * 1024) {
                 alert("File too large. Maximum size is 5MB.");
                 return;
@@ -407,9 +411,18 @@ export default function AdminDashboard() {
                     const ext = campaignImageFile.name.split('.').pop() || 'png';
                     const path = `campaigns/${targetId}/image.${ext}`;
                     
+                    console.log(`Uploading campaign image to ${path}`, {
+                        mimeType: campaignImageFile.type,
+                        sizeBytes: campaignImageFile.size
+                    });
+                    
                     const { error } = await supabase.storage
                         .from('campaign-images')
-                        .upload(path, campaignImageFile, { upsert: true });
+                        .upload(path, campaignImageFile, { 
+                            upsert: true,
+                            contentType: campaignImageFile.type || 'image/jpeg',
+                            cacheControl: '3600'
+                        });
                         
                     if (error) {
                         console.error("Storage upload failed:", error);
@@ -608,21 +621,58 @@ export default function AdminDashboard() {
     const handlePinImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && pendingPinId) {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64 = reader.result as string;
-                try {
-                    await supabase.from('treatments').update({
-                        is_pinned: true,
-                        pinned_image: base64
-                    }).eq('id', pendingPinId);
-                    setTreatments(prev => prev.map(t => t.id === pendingPinId ? { ...t, is_pinned: true, pinned_image: base64 } : t));
-                } catch (err: any) {
-                    console.error(err);
-                }
+            if (!file.type.startsWith('image/')) {
+                alert("Please select a valid image file.");
                 setPendingPinId(null);
-            };
-            reader.readAsDataURL(file);
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File too large. Maximum size is 5MB.");
+                setPendingPinId(null);
+                return;
+            }
+
+            const ext = file.name.split('.').pop() || 'png';
+            const path = `treatments/${pendingPinId}/pinned.${ext}`;
+            
+            console.log(`Uploading treatment pinned image to ${path}`, {
+                mimeType: file.type,
+                sizeBytes: file.size
+            });
+
+            try {
+                const { error } = await supabase.storage
+                    .from('campaign-images')
+                    .upload(path, file, { 
+                        upsert: true,
+                        contentType: file.type || 'image/jpeg',
+                        cacheControl: '3600'
+                    });
+
+                if (error) {
+                    console.error("Storage upload failed:", error);
+                    alert(`Failed to upload image: ${error.message}`);
+                    setPendingPinId(null);
+                    return;
+                }
+
+                const { data: publicUrlData } = supabase.storage
+                    .from('campaign-images')
+                    .getPublicUrl(path);
+
+                const publicUrl = publicUrlData.publicUrl;
+
+                await supabase.from('treatments').update({
+                    is_pinned: true,
+                    pinned_image: publicUrl
+                }).eq('id', pendingPinId);
+                
+                setTreatments(prev => prev.map(t => t.id === pendingPinId ? { ...t, is_pinned: true, pinned_image: publicUrl } : t));
+            } catch (err: any) {
+                console.error("Update failed", err);
+                alert("Failed to save pinned image URL to database.");
+            }
+            setPendingPinId(null);
         }
     };
 

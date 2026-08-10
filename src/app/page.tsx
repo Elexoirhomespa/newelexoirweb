@@ -425,15 +425,18 @@ export default function Home() {
                                     }`}
                                 >
                                     <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-gradient-to-br from-neutral-900 via-stone-900 to-black border border-black/15">
-                                        {/* Background Image (if available) */}
-                                        {(camp.image_url || camp.image) && (
+                                        {/* Background Image */}
+                                        {camp.image_url && (
                                             <Image 
-                                                src={camp.image_url || camp.image || ''} 
+                                                src={camp.image_url} 
                                                 alt={camp.title}
                                                 fill 
                                                 priority={idx < 3}
-                                                loading="eager"
-                                                unoptimized={Boolean((camp.image_url || camp.image)?.startsWith('data:') || (camp.image_url || camp.image)?.includes('supabase.co'))}
+                                                loading={idx < 3 ? "eager" : "lazy"}
+                                                decoding="async"
+                                                unoptimized={camp.image_url.includes('supabase.co')}
+                                                placeholder="blur"
+                                                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
                                                 sizes="(max-width: 768px) 90vw, 480px"
                                                 className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
@@ -509,7 +512,18 @@ export default function Home() {
                                     <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
                                         <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
                                             {treatment.pinned_image ? (
-                                                <Image src={treatment.pinned_image} alt={treatment.title} width={400} height={300} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                <Image 
+                                                    src={treatment.pinned_image} 
+                                                    alt={treatment.title} 
+                                                    width={400} 
+                                                    height={300} 
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    unoptimized={treatment.pinned_image.includes('supabase.co')}
+                                                    placeholder="blur"
+                                                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                />
                                             ) : (
                                                 <div className={`w-full h-full bg-gradient-to-br ${treatment.bgPattern} opacity-30 group-hover:opacity-50 transition-opacity duration-500`}></div>
                                             )}
