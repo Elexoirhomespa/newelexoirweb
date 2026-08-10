@@ -78,7 +78,8 @@ export default function AdminDashboard() {
     const [discountPercentage, setDiscountPercentage] = useState<number>(campaign?.discountPercentage ?? 0);
     const [campaignOrder, setCampaignOrder] = useState<number>(campaign?.order || 1);
     const [campaignTreatments, setCampaignTreatments] = useState<SelectedCampaignTreatment[]>(campaign?.selectedTreatments || []);
-    const [campaignImage, setCampaignImage] = useState<string>(campaign?.image || '');
+    const [campaignImage, setCampaignImage] = useState<string>(campaign?.image_url || campaign?.image || '');
+    const [campaignImageFile, setCampaignImageFile] = useState<File | null>(null);
     const [editingCampaignId, setEditingCampaignId] = useState<string | null>(campaign?.id || null);
 
     // Treatment selection helpers for campaigns (must be declared before handlers)
@@ -125,7 +126,8 @@ export default function AdminDashboard() {
         setCampaignDuration(c.duration || '1_month');
         setDiscountPercentage(c.discountPercentage ?? 0);
         setCampaignTreatments(c.selectedTreatments && c.selectedTreatments.length > 0 ? c.selectedTreatments : treatments.map(t => ({ treatmentId: t.id, durations: t.options.map(o => o.duration) })));
-        setCampaignImage(c.image || '');
+        setCampaignImage(c.image_url || c.image || '');
+        setCampaignImageFile(null);
         setCampaignOrder(c.order ?? (campaigns.findIndex(item => item.id === c.id) + 1));
         setEditingCampaignId(c.id || null);
         scrollToCampaignForm();
@@ -139,6 +141,7 @@ export default function AdminDashboard() {
         setDiscountPercentage(0);
         selectAllTreatments();
         setCampaignImage('');
+        setCampaignImageFile(null);
         setCampaignOrder(campaigns.length + 1);
         setEditingCampaignId(null);
         scrollToCampaignForm();
@@ -241,6 +244,7 @@ export default function AdminDashboard() {
         setCampaignDesc(preset.description);
         setDiscountPercentage(preset.discountPercentage);
         setCampaignImage(preset.image);
+        setCampaignImageFile(null);
         setCampaignDuration(preset.duration);
         setCampaignOrder(campaigns.length + 1);
         setEditingCampaignId(null); // CRITICAL: creating a new card from preset
@@ -326,6 +330,18 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleCampaignImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File too large. Maximum size is 5MB.");
+                return;
+            }
+            setCampaignImageFile(file);
+            setCampaignImage(URL.createObjectURL(file));
+        }
+    };
+
     const generateUUID = () => {
         if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
             return crypto.randomUUID();
@@ -384,12 +400,43 @@ export default function AdminDashboard() {
             if (activeTab === 'campaign') {
                 const targetId = editingCampaignId || generateUUID();
                 const targetOrder = Number(campaignOrder) || (editingCampaignId ? 1 : campaigns.length + 1);
+                
+                let finalImageUrl = campaignImage;
+
+                if (campaignImageFile) {
+                    const ext = campaignImageFile.name.split('.').pop() || 'png';
+                    const path = `campaigns/${targetId}/image.${ext}`;
+                    
+                    const { error } = await supabase.storage
+                        .from('campaign-images')
+                        .upload(path, campaignImageFile, { upsert: true });
+                        
+                    if (error) {
+                        console.error("Storage upload failed:", error);
+                        alert(`Failed to upload image: ${error.message}`);
+                        setIsSubmitting(false);
+                        return;
+                    }
+                    
+                    const { data: publicUrlData } = supabase.storage
+                        .from('campaign-images')
+                        .getPublicUrl(path);
+                        
+                    finalImageUrl = publicUrlData.publicUrl;
+                }
+
+                // Prevent base64 from being saved in image_url fallback
+                if (finalImageUrl.startsWith('data:')) {
+                    finalImageUrl = '';
+                }
+
                 const campaignData: Campaign = {
                     id: targetId,
                     title: campaignTitle.trim() || 'Special Spa Campaign',
                     label: campaignLabel.trim() || 'EXCLUSIVE OFFER',
                     description: campaignDesc.trim() || 'Book any eligible treatment below to claim your exclusive perk & special discount.',
-                    image: campaignImage || '',
+                    image_url: finalImageUrl || null,
+                    image: null, // Always write null to the base64 column
                     duration: campaignDuration || '1_month',
                     discountPercentage: Number(discountPercentage) || 0,
                     selectedTreatments: campaignTreatments.length > 0 
@@ -1125,7 +1172,7 @@ export default function AdminDashboard() {
                                                 type="file" 
                                                 accept="image/*" 
                                                 className="hidden" 
-                                                onChange={(e) => handleImageUpload(e, setCampaignImage)} 
+                                                onChange={handleCampaignImageUpload} 
                                             />
                                         </label>
                                     </div>
