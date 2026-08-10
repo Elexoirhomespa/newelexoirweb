@@ -426,14 +426,14 @@ export default function Home() {
                                 >
                                     <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-gradient-to-br from-neutral-900 via-stone-900 to-black border border-black/15">
                                         {/* Background Image (if available) */}
-                                        {camp.image && (
+                                        {(camp.image_url || camp.image) && (
                                             <Image 
-                                                src={camp.image} 
+                                                src={camp.image_url || camp.image || ''} 
                                                 alt={camp.title}
                                                 fill 
                                                 priority={idx < 3}
                                                 loading="eager"
-                                                unoptimized={Boolean(camp.image?.startsWith('data:') || camp.image?.includes('supabase.co'))}
+                                                unoptimized={Boolean((camp.image_url || camp.image)?.startsWith('data:') || (camp.image_url || camp.image)?.includes('supabase.co'))}
                                                 sizes="(max-width: 768px) 90vw, 480px"
                                                 className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />

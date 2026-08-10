@@ -57,9 +57,14 @@ export type Campaign = {
     label: string;
     description: string;
     image?: string;
+    image_url?: string;
     duration: string; // e.g., "1_month"
     discountPercentage: number;
     selectedTreatments: SelectedCampaignTreatment[];
+    tripOffer?: string;
+    tripImage?: string;
+    trip_image_url?: string;
+    campaignType?: string;
     order?: number; // 1, 2, 3...
     is_published?: boolean;
     brand?: string;
