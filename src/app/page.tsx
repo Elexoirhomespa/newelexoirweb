@@ -310,8 +310,8 @@ export default function Home() {
                     <h1 className="font-serif text-3xl text-primary font-medium tracking-tight">
                         {domain === 'bali' ? (
                             <>
-                                Awaken Your <br/>
-                                <span className="italic opacity-80">Senses</span>
+                                Island Relaxation, <br/>
+                                <span className="italic opacity-80">Delivered.</span>
                             </>
                         ) : (
                             <>
