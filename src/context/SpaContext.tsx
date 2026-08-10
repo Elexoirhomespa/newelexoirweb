@@ -329,52 +329,49 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
 
             try {
                 const siteBrand = siteBrandFilter;
-                // Query campaigns directly across brands or fallback smoothly in parallel
-                let [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
-                    supabase.from('treatments').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
-                    supabase.from('products').select('*').eq('is_published', true).eq('brand', siteBrand).order('created_at', { ascending: false }),
-                    supabase.from('campaigns').select('*').eq('is_published', true).order('created_at', { ascending: false }),
-                    supabase.from('therapists').select('*').eq('is_active', true).eq('brand', siteBrand).order('created_at', { ascending: false })
-                ]);
+                const fetchController = new AbortController();
+                // 10 second safety timeout for the client fetch
+                const timeoutId = setTimeout(() => fetchController.abort(), 10000);
 
-                // Fallback to 'elexoir' if current brand has no treatments
-                if (siteBrand !== 'elexoir' && (!treatmentsRes.data || treatmentsRes.data.length === 0)) {
-                    const fallbackRes = await Promise.all([
-                        supabase.from('treatments').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
-                        supabase.from('products').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
-                        supabase.from('therapists').select('*').eq('is_active', true).eq('brand', 'elexoir').order('created_at', { ascending: false })
-                    ]);
-                    treatmentsRes = fallbackRes[0];
-                    productsRes = fallbackRes[1];
-                    therapistsRes = fallbackRes[2];
-                }
+                try {
+                    const response = await fetch(`/api/spa-data?brand=${siteBrand}`, {
+                        signal: fetchController.signal
+                    });
+                    clearTimeout(timeoutId);
 
-                if (treatmentsRes.data && treatmentsRes.data.length > 0) {
-                    setTreatments(treatmentsRes.data);
-                    try { localStorage.setItem('spa_treatments', JSON.stringify(treatmentsRes.data)); } catch (e) { console.warn("Cache full"); }
-                }
-
-                if (productsRes.data && productsRes.data.length > 0) {
-                    setProducts(productsRes.data);
-                    try { localStorage.setItem('spa_products', JSON.stringify(productsRes.data)); } catch (e) { console.warn("Cache full"); }
-                }
-
-                // If DB has campaigns, update state and local cache
-                if (campaignsRes.data && campaignsRes.data.length > 0) {
-                    const fetchedCampaigns = sortCampaigns(campaignsRes.data as Campaign[]);
-                    setCampaigns(fetchedCampaigns);
-                    setCampaign(fetchedCampaigns[0] || null);
-                    try { 
-                        localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
-                        localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
-                    } catch(e) {}
-                }
-
-                if (therapistsRes.data) {
-                    setTherapists(therapistsRes.data);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.treatments && data.treatments.length > 0) {
+                            setTreatments(data.treatments);
+                            try { localStorage.setItem('spa_treatments', JSON.stringify(data.treatments)); } catch(e) {}
+                        }
+                        
+                        if (data.products && data.products.length > 0) {
+                            setProducts(data.products);
+                            try { localStorage.setItem('spa_products', JSON.stringify(data.products)); } catch(e) {}
+                        }
+                        
+                        if (data.campaigns && data.campaigns.length > 0) {
+                            const fetchedCampaigns = sortCampaigns(data.campaigns);
+                            setCampaigns(fetchedCampaigns);
+                            setCampaign(fetchedCampaigns[0] || null);
+                            try { 
+                                localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
+                                localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
+                            } catch(e) {}
+                        }
+                        
+                        if (data.therapists) {
+                            setTherapists(data.therapists);
+                        }
+                    }
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    console.error("Error fetching from API:", error);
                 }
             } catch (error) {
-                console.error("Error fetching data from Supabase:", error);
+                console.error("Error in data loading flow:", error);
             } finally {
                 setIsLoading(false);
             }
