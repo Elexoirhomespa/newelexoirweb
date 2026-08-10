@@ -140,6 +140,36 @@ DROP POLICY IF EXISTS "Public delete bookings" ON public.bookings;
 CREATE POLICY "Public delete bookings" ON public.bookings FOR DELETE USING (true);
 
 
+-- 5. PROMO CODES TABLE & COLUMNS
+CREATE TABLE IF NOT EXISTS public.promo_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+);
+
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS code TEXT UNIQUE;
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'percentage';
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS discount_value NUMERIC DEFAULT 0;
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS max_uses INTEGER DEFAULT 0;
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS current_uses INTEGER DEFAULT 0;
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'elexoir';
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+
+ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read promo_codes" ON public.promo_codes;
+CREATE POLICY "Public read promo_codes" ON public.promo_codes FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public insert promo_codes" ON public.promo_codes;
+CREATE POLICY "Public insert promo_codes" ON public.promo_codes FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public update promo_codes" ON public.promo_codes;
+CREATE POLICY "Public update promo_codes" ON public.promo_codes FOR UPDATE USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public delete promo_codes" ON public.promo_codes;
+CREATE POLICY "Public delete promo_codes" ON public.promo_codes FOR DELETE USING (true);
+
+
 -- =========================================================
 -- SEED DATA (Clean, valid standard UUIDs)
 -- =========================================================

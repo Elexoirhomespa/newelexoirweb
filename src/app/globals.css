@@ -19,6 +19,12 @@
   --font-serif: var(--font-newsreader);
 }
 
+body[data-domain="bali"] {
+  --color-secondary: #F3F4F6; /* Light gray */
+  --color-accent: #E5E7EB; /* Gray for cards */
+  --color-highlight: #F9FAFB; /* Off-white */
+}
+
 html, body {
   background-color: var(--color-background);
   color: var(--color-text);

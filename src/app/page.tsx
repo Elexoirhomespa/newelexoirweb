@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
 import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
@@ -91,6 +92,13 @@ export default function Home() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedCampaignDurations, setSelectedCampaignDurations] = useState<Record<string, string>>({});
     
+    // Promo Code State
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<any>(null);
+    const [isPromoLoading, setIsPromoLoading] = useState(false);
+    const [promoError, setPromoError] = useState('');
+    const [promoSuccess, setPromoSuccess] = useState('');
+    
     // Initialize date and time
     const getInitialDateTime = () => {
         const now = new Date();
@@ -136,17 +144,37 @@ export default function Home() {
             return;
         }
 
+        // Apply promo usages
+        if (appliedPromo) {
+            try {
+                await supabase.rpc('increment_promo_use', { promo_id: appliedPromo.id });
+                // We don't strictly wait or fail if it fails, as WA message is primary
+            } catch (e) {
+                console.error('Failed to increment promo use', e);
+            }
+        }
+
         // Open window synchronously to bypass popup blockers
         const newWindow = window.open('', '_blank');
 
         setIsProcessing(true);
         
         try {
-            const totalPrice = cartItems.reduce((acc, item) => {
+            const subtotalPrice = cartItems.reduce((acc, item) => {
                 const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
                 const multiplier = isCouple ? (item.guests / 2) : item.guests;
                 return acc + (item.price * multiplier);
             }, 0);
+
+            let discountAmount = 0;
+            if (appliedPromo) {
+                if (appliedPromo.discount_type === 'percentage') {
+                    discountAmount = subtotalPrice * (appliedPromo.discount_value / 100);
+                } else {
+                    discountAmount = appliedPromo.discount_value;
+                }
+            }
+            const totalPrice = Math.max(0, subtotalPrice - discountAmount);
 
             const waNumber = '6285174119423';
             
@@ -202,7 +230,12 @@ export default function Home() {
             const cleanHost = rawHost.replace(/^https?:\/\//, '').replace(/\/$/, '');
             const websiteSource = cleanHost.startsWith('www.') ? cleanHost : `www.${cleanHost}`;
 
-            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${totalPrice.toLocaleString('en-US')}\n\n*CLIENT DETAILS:*\n• Name: ${formData.name}\n• Date: ${formData.date}\n• Time: ${formData.time}\n• Location/Villa: ${formData.location}\n• Room Number: ${formData.room || 'N/A'}${campaignDetailsText}\n\nHello! I would like to confirm this booking.`;
+            let promoDetailsText = '';
+            if (appliedPromo) {
+                promoDetailsText = `\n\n*PROMO APPLIED:*\n• Code: ${appliedPromo.code}\n• Discount: ${appliedPromo.discount_type === 'percentage' ? appliedPromo.discount_value + '%' : 'IDR ' + appliedPromo.discount_value.toLocaleString('en-US')}\n• Subtotal: IDR ${subtotalPrice.toLocaleString('en-US')}`;
+            }
+
+            const baseMessage = `*NEW SPA BOOKING*\n${websiteSource}\n\n*TREATMENTS:*\n${treatmentsList}\n\n*TOTAL PRICE:* IDR ${totalPrice.toLocaleString('en-US')}${promoDetailsText}\n\n*CLIENT DETAILS:*\n• Name: ${formData.name}\n• Date: ${formData.date}\n• Time: ${formData.time}\n• Location/Villa: ${formData.location}\n• Room Number: ${formData.room || 'N/A'}${campaignDetailsText}\n\nHello! I would like to confirm this booking.`;
             const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(baseMessage)}`;
             if (newWindow) {
                 newWindow.location.href = waUrl;
@@ -219,6 +252,45 @@ export default function Home() {
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const handleApplyPromo = async () => {
+        if (!promoCodeInput.trim()) return;
+        setIsPromoLoading(true);
+        setPromoError('');
+        setPromoSuccess('');
+        try {
+            const { data, error } = await supabase
+                .from('promo_codes')
+                .select('*')
+                .eq('code', promoCodeInput.trim().toUpperCase())
+                .eq('is_active', true)
+                .single();
+            
+            if (error || !data) {
+                setPromoError('Invalid or expired promo code');
+                setAppliedPromo(null);
+            } else {
+                if (data.max_uses > 0 && data.current_uses >= data.max_uses) {
+                    setPromoError('Promo code usage limit reached');
+                    setAppliedPromo(null);
+                } else {
+                    setAppliedPromo(data);
+                    setPromoSuccess('Promo code applied successfully!');
+                }
+            }
+        } catch (err) {
+            setPromoError('Error verifying promo code');
+        } finally {
+            setIsPromoLoading(false);
+        }
+    };
+
+    const handleRemovePromo = () => {
+        setAppliedPromo(null);
+        setPromoCodeInput('');
+        setPromoSuccess('');
+        setPromoError('');
     };
 
     return (
@@ -439,7 +511,7 @@ export default function Home() {
                         <h3 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Most Booked</h3>
                         <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 pb-4 snap-x snap-mandatory">
                             {treatments.filter(t => t.is_pinned).map(treatment => (
-                                <a href={`/rituals/${treatment.id}`} key={treatment.id} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 snap-center md:snap-align-none outline-none">
+                                <Link href={`/rituals/${treatment.id}`} key={treatment.id} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 snap-center md:snap-align-none outline-none">
                                     <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
                                         <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
                                             {treatment.pinned_image ? (
@@ -461,7 +533,7 @@ export default function Home() {
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </Link>
                             ))}
                         </div>
                     </div>
@@ -620,7 +692,7 @@ export default function Home() {
                             <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-primary/50 mb-1 block">Take the Spa Home</span>
                             <h3 className="font-serif text-2xl md:text-3xl text-primary font-medium leading-tight">Spa Boutique</h3>
                         </div>
-                        <a href="/store" className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-xs font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap shrink-0">
+                        <Link href="/store" className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-xs font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap shrink-0">
                             Shop Now
                         </a>
                     </div>
@@ -1229,15 +1301,61 @@ export default function Home() {
                                             />
                                         </div>
 
+                                        <div className="space-y-1.5 pt-2">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Promo Code</label>
+                                            <div className="flex gap-2">
+                                                <input 
+                                                    type="text" placeholder="Enter code"
+                                                    value={promoCodeInput} onChange={e => setPromoCodeInput(e.target.value.toUpperCase())}
+                                                    disabled={!!appliedPromo || isPromoLoading}
+                                                    className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all uppercase"
+                                                />
+                                                {appliedPromo ? (
+                                                    <button type="button" onClick={handleRemovePromo} className="px-5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors uppercase tracking-wider whitespace-nowrap">
+                                                        Remove
+                                                    </button>
+                                                ) : (
+                                                    <button type="button" onClick={handleApplyPromo} disabled={!promoCodeInput.trim() || isPromoLoading} className="px-5 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider whitespace-nowrap">
+                                                        {isPromoLoading ? 'Applying...' : 'Apply'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {promoError && <p className="text-xs text-red-500 ml-1">{promoError}</p>}
+                                            {promoSuccess && <p className="text-xs text-emerald-600 ml-1">{promoSuccess}</p>}
+                                        </div>
+
                                         <div className="mt-8 pt-6 border-t border-border/50">
+                                            {appliedPromo && (
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Subtotal</span>
+                                                    <span className="text-sm font-serif text-text-muted line-through">
+                                                        IDR {cartItems.reduce((acc, item) => {
+                                                            const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                                                            const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                                                            return acc + (item.price * multiplier);
+                                                        }, 0).toLocaleString('en-US')}
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div className="flex items-end justify-between mb-6">
-                                                <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Total Price</span>
+                                                <span className="text-xs font-bold text-primary uppercase tracking-widest">Total Price</span>
                                                 <span className="text-2xl font-serif text-primary">
-                                                    IDR {cartItems.reduce((acc, item) => {
-                                                        const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
-                                                        const multiplier = isCouple ? (item.guests / 2) : item.guests;
-                                                        return acc + (item.price * multiplier);
-                                                    }, 0).toLocaleString('en-US')}
+                                                    IDR {(() => {
+                                                        let sub = cartItems.reduce((acc, item) => {
+                                                            const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                                                            const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                                                            return acc + (item.price * multiplier);
+                                                        }, 0);
+                                                        let disc = 0;
+                                                        if (appliedPromo) {
+                                                            if (appliedPromo.discount_type === 'percentage') {
+                                                                disc = sub * (appliedPromo.discount_value / 100);
+                                                            } else {
+                                                                disc = appliedPromo.discount_value;
+                                                            }
+                                                        }
+                                                        return Math.max(0, sub - disc).toLocaleString('en-US');
+                                                    })()}
                                                 </span>
                                             </div>
                                             <div className="flex flex-col gap-3">

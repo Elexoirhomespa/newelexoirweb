@@ -61,14 +61,7 @@ export default function GlobalLoader() {
                     <div className="flex flex-col items-center justify-center w-full max-w-sm px-8">
                         <div className="flex flex-col items-center gap-10 w-full">
                             
-                            <motion.h1 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8 }}
-                                className="text-white font-serif tracking-[0.3em] md:tracking-[0.4em] text-xl md:text-2xl uppercase text-center"
-                            >
-                                {siteBrandFilter === 'bali' ? 'Home Spa Ubud' : 'Elexoir'}
-                            </motion.h1>
+                            {/* Removed brand title per request */}
 
                             {/* Progress Section */}
                             <div className="w-full">

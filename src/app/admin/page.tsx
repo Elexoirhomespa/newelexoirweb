@@ -6,7 +6,7 @@ import {
     Megaphone, PlusCircle, Store, Settings, LayoutDashboard, 
     UploadCloud, CheckCircle, Plus, Trash2, Edit3, Pin, 
     ChevronDown, ChevronUp, Calculator, LogOut, Sparkles,
-    ArrowRight, ArrowUp, ArrowDown, Compass, ShieldCheck, Check
+    ArrowRight, ArrowUp, ArrowDown, Compass, ShieldCheck, Check, Ticket
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSpa, SelectedCampaignTreatment, Treatment, Product, TherapistFee, Campaign, sortCampaigns, DEFAULT_CAMPAIGNS } from '@/context/SpaContext';
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         therapists, setTherapists
     } = useSpa();
 
-    const [activeTab, setActiveTab] = useState<'campaign' | 'treatment' | 'store' | 'fees' | 'calculator' | 'list' | 'settings'>('campaign');
+    const [activeTab, setActiveTab] = useState<'campaign' | 'treatment' | 'store' | 'fees' | 'calculator' | 'list' | 'settings' | 'promo'>('campaign');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     
@@ -75,6 +75,19 @@ export default function AdminDashboard() {
         }
         fetchFees();
     }, [siteBrandFilter]);
+
+    // Promo Codes State
+    const [promoCodes, setPromoCodes] = useState<any[]>([]);
+    const [isPromoFormLoading, setIsPromoFormLoading] = useState(false);
+    const [promoForm, setPromoForm] = useState({ code: '', discount_type: 'percentage', discount_value: 0, max_uses: 0 });
+    
+    useEffect(() => {
+        async function fetchPromos() {
+            const { data } = await supabase.from('promo_codes').select('*').eq('brand', siteBrandFilter).order('created_at', { ascending: false });
+            if (data) setPromoCodes(data);
+        }
+        if (activeTab === 'promo') fetchPromos();
+    }, [activeTab, siteBrandFilter]);
 
     // Filter by Brand / Property (elexoir, thevisala, etc)
     const [selectedBrand, setSelectedBrand] = useState(siteBrandFilter);
@@ -356,6 +369,45 @@ export default function AdminDashboard() {
         });
     };
 
+    const handlePromoSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!promoForm.code) return;
+        setIsPromoFormLoading(true);
+        try {
+            const { error } = await supabase.from('promo_codes').insert({
+                code: promoForm.code.trim().toUpperCase(),
+                discount_type: promoForm.discount_type,
+                discount_value: promoForm.discount_value,
+                max_uses: promoForm.max_uses || 0,
+                brand: siteBrandFilter,
+                is_active: true
+            });
+            if (error) throw error;
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 3000);
+            setPromoForm({ code: '', discount_type: 'percentage', discount_value: 0, max_uses: 0 });
+            // re-fetch
+            const { data } = await supabase.from('promo_codes').select('*').eq('brand', siteBrandFilter).order('created_at', { ascending: false });
+            if (data) setPromoCodes(data);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to save promo code. It might already exist.');
+        } finally {
+            setIsPromoFormLoading(false);
+        }
+    };
+
+    const togglePromo = async (id: string, currentStatus: boolean) => {
+        await supabase.from('promo_codes').update({ is_active: !currentStatus }).eq('id', id);
+        setPromoCodes(prev => prev.map(p => p.id === id ? { ...p, is_active: !currentStatus } : p));
+    };
+
+    const deletePromo = async (id: string) => {
+        if (!confirm('Delete this promo code?')) return;
+        await supabase.from('promo_codes').delete().eq('id', id);
+        setPromoCodes(prev => prev.filter(p => p.id !== id));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -577,6 +629,7 @@ export default function AdminDashboard() {
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                     {[
                         { id: 'campaign', icon: Megaphone, label: 'Campaign Card' },
+                        { id: 'promo', icon: Ticket, label: 'Promo Codes' },
                         { id: 'treatment', icon: PlusCircle, label: 'Treatments' },
                         { id: 'store', icon: Store, label: 'Store Products' },
                         { id: 'fees', icon: Settings, label: 'Therapist Fees' },
@@ -622,6 +675,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-bold tracking-widest uppercase text-black">
                             {activeTab === 'campaign' && 'Campaign Card Setup'}
+                            {activeTab === 'promo' && 'Promo Codes'}
                             {activeTab === 'treatment' && 'Treatment Management'}
                             {activeTab === 'store' && 'Store Catalog'}
                             {activeTab === 'fees' && 'Therapist Wage Rates'}
@@ -635,6 +689,7 @@ export default function AdminDashboard() {
                 <div className="md:hidden px-4 pt-3 pb-1 border-b border-black/10 overflow-x-auto no-scrollbar flex items-center gap-2">
                     {[
                         { id: 'campaign', label: 'Campaign' },
+                        { id: 'promo', label: 'Promo' },
                         { id: 'treatment', label: 'Treatment' },
                         { id: 'store', label: 'Store' },
                         { id: 'fees', label: 'Fees' },
@@ -1370,6 +1425,127 @@ export default function AdminDashboard() {
                     )}
 
                     {/* TREATMENT CREATION TAB */}
+                    {/* PROMO CODES TAB */}
+                    {activeTab === 'promo' && (
+                        <div className="space-y-6">
+                            <form onSubmit={handlePromoSubmit} className="bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
+                                <h3 className="text-base font-bold uppercase tracking-wider text-black mb-6">Create Promo Code</h3>
+                                
+                                {success && (
+                                    <div className="mb-6 p-4 bg-[#F6F3EC] border border-[#E5E0D8] rounded-xl flex items-start gap-3">
+                                        <CheckCircle className="w-5 h-5 text-black shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-1">Success</h4>
+                                            <p className="text-xs text-black/70">Promo code created successfully.</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/70 ml-1">Promo Code</label>
+                                        <input 
+                                            type="text" required placeholder="e.g. SUMMER20"
+                                            value={promoForm.code} onChange={e => setPromoForm({...promoForm, code: e.target.value.toUpperCase()})}
+                                            className="w-full bg-[#FDFBF7] border border-black/10 rounded-xl px-4 py-3.5 text-sm text-black placeholder:text-black/30 focus:outline-none focus:ring-1 focus:ring-black transition-all uppercase"
+                                        />
+                                    </div>
+                                    
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/70 ml-1">Discount Type</label>
+                                        <select 
+                                            value={promoForm.discount_type} onChange={e => setPromoForm({...promoForm, discount_type: e.target.value})}
+                                            className="w-full bg-[#FDFBF7] border border-black/10 rounded-xl px-4 py-3.5 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
+                                        >
+                                            <option value="percentage">Percentage (%)</option>
+                                            <option value="fixed">Fixed Amount (IDR)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/70 ml-1">Discount Value</label>
+                                        <input 
+                                            type="number" required min="0" placeholder="e.g. 20"
+                                            value={promoForm.discount_value || ''} onChange={e => setPromoForm({...promoForm, discount_value: parseFloat(e.target.value) || 0})}
+                                            className="w-full bg-[#FDFBF7] border border-black/10 rounded-xl px-4 py-3.5 text-sm text-black placeholder:text-black/30 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/70 ml-1">Max Uses (0 = unlimited)</label>
+                                        <input 
+                                            type="number" required min="0" placeholder="e.g. 100"
+                                            value={promoForm.max_uses || ''} onChange={e => setPromoForm({...promoForm, max_uses: parseInt(e.target.value) || 0})}
+                                            className="w-full bg-[#FDFBF7] border border-black/10 rounded-xl px-4 py-3.5 text-sm text-black placeholder:text-black/30 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        disabled={isPromoFormLoading}
+                                        className="bg-black text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black/80 transition-all shadow-sm disabled:opacity-50"
+                                    >
+                                        {isPromoFormLoading ? 'Saving...' : 'Create Promo Code'}
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div className="bg-white border border-black/15 rounded-2xl overflow-hidden shadow-sm">
+                                <div className="p-5 md:p-6 border-b border-black/10">
+                                    <h3 className="text-base font-bold uppercase tracking-wider text-black">Active Promo Codes</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead className="bg-[#FDFBF7] border-b border-black/10">
+                                            <tr>
+                                                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/50">Code</th>
+                                                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/50">Discount</th>
+                                                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/50">Uses</th>
+                                                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/50">Status</th>
+                                                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-black/50 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {promoCodes.map(promo => (
+                                                <tr key={promo.id} className="border-b border-black/5 hover:bg-black/[0.02]">
+                                                    <td className="px-6 py-4 font-bold text-black">{promo.code}</td>
+                                                    <td className="px-6 py-4">
+                                                        {promo.discount_type === 'percentage' ? `${promo.discount_value}%` : `IDR ${promo.discount_value.toLocaleString()}`}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        {promo.current_uses} / {promo.max_uses === 0 ? '∞' : promo.max_uses}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <button 
+                                                            onClick={() => togglePromo(promo.id, promo.is_active)}
+                                                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${promo.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                                                        >
+                                                            {promo.is_active ? 'Active' : 'Inactive'}
+                                                        </button>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right space-x-2">
+                                                        <button onClick={() => deletePromo(promo.id)} className="p-2 text-black/40 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {promoCodes.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-black/50 italic">
+                                                        No promo codes created yet.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'treatment' && (
                         <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
                             <div className="flex items-center justify-between border-b border-black/10 pb-4">
