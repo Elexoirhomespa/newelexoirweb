@@ -176,12 +176,11 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
         }
     };
 
-    if (!isLoaded) {
-        return <GlobalLoader />;
-    }
-
     return (
-        <div className="min-h-screen bg-[#FDFBF7] relative overflow-hidden font-sans text-text pb-24 md:pb-12">
+        <>
+            <GlobalLoader />
+            {isLoaded && (
+                <div className="min-h-screen bg-[#FDFBF7] relative overflow-hidden font-sans text-text pb-24 md:pb-12">
             
             {/* Top Gradient Background */}
             <div className="absolute top-0 left-0 right-0 h-[400px] md:h-[500px] bg-gradient-to-b from-[#D2F34C] to-[#FDFBF7] z-0 pointer-events-none"></div>
@@ -801,6 +800,8 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                 <ServiceAreas />
                 <FaqSection />
             </div>
-        </div>
+                </div>
+            )}
+        </>
     );
 }

@@ -290,12 +290,11 @@ export default function Home() {
         setPromoError('');
     };
 
-    if (!isLoaded) {
-        return <GlobalLoader />;
-    }
-
     return (
-        <div className={`min-h-screen relative overflow-hidden font-sans text-text ${domain === 'bali' ? 'bg-white' : 'bg-[#FDFBF7]'}`}>
+        <>
+            <GlobalLoader />
+            {isLoaded && (
+                <div className={`min-h-screen relative overflow-hidden font-sans text-text ${domain === 'bali' ? 'bg-white' : 'bg-[#FDFBF7]'}`}>
             
             {/* Top Gradient Background */}
             {domain === 'ubud' && (
@@ -1353,6 +1352,8 @@ export default function Home() {
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
             </div>
-        </div>
+                </div>
+            )}
+        </>
     );
 }

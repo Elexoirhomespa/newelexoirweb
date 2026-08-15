@@ -10,22 +10,28 @@ export default function GlobalLoader() {
     const [progress, setProgress] = useState(1);
 
     useEffect(() => {
+        let interval: NodeJS.Timeout;
+        
         if (!isLoaded) {
             setShowLoader(true);
             setProgress(1);
             
             // Fast continuous progress while waiting
-            const interval = setInterval(() => {
+            interval = setInterval(() => {
                 setProgress(prev => {
                     if (prev >= 90) return 90; // Wait at 90%
                     return prev + 5; 
                 });
-            }, 100);
-            return () => clearInterval(interval);
+            }, 50);
         } else {
+            // Data is ready - shoot to 100% and gracefully exit
             setProgress(100);
-            setShowLoader(false);
+            setTimeout(() => {
+                setShowLoader(false);
+            }, 300); // 300ms pause at 100% before fading out
         }
+        
+        return () => clearInterval(interval);
     }, [isLoaded]);
 
     return (
