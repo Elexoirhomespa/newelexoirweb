@@ -435,8 +435,6 @@ export default function Home() {
                                                 loading={idx < 3 ? "eager" : "lazy"}
                                                 decoding="async"
                                                 unoptimized={camp.image_url.includes('supabase.co')}
-                                                placeholder="blur"
-                                                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
                                                 sizes="(max-width: 768px) 90vw, 480px"
                                                 className="object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
@@ -520,8 +518,6 @@ export default function Home() {
                                                     loading="lazy"
                                                     decoding="async"
                                                     unoptimized={treatment.pinned_image.includes('supabase.co')}
-                                                    placeholder="blur"
-                                                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                                                 />
                                             ) : (
