@@ -6,31 +6,35 @@ import { useSpa } from '@/context/SpaContext';
 
 export default function GlobalLoader() {
     const { isLoaded, siteBrandFilter } = useSpa();
-    const [showLoader, setShowLoader] = useState(true);
+    const [showLoader, setShowLoader] = useState(!isLoaded);
     const [progress, setProgress] = useState(1);
 
     useEffect(() => {
-        // Guaranteed fast 1-100% animation every time the app boots
+        if (!showLoader) return;
+
         const interval = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 100) {
                     clearInterval(interval);
-                    setTimeout(() => setShowLoader(false), 400);
+                    setTimeout(() => setShowLoader(false), 200);
                     return 100;
                 }
                 
-                // If data is not loaded yet, stall at 90%
-                if (prev >= 90 && !isLoaded) {
-                    return 90;
+                if (!isLoaded) {
+                    // Smooth, continuous crawl to 99% if waiting for data
+                    if (prev >= 99) return 99;
+                    if (prev >= 80) return prev + 1; // Slower near the end
+                    if (prev >= 50) return prev + 2; 
+                    return prev + 3; // Fast initially
+                } else {
+                    // Data is ready, quickly jump to 100%
+                    return prev + 8;
                 }
-                
-                // Fast increments
-                return prev + 4;
             });
-        }, 30); // 30ms * 25 steps = ~750ms total animation
+        }, 30);
         
         return () => clearInterval(interval);
-    }, [isLoaded]);
+    }, [isLoaded, showLoader]);
 
     return (
         <AnimatePresence>
