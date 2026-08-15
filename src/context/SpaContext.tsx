@@ -288,7 +288,12 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
     });
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
-    const [isLoaded, setIsLoaded] = useState<boolean>(false);
+    const [isLoaded, setIsLoaded] = useState<boolean>(() => {
+        if (typeof window !== 'undefined') {
+            return !!(localStorage.getItem('spa_treatments') && localStorage.getItem('spa_products'));
+        }
+        return false;
+    });
     const [siteBrandFilter, setSiteBrandFilter] = useState<string>(brand || process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
     const [therapists, setTherapists] = useState<Therapist[]>([]);
 

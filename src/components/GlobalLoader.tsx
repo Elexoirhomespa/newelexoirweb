@@ -10,41 +10,22 @@ export default function GlobalLoader() {
     const [progress, setProgress] = useState(1);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
-        
         if (!isLoaded) {
             setShowLoader(true);
             setProgress(1);
-            // While loading, slowly increment progress so it doesn't get stuck early
-            interval = setInterval(() => {
+            
+            // Fast continuous progress while waiting
+            const interval = setInterval(() => {
                 setProgress(prev => {
-                    if (prev >= 99) {
-                        return 99; // Only cap at 99 after 25 seconds
-                    }
-                    // Steady increment of 1 every 250ms
-                    return prev + 1;
+                    if (prev >= 90) return 90; // Wait at 90%
+                    return prev + 5; 
                 });
-            }, 250); // 250ms * 99 = ~24.7 seconds to reach 99%
+            }, 100);
+            return () => clearInterval(interval);
         } else {
-            // When isLoaded becomes true, quickly animate to 100
-            interval = setInterval(() => {
-                setProgress(prev => {
-                    if (prev >= 100) {
-                        clearInterval(interval);
-                        
-                        // Wait a tiny bit at 100% before hiding
-                        setTimeout(() => {
-                            setShowLoader(false);
-                        }, 400);
-                        
-                        return 100;
-                    }
-                    return prev + 2; // Smooth fast zoom to 100
-                });
-            }, 10);
+            setProgress(100);
+            setShowLoader(false);
         }
-
-        return () => clearInterval(interval);
     }, [isLoaded]);
 
     return (
@@ -53,7 +34,7 @@ export default function GlobalLoader() {
                 <motion.div
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                     className="fixed inset-0 z-[99999] bg-[#0A0A0A] flex flex-col items-center justify-center overflow-hidden"
                 >
                     <div className="flex flex-col items-center justify-center w-full max-w-sm px-8">
