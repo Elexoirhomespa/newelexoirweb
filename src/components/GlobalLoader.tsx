@@ -10,26 +10,24 @@ export default function GlobalLoader() {
     const [progress, setProgress] = useState(1);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
-        
-        if (!isLoaded) {
-            setShowLoader(true);
-            setProgress(1);
-            
-            // Fast continuous progress while waiting
-            interval = setInterval(() => {
-                setProgress(prev => {
-                    if (prev >= 90) return 90; // Wait at 90%
-                    return prev + 5; 
-                });
-            }, 50);
-        } else {
-            // Data is ready - shoot to 100% and gracefully exit
-            setProgress(100);
-            setTimeout(() => {
-                setShowLoader(false);
-            }, 300); // 300ms pause at 100% before fading out
-        }
+        // Guaranteed fast 1-100% animation every time the app boots
+        const interval = setInterval(() => {
+            setProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => setShowLoader(false), 400);
+                    return 100;
+                }
+                
+                // If data is not loaded yet, stall at 90%
+                if (prev >= 90 && !isLoaded) {
+                    return 90;
+                }
+                
+                // Fast increments
+                return prev + 4;
+            });
+        }, 30); // 30ms * 25 steps = ~750ms total animation
         
         return () => clearInterval(interval);
     }, [isLoaded]);
