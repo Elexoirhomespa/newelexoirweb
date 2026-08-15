@@ -185,7 +185,7 @@ type SpaContextType = {
     clearCart: () => void;
     savedProducts: string[];
     toggleSavedProduct: (productId: string) => void;
-    isLoading: boolean;
+    isLoaded: boolean;
     siteBrandFilter: string;
     setSiteBrandFilter: (brand: string) => void;
     therapists: Therapist[];
@@ -288,7 +288,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
     });
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [siteBrandFilter, setSiteBrandFilter] = useState<string>(brand || process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
     const [therapists, setTherapists] = useState<Therapist[]>([]);
 
@@ -330,7 +330,9 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
                 console.error("Error reading from localStorage", e);
             }
 
-
+            if (hasCache) {
+                setIsLoaded(true);
+            }
 
             try {
                 const siteBrand = siteBrandFilter;
@@ -378,7 +380,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
             } catch (error) {
                 console.error("Error in data loading flow:", error);
             } finally {
-                setIsLoading(false);
+                setIsLoaded(true);
             }
         }
 
@@ -399,10 +401,45 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
             } catch (e) {}
         };
 
+        // Background silent polling
+        const pollData = async () => {
+            try {
+                const response = await fetch(`/api/spa-data?brand=${siteBrandFilter}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.treatments && data.treatments.length > 0) {
+                        setTreatments(data.treatments);
+                        try { localStorage.setItem('spa_treatments', JSON.stringify(data.treatments)); } catch(e) {}
+                    }
+                    if (data.products && data.products.length > 0) {
+                        setProducts(data.products);
+                        try { localStorage.setItem('spa_products', JSON.stringify(data.products)); } catch(e) {}
+                    }
+                    if (data.campaigns && data.campaigns.length > 0) {
+                        const fetchedCampaigns = sortCampaigns(data.campaigns);
+                        setCampaigns(fetchedCampaigns);
+                        setCampaign(fetchedCampaigns[0] || null);
+                        try { 
+                            localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
+                            localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
+                        } catch(e) {}
+                    }
+                    if (data.therapists) {
+                        setTherapists(data.therapists);
+                    }
+                }
+            } catch(e) {
+                // silently fail polling
+            }
+        };
+
+        const intervalId = setInterval(pollData, 60000); // Poll every 60 seconds
+
         window.addEventListener('storage', handleSync);
         window.addEventListener('spa_campaigns_updated', handleSync);
 
         return () => {
+            clearInterval(intervalId);
             window.removeEventListener('storage', handleSync);
             window.removeEventListener('spa_campaigns_updated', handleSync);
         };
@@ -441,7 +478,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
             treatments, setTreatments, campaign, setCampaign, campaigns, setCampaigns, products, setProducts,
             cartItems, addToCart, updateCartQuantity, removeFromCart, clearCart,
             savedProducts, toggleSavedProduct,
-            isLoading,
+            isLoaded,
             siteBrandFilter,
             setSiteBrandFilter,
             therapists, setTherapists

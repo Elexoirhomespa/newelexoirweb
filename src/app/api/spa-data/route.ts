@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export const revalidate = 604800; // Cache for 7 days (604800 seconds)
+export const revalidate = 60; // Cache for 60 seconds
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
             therapists: therapistsRes.data || []
         }, {
             headers: {
-                'Cache-Control': 'public, s-maxage=604800, stale-while-revalidate=86400',
+                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
             }
         });
     } catch (error) {

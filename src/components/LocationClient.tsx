@@ -2,7 +2,8 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, Bitcoin } from 'lucide-react';
+import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, Bitcoin, CheckCircle2, Copy } from 'lucide-react';
+import GlobalLoader from '@/components/GlobalLoader';
 import Link from 'next/link';
 import { useSpa } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
@@ -21,7 +22,7 @@ const CATEGORIES = [
 
 
 export default function LocationClient({ locationName, locationSlug }: { locationName: string, locationSlug: string }) {
-    const { treatments, campaign, products, isLoading } = useSpa();
+    const { treatments, campaign, products, isLoaded } = useSpa();
 
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -174,6 +175,10 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
             setIsProcessing(false);
         }
     };
+
+    if (!isLoaded) {
+        return <GlobalLoader />;
+    }
 
     return (
         <div className="min-h-screen bg-[#FDFBF7] relative overflow-hidden font-sans text-text pb-24 md:pb-12">
@@ -344,13 +349,7 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
 
-                    {isLoading ? (
-                        <div className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar">
-                            {[1,2,3].map((skeleton) => (
-                                <div key={skeleton} className="w-72 md:w-80 h-96 shrink-0 rounded-[32px] md:rounded-[40px] bg-border/40 animate-pulse"></div>
-                            ))}
-                        </div>
-                    ) : treatments.length === 0 ? (
+                    {treatments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden rounded-[40px] bg-[#F5F5F7] mx-6 md:mx-0">
                             <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/0 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center">

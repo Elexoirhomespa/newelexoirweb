@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSpa } from '@/context/SpaContext';
 
 export default function GlobalLoader() {
-    const { isLoading, siteBrandFilter } = useSpa();
+    const { isLoaded, siteBrandFilter } = useSpa();
     const [showLoader, setShowLoader] = useState(true);
     const [progress, setProgress] = useState(1);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
         
-        if (isLoading) {
+        if (!isLoaded) {
             setShowLoader(true);
             setProgress(1);
             // While loading, slowly increment progress so it doesn't get stuck early
@@ -26,7 +26,7 @@ export default function GlobalLoader() {
                 });
             }, 250); // 250ms * 99 = ~24.7 seconds to reach 99%
         } else {
-            // When isLoading becomes false, quickly animate to 100
+            // When isLoaded becomes true, quickly animate to 100
             interval = setInterval(() => {
                 setProgress(prev => {
                     if (prev >= 100) {
@@ -45,7 +45,7 @@ export default function GlobalLoader() {
         }
 
         return () => clearInterval(interval);
-    }, [isLoading]);
+    }, [isLoaded]);
 
     return (
         <AnimatePresence>
