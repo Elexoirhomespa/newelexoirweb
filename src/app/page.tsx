@@ -635,11 +635,7 @@ export default function Home() {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
 
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : treatments.length === 0 ? (
+                    {treatments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden rounded-[40px] bg-[#F5F5F7] mx-6 md:mx-0">
                             <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/0 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center">
