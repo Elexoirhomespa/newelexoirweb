@@ -26,6 +26,8 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
         currentProgress += diff * 0.15;
         var bar = document.getElementById("splash-progress-bar");
         if (bar) bar.style.width = currentProgress + "%";
+        var text = document.getElementById("splash-progress-text");
+        if (text) text.innerText = Math.round(currentProgress) + "%";
         if (currentProgress < 99) requestAnimationFrame(updateBar);
       }
       requestAnimationFrame(updateBar);
@@ -117,16 +119,19 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
           <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] opacity-60" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center w-[200px] mt-[-20px]">
-          <div className="animate-pulse mb-5">
-            <h2 className="text-[#1D1D1F] text-[13px] font-serif font-medium tracking-wider drop-shadow-sm opacity-80">
-              Preparing your sanctuary
+        <div className="relative z-10 w-[80%] max-w-[320px]">
+          <div className="flex justify-between items-end mb-3">
+            <h2 className="text-[#1D1D1F] text-[10px] uppercase tracking-[0.2em] font-medium opacity-80">
+              PREPARING SANCTUARY
             </h2>
+            <span id="splash-progress-text" className="text-[#1D1D1F] text-[11px] font-mono tracking-widest opacity-80">
+              0%
+            </span>
           </div>
 
-          {/* Progress section (JS Synced Animation) */}
-          <div className="w-full h-[3px] bg-black/5 rounded-full overflow-hidden shadow-inner">
-            <div id="splash-progress-bar" className="h-full bg-primary rounded-full shadow-sm" style={{ width: "0%" }} />
+          {/* Thin Line Progress Bar */}
+          <div className="w-full h-[1px] bg-black/10 relative overflow-hidden">
+            <div id="splash-progress-bar" className="absolute top-0 left-0 h-full bg-[#1D1D1F]" style={{ width: "0%" }} />
           </div>
         </div>
       </div>
