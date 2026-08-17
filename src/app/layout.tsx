@@ -20,7 +20,7 @@ export async function generateViewport(): Promise<Viewport> {
   const headersList = await headers();
   const host = headersList.get("host") || "www.elexoirhomespaubud.com";
   const isBaliDomain = (host.includes("homespaubud") || host.includes("ubudhomespa")) && !host.includes("elexoir");
-  
+
   return {
     themeColor: isBaliDomain ? "#FFFFFF" : "#D2F34C",
     width: "device-width",
@@ -39,9 +39,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
   const title = isBaliDomain ? "Home Spa Ubud | Luxury Mobile Spa" : "Elexoir Home Spa | Premium Mobile Spa & In-Villa Massage Ubud";
-  const description = isBaliDomain 
-      ? "Looking for the best massage in Bali? We deliver premium, 5-star professional spa treatments directly to your private villa or hotel. Serving Seminyak, Canggu, Kuta, and Nusa Dua. Book now for ultimate relaxation!" 
-      : "Experience the top-rated luxury mobile spa in Bali. Professional in-villa massages, couples treatments & holistic rituals delivered directly to your hotel or villa in Ubud. Book your 5-star sanctuary today!";
+  const description = isBaliDomain
+    ? "Looking for the best massage in Bali? We deliver premium, 5-star professional spa treatments directly to your private villa or hotel. Serving Seminyak, Canggu, Kuta, and Nusa Dua. Book now for ultimate relaxation!"
+    : "Experience the top-rated luxury mobile spa in Bali. Professional in-villa massages, couples treatments & holistic rituals delivered directly to your hotel or villa in Ubud. Book your 5-star sanctuary today!";
 
   return {
     metadataBase: new URL(url),
@@ -51,9 +51,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: description,
     keywords: [
-      name, "Choose Massage Therapist Bali", "Book Available Therapist Bali", 
-      "On-Demand Massage Bali", "Mobile Spa Bali", "In Villa Massage Bali", 
-      "Bali Therapist Booking", "Professional Massage Bali", "Ubud Massage Therapist", 
+      name, "Choose Massage Therapist Bali", "Book Available Therapist Bali",
+      "On-Demand Massage Bali", "Mobile Spa Bali", "In Villa Massage Bali",
+      "Bali Therapist Booking", "Professional Massage Bali", "Ubud Massage Therapist",
       "Canggu Massage Therapist", "Seminyak Massage Therapist", "Massage near me Bali"
     ],
     authors: [{ name: name }],
@@ -163,7 +163,7 @@ export default async function RootLayout({
 
   const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
-  
+
   // SSR Data Fetching with server-side caching (120s revalidation)
   const initialData = await getSpaData(brand);
 

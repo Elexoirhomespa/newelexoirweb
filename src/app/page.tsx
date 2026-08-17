@@ -420,9 +420,9 @@ export default function Home() {
                                 >
                                     <div className="relative w-full h-[220px] sm:h-[250px] md:h-[280px] rounded-[24px] md:rounded-[28px] overflow-hidden shadow-lg group bg-gradient-to-br from-neutral-900 via-stone-900 to-black border border-black/15">
                                         {/* Background Image */}
-                                        {camp.image_url && (
+                                        {(camp.image_url || camp.image) && (
                                             <Image 
-                                                src={camp.image_url} 
+                                                src={(camp.image_url || camp.image) as string} 
                                                 alt={camp.title}
                                                 fill 
                                                 priority={idx === 0}
