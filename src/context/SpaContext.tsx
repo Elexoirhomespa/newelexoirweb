@@ -314,101 +314,8 @@ export function SpaProvider({ children, brand, initialData }: { children: ReactN
         return [];
     });
 
+    // Cross-tab sync only — no client-side fetching needed since SSR provides all data
     useEffect(() => {
-        async function loadData() {
-            let hasCache = false;
-            try {
-                const cachedTreatments = localStorage.getItem('spa_treatments');
-                const cachedProducts = localStorage.getItem('spa_products');
-                const cachedCampaigns = localStorage.getItem('spa_campaigns');
-                const cachedCampaign = localStorage.getItem('spa_campaign');
-
-                if (cachedTreatments) {
-                    setTreatments(JSON.parse(cachedTreatments));
-                    hasCache = true;
-                }
-                if (cachedProducts) {
-                    setProducts(JSON.parse(cachedProducts));
-                    hasCache = true;
-                }
-                if (cachedCampaigns !== null) {
-                    const parsed = JSON.parse(cachedCampaigns);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        const sorted = sortCampaigns(parsed);
-                        setCampaigns(sorted);
-                        setCampaign(sorted[0] || null);
-                        hasCache = true;
-                    }
-                } else if (cachedCampaign !== null) {
-                    const single = JSON.parse(cachedCampaign);
-                    if (single) {
-                        setCampaigns([single]);
-                        setCampaign(single);
-                        hasCache = true;
-                    }
-                }
-
-            } catch (e) {
-                console.error("Error reading from localStorage", e);
-            }
-
-            if (hasCache) {
-                setIsLoaded(true);
-            }
-
-            try {
-                const siteBrand = siteBrandFilter;
-                const fetchController = new AbortController();
-                // 10 second safety timeout for the client fetch
-                const timeoutId = setTimeout(() => fetchController.abort(), 10000);
-
-                try {
-                    const response = await fetch(`/api/spa-data?brand=${siteBrand}`, {
-                        signal: fetchController.signal
-                    });
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        
-                        if (data.treatments && data.treatments.length > 0) {
-                            setTreatments(data.treatments);
-                            try { localStorage.setItem('spa_treatments', JSON.stringify(data.treatments)); } catch(e) {}
-                        }
-                        
-                        if (data.products && data.products.length > 0) {
-                            setProducts(data.products);
-                            try { localStorage.setItem('spa_products', JSON.stringify(data.products)); } catch(e) {}
-                        }
-                        
-                        if (data.campaigns && data.campaigns.length > 0) {
-                            const fetchedCampaigns = sortCampaigns(data.campaigns);
-                            setCampaigns(fetchedCampaigns);
-                            setCampaign(fetchedCampaigns[0] || null);
-                            try { 
-                                localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
-                                localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
-                            } catch(e) {}
-                        }
-                        
-                        if (data.therapists) {
-                            setTherapists(data.therapists);
-                        }
-                    }
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    console.error("Error fetching from API:", error);
-                }
-            } catch (error) {
-                console.error("Error in data loading flow:", error);
-            } finally {
-                setIsLoaded(true);
-            }
-        }
-
-        loadData();
-
-        // Listen for realtime sync across tabs or admin updates
         const handleSync = () => {
             try {
                 const stored = localStorage.getItem('spa_campaigns');
@@ -423,45 +330,26 @@ export function SpaProvider({ children, brand, initialData }: { children: ReactN
             } catch (e) {}
         };
 
-        // Background silent polling
-        const pollData = async () => {
-            try {
-                const response = await fetch(`/api/spa-data?brand=${siteBrandFilter}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.treatments && data.treatments.length > 0) {
-                        setTreatments(data.treatments);
-                        try { localStorage.setItem('spa_treatments', JSON.stringify(data.treatments)); } catch(e) {}
-                    }
-                    if (data.products && data.products.length > 0) {
-                        setProducts(data.products);
-                        try { localStorage.setItem('spa_products', JSON.stringify(data.products)); } catch(e) {}
-                    }
-                    if (data.campaigns && data.campaigns.length > 0) {
-                        const fetchedCampaigns = sortCampaigns(data.campaigns);
-                        setCampaigns(fetchedCampaigns);
-                        setCampaign(fetchedCampaigns[0] || null);
-                        try { 
-                            localStorage.setItem('spa_campaigns', JSON.stringify(fetchedCampaigns));
-                            localStorage.setItem('spa_campaign', JSON.stringify(fetchedCampaigns[0] || null));
-                        } catch(e) {}
-                    }
-                    if (data.therapists) {
-                        setTherapists(data.therapists);
-                    }
-                }
-            } catch(e) {
-                // silently fail polling
-            }
-        };
+        // Persist SSR data to localStorage for cross-tab access
+        if (initialData?.treatments && initialData.treatments.length > 0) {
+            try { localStorage.setItem('spa_treatments', JSON.stringify(initialData.treatments)); } catch(e) {}
+        }
+        if (initialData?.products && initialData.products.length > 0) {
+            try { localStorage.setItem('spa_products', JSON.stringify(initialData.products)); } catch(e) {}
+        }
+        if (initialData?.campaigns && initialData.campaigns.length > 0) {
+            try { 
+                localStorage.setItem('spa_campaigns', JSON.stringify(sortCampaigns(initialData.campaigns)));
+                localStorage.setItem('spa_campaign', JSON.stringify(sortCampaigns(initialData.campaigns)[0] || null));
+            } catch(e) {}
+        }
 
-        const intervalId = setInterval(pollData, 60000); // Poll every 60 seconds
+        setIsLoaded(true);
 
         window.addEventListener('storage', handleSync);
         window.addEventListener('spa_campaigns_updated', handleSync);
 
         return () => {
-            clearInterval(intervalId);
             window.removeEventListener('storage', handleSync);
             window.removeEventListener('spa_campaigns_updated', handleSync);
         };

@@ -3,7 +3,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Search, Heart, Cloud, Sparkles, Droplet, User, Flame, Clock, ArrowRight, X, ShoppingBag, Plus, Minus, MessageCircle, ChevronLeft, Bitcoin, CheckCircle2, Copy } from 'lucide-react';
-import GlobalLoader from '@/components/GlobalLoader';
 import Link from 'next/link';
 import { useSpa } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
@@ -178,7 +177,6 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
 
     return (
         <>
-            <GlobalLoader />
             {isLoaded && (
                 <div className="min-h-screen bg-[#FDFBF7] relative overflow-hidden font-sans text-text pb-24 md:pb-12">
             
@@ -352,9 +350,8 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                         <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden rounded-[40px] bg-[#F5F5F7] mx-6 md:mx-0">
                             <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/0 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center">
-                                <span className="bg-white/80 backdrop-blur-md border border-white/60 text-[#86868B] px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm mb-4">Coming Soon</span>
-                                <h3 className="text-2xl md:text-3xl font-medium text-[#1D1D1F] tracking-tight mb-2">Signature Treatments</h3>
-                                <p className="text-[#86868B] max-w-sm mx-auto text-sm font-medium px-4">We are preparing our exclusive spa experiences.</p>
+                                <h3 className="text-2xl md:text-3xl font-medium text-[#1D1D1F] tracking-tight mb-2">Treatments Available Soon</h3>
+                                <p className="text-[#86868B] max-w-sm mx-auto text-sm font-medium px-4">Contact us to book a treatment for this area.</p>
                             </div>
                         </div>
                     ) : (
