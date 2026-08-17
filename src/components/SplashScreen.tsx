@@ -63,7 +63,12 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
           if (bar) bar.style.width = "100%";
           splash.style.transition = "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
           splash.style.opacity = "0";
-          setTimeout(function() { splash.style.display = "none"; }, 600);
+          setTimeout(function() { 
+            splash.style.display = "none"; 
+            document.documentElement.classList.add("skip-splash");
+          }, 600);
+        } else {
+            document.documentElement.classList.add("skip-splash");
         }
         
         var children = document.getElementById("splash-children-container");
