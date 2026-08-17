@@ -20,21 +20,16 @@ export default function GlobalLoader() {
                     return 100;
                 }
                 
-                if (!isLoaded) {
-                    // Smooth, continuous crawl to 99% if waiting for data
-                    if (prev >= 99) return 99;
-                    if (prev >= 80) return prev + 1; // Slower near the end
-                    if (prev >= 50) return prev + 2; 
-                    return prev + 3; // Fast initially
-                } else {
-                    // Data is ready, quickly jump to 100%
-                    return prev + 8;
-                }
+                // Very fast loading regardless of data state, for instant splash feel
+                if (prev < 40) return prev + 15;
+                if (prev < 80) return prev + 10;
+                if (prev < 95) return prev + 5;
+                return prev + 2; 
             });
-        }, 30);
+        }, 15);
         
         return () => clearInterval(interval);
-    }, [isLoaded, showLoader]);
+    }, [showLoader]);
 
     return (
         <AnimatePresence>
