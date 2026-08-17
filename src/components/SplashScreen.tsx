@@ -163,25 +163,15 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
             </div>
 
             <div className="relative z-10 flex flex-col items-center mt-[-40px]">
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-                className="relative mb-8"
-              >
+              <div className="relative mb-8 animate-pulse">
                 <h2 className="text-white text-lg font-serif font-medium tracking-wide">
                   Preparing your sanctuary...
                 </h2>
-              </motion.div>
+              </div>
             </div>
 
             {/* Progress section */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.4 }}
-              className="absolute bottom-[14%] flex flex-col items-center gap-3 w-[200px]"
-            >
+            <div className="absolute bottom-[14%] flex flex-col items-center gap-3 w-[200px]">
               <div className="w-full h-[3px] bg-white/10 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-white rounded-full transition-none"
@@ -192,16 +182,11 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
               <span className="text-white/60 text-[11px] font-bold tabular-nums tracking-wide">
                 {Math.round(progress)}%
               </span>
-            </motion.div>
+            </div>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ delay: 1.2, duration: 0.5 }}
-              className="absolute bottom-[6%] text-white text-[10px] font-semibold tracking-[0.15em] uppercase"
-            >
+            <p className="absolute bottom-[6%] text-white/40 text-[10px] font-semibold tracking-[0.15em] uppercase">
               Bali, Indonesia
-            </motion.p>
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
