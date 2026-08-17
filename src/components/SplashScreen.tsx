@@ -95,24 +95,18 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
           <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] opacity-60" />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center mt-[-40px]">
-          <div className="relative mb-8 animate-pulse">
-            <h2 className="text-[#1D1D1F] text-lg font-serif font-medium tracking-wide drop-shadow-sm">
+        <div className="relative z-10 flex flex-col items-center justify-center w-[200px] mt-[-20px]">
+          <div className="animate-pulse mb-5">
+            <h2 className="text-[#1D1D1F] text-[13px] font-serif font-medium tracking-wider drop-shadow-sm opacity-80">
               Preparing your sanctuary...
             </h2>
           </div>
-        </div>
 
-        {/* Progress section (Native CSS Animation) */}
-        <div className="absolute bottom-[14%] flex flex-col items-center gap-3 w-[200px]">
+          {/* Progress section (Native CSS Animation) */}
           <div className="w-full h-[3px] bg-black/5 rounded-full overflow-hidden shadow-inner">
             <div className="h-full bg-primary rounded-full animate-load-progress shadow-sm" />
           </div>
         </div>
-
-        <p className="absolute bottom-[6%] text-black/40 text-[10px] font-semibold tracking-[0.15em] uppercase">
-          Bali, Indonesia
-        </p>
       </div>
 
       <div 
