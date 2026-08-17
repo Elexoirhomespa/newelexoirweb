@@ -11,7 +11,7 @@ import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import ServiceAreas from '@/components/ServiceAreas';
 import FaqSection from '@/components/FaqSection';
-import GlobalLoader from '@/components/GlobalLoader';
+
 
 // Dummy data for redesign structure
 const CATEGORIES = [
@@ -292,9 +292,7 @@ export default function Home() {
 
     return (
         <>
-            <GlobalLoader />
-            {isLoaded && (
-                <div className={`min-h-screen relative overflow-hidden font-sans text-text ${domain === 'bali' ? 'bg-white' : 'bg-[#FDFBF7]'}`}>
+            <div className={`min-h-screen relative overflow-hidden font-sans text-text ${domain === 'bali' ? 'bg-white' : 'bg-[#FDFBF7]'}`}>
             
             {/* Top Gradient Background */}
             {domain === 'ubud' && (
@@ -1345,7 +1343,6 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6 relative z-10">
             </div>
                 </div>
-            )}
         </>
     );
 }

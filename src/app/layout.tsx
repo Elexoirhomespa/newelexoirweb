@@ -106,6 +106,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import SplashScreen from "@/components/SplashScreen";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -145,7 +147,9 @@ export default async function RootLayout({
           <div className="flex flex-col min-h-screen w-full relative">
             <TopNav />
             <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">
-              {children}
+              <SplashScreen>
+                {children}
+              </SplashScreen>
             </main>
           </div>
         </SpaProvider>
