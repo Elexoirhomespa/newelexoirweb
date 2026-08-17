@@ -20,7 +20,7 @@ const CATEGORIES = [
 
 
 export default function Home() {
-    const { treatments, campaign, campaigns, products, isLoaded } = useSpa();
+    const { treatments, campaign, campaigns, products, isLoaded, siteBrandFilter } = useSpa();
 
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -31,7 +31,7 @@ export default function Home() {
     const [currentCampaignIndex, setCurrentCampaignIndex] = useState(0);
     const campaignCarouselRef = useRef<HTMLDivElement>(null);
     const [showStory, setShowStory] = useState(false);
-    const [domain, setDomain] = useState('ubud');
+    const domain = siteBrandFilter === 'bali' ? 'bali' : 'ubud';
 
     const activeCampaigns = sortCampaigns(
         (campaigns && campaigns.length > 0)
@@ -58,12 +58,7 @@ export default function Home() {
         }
     };
     
-    React.useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const host = window.location.hostname;
-            setDomain((host.includes('homespaubud') || host.includes('ubudhomespa')) && !host.includes('elexoir') ? 'bali' : 'ubud');
-        }
-    }, []);
+    
     
     // Show only if there is at least one pinned treatment in the database
     const showPinnedTreatments = treatments.some(t => t.is_pinned);
