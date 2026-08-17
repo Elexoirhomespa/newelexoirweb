@@ -1,10 +1,28 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+
 export default function SplashScreen({ children }: { children: React.ReactNode }) {
   // A completely Zero-React-Dependency splash screen!
   // This executes instantly during the HTML parsing phase, 
   // making it completely immune to slow network connections or JS bundle sizes.
   
+  const [isReactDismissed, setIsReactDismissed] = useState(false);
+
+  useEffect(() => {
+    // If it's already done before React hydrates, dismiss instantly
+    if (sessionStorage.getItem("splashDone") === "1" && document.documentElement.classList.contains("skip-splash")) {
+      setIsReactDismissed(true);
+    }
+
+    const handleSplashComplete = () => {
+      setIsReactDismissed(true);
+    };
+
+    window.addEventListener("splashComplete", handleSplashComplete);
+    return () => window.removeEventListener("splashComplete", handleSplashComplete);
+  }, []);
+
   const vanillaScript = `
     (function() {
       if (window.innerWidth >= 768 || sessionStorage.getItem("splashDone")) {
@@ -66,9 +84,11 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
           setTimeout(function() { 
             document.documentElement.classList.remove("dismissing-splash");
             document.documentElement.classList.add("skip-splash");
+            window.dispatchEvent(new Event("splashComplete"));
           }, 600);
         } else {
             document.documentElement.classList.add("skip-splash");
+            window.dispatchEvent(new Event("splashComplete"));
         }
         
         var children = document.getElementById("splash-children-container");
@@ -119,36 +139,38 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
         `
       }} />
 
-      <div
-        id="splash-screen-container"
-        className="md:hidden fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white"
-        style={{ touchAction: "none" }}
-      >
-        {/* Soft ambient gradient for light theme */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] opacity-60" />
-        </div>
-
-        <div className="relative z-10 w-[80%] max-w-[320px]">
-          <div className="flex justify-between items-end mb-3">
-            <h2 className="text-[#1D1D1F] text-[10px] uppercase tracking-[0.2em] font-medium opacity-80">
-              PREPARING SANCTUARY
-            </h2>
-            <span id="splash-progress-text" className="text-[#1D1D1F] text-[11px] font-mono tracking-widest opacity-80">
-              0%
-            </span>
+      {!isReactDismissed && (
+        <div
+          id="splash-screen-container"
+          className="md:hidden fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white"
+          style={{ touchAction: "none" }}
+        >
+          {/* Soft ambient gradient for light theme */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] opacity-60" />
           </div>
 
-          {/* Thin Line Progress Bar */}
-          <div className="w-full h-[1px] bg-black/10 relative overflow-hidden">
-            <div id="splash-progress-bar" className="absolute top-0 left-0 h-full bg-[#1D1D1F]" style={{ width: "0%" }} />
+          <div className="relative z-10 w-[80%] max-w-[320px]">
+            <div className="flex justify-between items-end mb-3">
+              <h2 className="text-[#1D1D1F] text-[10px] uppercase tracking-[0.2em] font-medium opacity-80">
+                PREPARING SANCTUARY
+              </h2>
+              <span id="splash-progress-text" className="text-[#1D1D1F] text-[11px] font-mono tracking-widest opacity-80">
+                0%
+              </span>
+            </div>
+
+            {/* Thin Line Progress Bar */}
+            <div className="w-full h-[1px] bg-black/10 relative overflow-hidden">
+              <div id="splash-progress-bar" className="absolute top-0 left-0 h-full bg-[#1D1D1F]" style={{ width: "0%" }} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div 
         id="splash-children-container"
-        className="max-md:invisible"
+        className={isReactDismissed ? "" : "max-md:invisible"}
       >
         {children}
       </div>
