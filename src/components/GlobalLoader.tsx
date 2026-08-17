@@ -16,20 +16,26 @@ export default function GlobalLoader() {
             setProgress(prev => {
                 if (prev >= 100) {
                     clearInterval(interval);
-                    setTimeout(() => setShowLoader(false), 200);
+                    setTimeout(() => setShowLoader(false), 300);
                     return 100;
                 }
                 
-                // Very fast loading regardless of data state, for instant splash feel
-                if (prev < 40) return prev + 15;
-                if (prev < 80) return prev + 10;
-                if (prev < 95) return prev + 5;
-                return prev + 2; 
+                if (!isLoaded) {
+                    // Paced progress to give database time to load without getting "stuck" too early
+                    if (prev >= 98) return 98;
+                    if (prev >= 90) return prev + 0.5; // Very slow near the end
+                    if (prev >= 70) return prev + 1;
+                    if (prev >= 40) return prev + 2;
+                    return prev + 3;
+                } else {
+                    // Database is loaded, swiftly complete the animation
+                    return prev + 10;
+                }
             });
-        }, 15);
+        }, 30);
         
         return () => clearInterval(interval);
-    }, [showLoader]);
+    }, [isLoaded, showLoader]);
 
     return (
         <AnimatePresence>
