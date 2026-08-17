@@ -124,6 +124,27 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
     })();
   `;
 
+  const splashHTML = `
+    <div id="splash-screen-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #ffffff; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999; touch-action: none;">
+      <div style="position: absolute; inset: 0; pointer-events: none; overflow: hidden;">
+        <div style="position: absolute; top: 20%; left: 50%; transform: translateX(-50%); width: 400px; height: 400px; border-radius: 50%; background-color: rgba(210, 243, 76, 0.05); filter: blur(120px); opacity: 0.6;"></div>
+      </div>
+      <div style="position: relative; z-index: 10; width: 80%; max-width: 320px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
+          <h2 style="color: #1D1D1F; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 500; opacity: 0.8; margin: 0;">
+            PREPARING SANCTUARY
+          </h2>
+          <span id="splash-progress-text" style="color: #1D1D1F; font-size: 11px; font-family: monospace; letter-spacing: 0.1em; opacity: 0.8;">
+            0%
+          </span>
+        </div>
+        <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.1); position: relative; overflow: hidden;">
+          <div id="splash-progress-bar" style="position: absolute; top: 0; left: 0; height: 100%; background-color: #1D1D1F; width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: vanillaScript }} />
@@ -135,37 +156,16 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
             transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
           }
           html.skip-splash #splash-screen-container { display: none !important; }
-          html.skip-splash #splash-children-container { visibility: visible !important; }
+          html.skip-splash #splash-children-container { visibility: visible !important; opacity: 1 !important; transition: opacity 0.4s ease-in; }
+          
+          @media (min-width: 768px) {
+            #splash-screen-container { display: none !important; }
+          }
         `
       }} />
 
       {!isReactDismissed && (
-        <div
-          id="splash-screen-container"
-          className="md:hidden fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white"
-          style={{ touchAction: "none" }}
-        >
-          {/* Soft ambient gradient for light theme */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] opacity-60" />
-          </div>
-
-          <div className="relative z-10 w-[80%] max-w-[320px]">
-            <div className="flex justify-between items-end mb-3">
-              <h2 className="text-[#1D1D1F] text-[10px] uppercase tracking-[0.2em] font-medium opacity-80">
-                PREPARING SANCTUARY
-              </h2>
-              <span id="splash-progress-text" className="text-[#1D1D1F] text-[11px] font-mono tracking-widest opacity-80">
-                0%
-              </span>
-            </div>
-
-            {/* Thin Line Progress Bar */}
-            <div className="w-full h-[1px] bg-black/10 relative overflow-hidden">
-              <div id="splash-progress-bar" className="absolute top-0 left-0 h-full bg-[#1D1D1F]" style={{ width: "0%" }} />
-            </div>
-          </div>
-        </div>
+        <div dangerouslySetInnerHTML={{ __html: splashHTML }} />
       )}
 
       <div 
