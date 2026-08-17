@@ -281,6 +281,7 @@ export default function AdminDashboard() {
     // Dynamic fields for Therapist Fees
     const [feeInputs, setFeeInputs] = useState<{ [key: string]: string }>({});
     const [feeSearch, setFeeSearch] = useState('');
+    const [menuSearch, setMenuSearch] = useState('');
     const [expandedFees, setExpandedFees] = useState<{ [key: string]: boolean }>({});
     
     useEffect(() => {
@@ -1782,26 +1783,40 @@ export default function AdminDashboard() {
                     {/* OVERVIEW TAB */}
                     {activeTab === 'list' && (
                         <div className="space-y-6 bg-white border border-black/15 rounded-2xl p-5 md:p-8 shadow-sm">
-                            <h3 className="text-base font-bold uppercase tracking-wider text-black border-b border-black/10 pb-4">
-                                Treatment & Store Catalog Overview
-                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-black/10 pb-4 gap-4">
+                                <h3 className="text-base font-bold uppercase tracking-wider text-black">
+                                    Treatment & Store Catalog Overview
+                                </h3>
+                                <div className="relative w-full sm:w-64">
+                                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <Search className="h-4 w-4 text-black/40" />
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search treatments..." 
+                                        value={menuSearch}
+                                        onChange={(e) => setMenuSearch(e.target.value)}
+                                        className="w-full pl-9 pr-4 py-2 bg-black/5 border border-black/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+                                    />
+                                </div>
+                            </div>
 
                             <div className="space-y-3">
-                                {treatments.map(t => (
-                                    <div key={t.id} className="p-4 rounded-xl border border-black/10 flex items-center justify-between gap-4">
-                                        <div>
+                                {treatments.filter(t => t.title.toLowerCase().includes(menuSearch.toLowerCase()) || t.category.toLowerCase().includes(menuSearch.toLowerCase())).map(t => (
+                                    <div key={t.id} className="p-4 rounded-xl border border-black/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <div className="w-full sm:w-auto">
                                             <h4 className="text-sm font-bold text-black">{t.title}</h4>
                                             <p className="text-xs text-black/60 line-clamp-1">{t.desc}</p>
-                                            <div className="flex gap-2 mt-2">
+                                            <div className="flex flex-wrap gap-2 mt-2">
                                                 {t.options.map(o => (
-                                                    <span key={o.duration} className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/5 text-black border border-black/10">
-                                                        {o.duration}m: Rp {o.price}
+                                                    <span key={o.duration} className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/5 text-black border border-black/10 whitespace-nowrap">
+                                                        {o.duration}m: Rp {parseInt(o.price.replace(/,/g, '') || '0').toLocaleString('en-US')}
                                                     </span>
                                                 ))}
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 shrink-0">
+                                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto mt-2 sm:mt-0">
                                             <button
                                                 type="button"
                                                 onClick={() => handleTogglePin(t)}
