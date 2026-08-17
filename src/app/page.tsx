@@ -8,10 +8,6 @@ import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
-import WhyChooseUs from '@/components/WhyChooseUs';
-import ServiceAreas from '@/components/ServiceAreas';
-import FaqSection from '@/components/FaqSection';
-
 
 // Dummy data for redesign structure
 const CATEGORIES = [
@@ -713,78 +709,6 @@ export default function Home() {
                     </div>
                 </div>
                 )}
-            </div>
-            
-            <div className="pb-16 md:pb-24">
-                {/* About Us / Our Philosophy */}
-                <div className="mb-16 md:mb-24 flex flex-col md:flex-row gap-10 md:gap-20 items-center max-w-7xl mx-auto px-6">
-                    <div className="flex-1 w-full">
-                        <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary/60 mb-2 md:mb-4 block">Our Philosophy</span>
-                        <h3 className="font-serif text-3xl md:text-5xl text-primary font-medium mb-4 md:mb-6 leading-tight domain-ubud-only">
-                            Sanctuary for the Soul
-                        </h3>
-                        <h3 className="font-serif text-3xl md:text-5xl text-primary font-medium mb-4 md:mb-6 leading-tight domain-bali-only">
-                            Bespoke Tranquility at <span className="italic">Your Doorstep</span>
-                        </h3>
-                        <p className="text-sm md:text-base text-text-muted leading-relaxed mb-6 md:mb-8 font-light domain-ubud-only">
-                            Born from the ancient healing traditions of Bali, Elexoir Home Spa was created with a singular vision: to bring unparalleled luxury and profound relaxation directly to your sanctuary. We believe that true wellness requires an environment where you feel completely at ease—your own home or villa.
-                        </p>
-                        <p className="text-sm md:text-base text-text-muted leading-relaxed mb-6 md:mb-8 font-light domain-bali-only">
-                            Born from the ancient healing traditions of Bali, Home Spa Ubud was created with a singular vision: to bring unparalleled luxury and profound relaxation directly to your sanctuary. We believe that true wellness requires an environment where you feel completely at ease—your own home or villa.
-                        </p>
-                        <AnimatePresence>
-                            {showStory && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-hidden mb-6 md:mb-8"
-                                >
-                                    <h4 className="font-serif text-xl md:text-2xl text-primary mb-3 md:mb-4 leading-tight">
-                                        The Ultimate <span className="italic">Luxury Home Spa</span> in Bali
-                                    </h4>
-                                    <div className="text-sm md:text-base text-text-muted leading-relaxed font-light mb-6 space-y-4">
-                                        <p className="domain-ubud-only">
-                                            Elevate your wellness journey with Elexoir Home Spa, Bali's premier mobile spa and in-villa massage service. Whether you are staying in the lush jungles of Ubud, the vibrant coasts of Canggu and Seminyak, or the breathtaking cliffs of Uluwatu, our certified professional therapists bring the ultimate 5-star spa experience directly to your doorstep.
-                                        </p>
-                                        <p className="domain-bali-only">
-                                            Elevate your wellness journey with Home Spa Ubud, Bali's premier mobile spa and in-villa massage service. Whether you are staying in the lush jungles of Ubud, the vibrant coasts of Canggu and Seminyak, or the breathtaking cliffs of Uluwatu, our certified professional therapists bring the ultimate 5-star spa experience directly to your doorstep.
-                                        </p>
-                                        <p>
-                                            We specialize in traditional Balinese Massage, Deep Tissue therapies, and exclusive Couples Massage packages designed for absolute relaxation. Using only premium, organic massage oils and authentic holistic healing techniques, our bespoke spa treatments in Bali transform your private villa or hotel room into a tranquil sanctuary of rejuvenation.
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        {!showStory && (
-                            <button 
-                                onClick={() => setShowStory(true)}
-                                className="inline-flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest bg-white/70 hover:bg-white border border-border/60 px-5 py-3 rounded-full transition-all shadow-sm hover:shadow active:scale-95"
-                            >
-                                Discover Our Story <ArrowRight size={14} />
-                            </button>
-                        )}
-                    </div>
-                    <div className="flex-1 w-full relative">
-                        <div className="aspect-[16/10] sm:aspect-[4/3] rounded-[28px] md:rounded-[40px] overflow-hidden bg-gradient-to-br from-highlight/60 to-surface border border-white/80 shadow-soft relative flex items-center justify-center p-6 md:p-10 text-center">
-                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8),transparent_100%)] pointer-events-none"></div>
-                             <div className="relative z-10">
-                                 <h4 className="font-serif text-2xl md:text-3xl text-primary mb-2 md:mb-3 italic">"A journey to pure tranquility."</h4>
-                                 <p className="text-[9px] md:text-[10px] text-primary/60 uppercase tracking-widest font-bold">Vogue Wellness</p>
-                             </div>
-                        </div>
-                        {/* Decorative element */}
-                        <div className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 w-20 md:w-24 h-20 md:h-24 bg-secondary/30 rounded-full blur-2xl pointer-events-none"></div>
-                    </div>
-                </div>
-                
-                <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-16 md:space-y-24">
-                    <WhyChooseUs />
-                    <ServiceAreas />
-                    <FaqSection />
-                </div>
             </div>
 
             {/* Campaign Modal */}
