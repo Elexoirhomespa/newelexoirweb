@@ -57,14 +57,14 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
         isDismissed = true;
         sessionStorage.setItem("splashDone", "1");
         
+        document.documentElement.classList.add("dismissing-splash");
+        
         var splash = document.getElementById("splash-screen-container");
         if (splash) {
           var bar = document.getElementById("splash-progress-bar");
           if (bar) bar.style.width = "100%";
-          splash.style.transition = "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
-          splash.style.opacity = "0";
           setTimeout(function() { 
-            splash.style.display = "none"; 
+            document.documentElement.classList.remove("dismissing-splash");
             document.documentElement.classList.add("skip-splash");
           }, 600);
         } else {
@@ -109,6 +109,11 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
       <script dangerouslySetInnerHTML={{ __html: vanillaScript }} />
       <style dangerouslySetInnerHTML={{
         __html: `
+          html.dismissing-splash #splash-screen-container { 
+            opacity: 0 !important; 
+            pointer-events: none !important;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          }
           html.skip-splash #splash-screen-container { display: none !important; }
           html.skip-splash #splash-children-container { visibility: visible !important; }
         `
