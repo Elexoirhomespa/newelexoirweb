@@ -162,11 +162,17 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
               <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-gray-200/20 blur-[100px] opacity-10" />
             </div>
 
-            {/* Logo container removed per request */}
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="relative mb-8">
-                {/* No Logo */}
-              </div>
+            <div className="relative z-10 flex flex-col items-center mt-[-40px]">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
+                className="relative mb-8"
+              >
+                <h2 className="text-white text-lg font-serif font-medium tracking-wide">
+                  Preparing your sanctuary...
+                </h2>
+              </motion.div>
             </div>
 
             {/* Progress section */}
