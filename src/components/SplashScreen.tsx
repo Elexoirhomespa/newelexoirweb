@@ -153,38 +153,15 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-            className="md:hidden fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black"
+            className="md:hidden fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white"
             style={{ touchAction: "none" }}
           >
-            {/* Soft ambient gradient */}
+            {/* Soft ambient gradient for light theme */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-white text-black/8 blur-[120px] opacity-10" />
-              <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-gray-200/20 blur-[100px] opacity-10" />
+              <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[120px] opacity-60" />
             </div>
 
-            <div className="relative z-10 flex flex-col items-center mt-[-40px]">
-              <div className="relative mb-8 animate-pulse">
-                <h2 className="text-white text-lg font-serif font-medium tracking-wide">
-                  Preparing your sanctuary...
-                </h2>
-              </div>
-            </div>
-
-            {/* Progress section */}
-            <div className="absolute bottom-[14%] flex flex-col items-center gap-3 w-[200px]">
-              <div className="w-full h-[3px] bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white rounded-full transition-none"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-
-              <span className="text-white/60 text-[11px] font-bold tabular-nums tracking-wide">
-                {Math.round(progress)}%
-              </span>
-            </div>
-
-            <p className="absolute bottom-[6%] text-white/40 text-[10px] font-semibold tracking-[0.15em] uppercase">
+            <p className="absolute bottom-[6%] text-black/40 text-[10px] font-semibold tracking-[0.15em] uppercase">
               Bali, Indonesia
             </p>
           </motion.div>
