@@ -14,7 +14,6 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
   useEffect(() => {
     const mobile = window.innerWidth < 768;
     setIsMobile(mobile);
-    setMounted(true);
 
     if (sessionStorage.getItem("splashDone")) {
       setShowSplash(false);
@@ -49,7 +48,7 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
   }, [targetProgress, showSplash, isReady]);
 
   useEffect(() => {
-    if (!mounted || !showSplash) return;
+    if (!showSplash) return;
     if (!isMobile) {
       setIsReady(true);
       return;
@@ -125,21 +124,36 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
       window.removeEventListener("load", onLoad);
       window.removeEventListener("app-content-ready", onAppReady);
     };
-  }, [mounted, isMobile, showSplash, checkReady]);
-
-  if ((!isMobile && mounted) || !showSplash) return <>{children}</>;
-  if (!mounted) return <div style={{ visibility: "hidden" }}>{children}</div>;
+  }, [isMobile, showSplash, checkReady]);
 
   return (
     <>
+      {/* Inline script to prevent splash screen flash for returning users before hydration */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            if (sessionStorage.getItem("splashDone")) {
+              document.documentElement.classList.add("skip-splash");
+            }
+          `
+        }}
+      />
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          html.skip-splash #splash-screen-container { display: none !important; }
+          html.skip-splash #splash-children-container { visibility: visible !important; }
+        `
+      }} />
+
       <AnimatePresence>
-        {!isReady && (
+        {showSplash && !isReady && (
           <motion.div
             key="splash"
+            id="splash-screen-container"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black"
+            className="md:hidden fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black"
             style={{ touchAction: "none" }}
           >
             {/* Soft ambient gradient */}
@@ -186,7 +200,10 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
         )}
       </AnimatePresence>
 
-      <div style={{ visibility: isReady ? "visible" : "hidden" }}>
+      <div 
+        id="splash-children-container"
+        className={isReady ? "" : "invisible md:visible"}
+      >
         {children}
       </div>
     </>
