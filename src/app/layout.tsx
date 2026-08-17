@@ -107,6 +107,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import SplashScreen from "@/components/SplashScreen";
+import { supabase } from "@/lib/supabase";
 
 export default async function RootLayout({
   children,
@@ -121,14 +122,49 @@ export default async function RootLayout({
   const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
   
+  // SSR Data Fetching for Instant First Paint
+  let treatments = [];
+  let products = [];
+  let campaigns = [];
+  let therapists = [];
+
+  try {
+      let [treatmentsRes, productsRes, campaignsRes, therapistsRes] = await Promise.all([
+          supabase.from('treatments').select('*').eq('is_published', true).eq('brand', brand).order('created_at', { ascending: false }),
+          supabase.from('products').select('*').eq('is_published', true).eq('brand', brand).order('created_at', { ascending: false }),
+          supabase.from('campaigns').select('*').eq('is_published', true).order('created_at', { ascending: false }),
+          supabase.from('therapists').select('*').eq('is_active', true).eq('brand', brand).order('created_at', { ascending: false })
+      ]);
+
+      if (brand !== 'elexoir' && (!treatmentsRes.data || treatmentsRes.data.length === 0)) {
+          const fallbackRes = await Promise.all([
+              supabase.from('treatments').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+              supabase.from('products').select('*').eq('is_published', true).eq('brand', 'elexoir').order('created_at', { ascending: false }),
+              supabase.from('therapists').select('*').eq('is_active', true).eq('brand', 'elexoir').order('created_at', { ascending: false })
+          ]);
+          treatmentsRes = fallbackRes[0];
+          productsRes = fallbackRes[1];
+          therapistsRes = fallbackRes[2];
+      }
+
+      treatments = treatmentsRes.data || [];
+      products = productsRes.data || [];
+      campaigns = campaignsRes.data || [];
+      therapists = therapistsRes.data || [];
+  } catch (error) {
+      console.error("SSR error fetching spa data:", error);
+  }
+
+  const initialData = { treatments, products, campaigns, therapists };
+
   return (
     <html lang="en" className="antialiased scroll-smooth">
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-9CFBSVYEY9"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){window.dataLayer.push(arguments);}
@@ -143,7 +179,7 @@ export default async function RootLayout({
         data-domain={isBaliDomain ? "bali" : "ubud"}
         className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
       >
-        <SpaProvider brand={brand}>
+        <SpaProvider brand={brand} initialData={initialData}>
           <div className="flex flex-col min-h-screen w-full relative">
             <TopNav />
             <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden">

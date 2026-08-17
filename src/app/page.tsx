@@ -633,16 +633,6 @@ export default function Home() {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
 
-                    {treatments.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden rounded-[40px] bg-[#F5F5F7] mx-6 md:mx-0">
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/0 pointer-events-none"></div>
-                            <div className="relative z-10 flex flex-col items-center">
-                                <span className="bg-white/80 backdrop-blur-md border border-white/60 text-[#86868B] px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm mb-4">Coming Soon</span>
-                                <h3 className="text-2xl md:text-3xl font-medium text-[#1D1D1F] tracking-tight mb-2">Signature Treatments</h3>
-                                <p className="text-[#86868B] max-w-sm mx-auto text-sm font-medium px-4">We are preparing our exclusive spa experiences.</p>
-                            </div>
-                        </div>
-                    ) : (
                     <div ref={scrollContainerRef} className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar scroll-smooth">
                         {filteredAndSortedTreatments.map((item, idx) => (
                             <Link href={`/rituals/${item.id}`} key={item.id} className="w-72 md:w-80 shrink-0 block group outline-none">
@@ -677,7 +667,6 @@ export default function Home() {
                             </Link>
                         ))}
                     </div>
-                    )}
                 </div>
 
                 {/* The Elexoir Boutique Section */}

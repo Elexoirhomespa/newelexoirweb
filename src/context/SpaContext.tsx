@@ -241,10 +241,18 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
     }
 ];
 
+export type SpaInitialData = {
+    treatments?: Treatment[];
+    campaigns?: Campaign[];
+    products?: Product[];
+    therapists?: Therapist[];
+};
+
 const SpaContext = createContext<SpaContextType | undefined>(undefined);
 
-export function SpaProvider({ children, brand }: { children: ReactNode, brand?: string }) {
+export function SpaProvider({ children, brand, initialData }: { children: ReactNode, brand?: string, initialData?: SpaInitialData }) {
     const [treatments, setTreatments] = useState<Treatment[]>(() => {
+        if (initialData?.treatments && initialData.treatments.length > 0) return initialData.treatments;
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_treatments');
@@ -254,6 +262,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
         return [];
     });
     const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
+        if (initialData?.campaigns && initialData.campaigns.length > 0) return sortCampaigns(initialData.campaigns);
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_campaigns');
@@ -266,6 +275,9 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
         return [];
     });
     const [campaign, setCampaign] = useState<Campaign | null>(() => {
+        if (initialData?.campaigns && initialData.campaigns.length > 0) {
+            return sortCampaigns(initialData.campaigns)[0] || null;
+        }
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_campaign');
@@ -278,6 +290,7 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
         return null;
     });
     const [products, setProducts] = useState<Product[]>(() => {
+        if (initialData?.products && initialData.products.length > 0) return initialData.products;
         if (typeof window !== 'undefined') {
             try {
                 const cached = localStorage.getItem('spa_products');
@@ -289,13 +302,17 @@ export function SpaProvider({ children, brand }: { children: ReactNode, brand?: 
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [savedProducts, setSavedProducts] = useState<string[]>([]);
     const [isLoaded, setIsLoaded] = useState<boolean>(() => {
+        if (initialData && (initialData.treatments?.length || initialData.products?.length)) return true;
         if (typeof window !== 'undefined') {
             return !!(localStorage.getItem('spa_treatments') && localStorage.getItem('spa_products'));
         }
         return false;
     });
     const [siteBrandFilter, setSiteBrandFilter] = useState<string>(brand || process.env.NEXT_PUBLIC_SITE_BRAND || 'elexoir');
-    const [therapists, setTherapists] = useState<Therapist[]>([]);
+    const [therapists, setTherapists] = useState<Therapist[]>(() => {
+        if (initialData?.therapists && initialData.therapists.length > 0) return initialData.therapists;
+        return [];
+    });
 
     useEffect(() => {
         async function loadData() {
