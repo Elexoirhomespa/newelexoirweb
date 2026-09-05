@@ -38,12 +38,56 @@ export default function FaqSection() {
     {
       q: "How do I book a home spa treatment?",
       a: "Booking is simple and fast. Browse our treatments, select your duration and group size, and securely confirm your appointment instantly via WhatsApp with our concierge team. We even offer same-day booking depending on availability."
+    },
+    {
+      q: "What types of massage are available?",
+      a: "Our diverse menu includes Traditional Balinese Massage, Deep Tissue Massage, Aromatherapy, Reflexology, and specialized prenatal massages. Each treatment is tailored to your unique wellness needs."
+    },
+    {
+      q: "Do I need to provide anything for the home spa session?",
+      a: "Not at all. Elexoir Home Spa provides everything needed for a luxurious spa experience, including a professional massage bed, fresh high-quality linens, premium oils, and relaxing music. You only need to provide the space."
+    },
+    {
+      q: "Are your massage therapists certified?",
+      a: "Yes, every therapist at Elexoir Home Spa is rigorously trained, fully certified, and possesses years of experience in 5-star luxury hotels and premium spa environments across Bali."
+    },
+    {
+      q: "Can I book a massage for my large group or retreat?",
+      a: "Absolutely. We regularly cater to yoga retreats, bridal parties, and corporate events across Bali. We can deploy multiple therapists simultaneously to accommodate large groups in your villa."
+    },
+    {
+      q: "What is your cancellation policy?",
+      a: "We offer a flexible cancellation policy. You can cancel or reschedule your mobile spa appointment free of charge up to 4 hours before your scheduled treatment time."
+    },
+    {
+      q: "Do you offer prenatal or pregnancy massage?",
+      a: "Yes, we offer specialized prenatal massages performed by specifically trained therapists. This gentle treatment helps relieve lower back pain, reduces swelling, and promotes deep relaxation for mothers-to-be."
+    },
+    {
+      q: "What areas of Bali do you cover?",
+      a: "Our mobile massage therapists cover all major tourist and residential areas in Bali, including Ubud, Canggu, Seminyak, Legian, Kuta, Jimbaran, Nusa Dua, Sanur, and Uluwatu."
+    },
+    {
+      q: "Is it safe to have a massage therapist come to my villa?",
+      a: "Your safety and privacy are our highest priorities. All our therapists are thoroughly vetted, background-checked, and adhere to strict professional conduct and hygiene protocols."
+    },
+    {
+      q: "Can I customize the pressure of my massage?",
+      a: "Of course. Before your treatment begins, your therapist will consult with you regarding your preferred pressure—whether soft, medium, or strong firm pressure—and any specific areas you'd like them to focus on or avoid."
+    },
+    {
+      q: "Do you use organic massage oils?",
+      a: "Yes, we exclusively use premium, 100% natural, and organic massage oils. Our bespoke blends are designed to nourish the skin, soothe the senses, and enhance the overall therapeutic benefits of your massage."
+    },
+    {
+      q: "How far in advance should I book?",
+      a: "While we do our best to accommodate last-minute and same-day requests, we recommend booking at least 24 hours in advance to guarantee your preferred time slot and therapist."
     }
   ];
 
   return (
     <section className="mb-12 md:mb-24">
-      <div className="max-w-3xl mx-auto px-4 md:px-0">
+      <div className="w-full mx-auto">
         <div className="text-center mb-8 md:mb-12">
           <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-3 block">FAQ</span>
           <h2 className="font-serif text-3xl md:text-4xl text-primary leading-tight">Frequently Asked Questions</h2>

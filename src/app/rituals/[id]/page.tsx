@@ -51,11 +51,11 @@ export default function RitualsDetails() {
     }
 
     const selectedOption = treatment.options[selectedOptionIdx] || treatment.options[0];
-    const isCoupleTreatment = ['couple', 'four hand'].some(k => treatment.title.toLowerCase().includes(k));
+    const isCoupleTreatment = ['couple', 'four hand', 'honeymoon'].some(k => treatment.title.toLowerCase().includes(k));
 
     // Calculate smart price
     const subtotalPrice = cartItems.reduce((acc, item) => {
-        const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+        const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
         const multiplier = isCouple ? (item.guests / 2) : item.guests;
         return acc + (item.price * multiplier);
     }, 0);
