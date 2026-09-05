@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Clock } from 'lucide-react';
+import { Search, Clock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSpa } from '@/context/SpaContext';
@@ -53,14 +53,16 @@ export default function Explore() {
     }, [treatments, activeCategory, searchQuery, maxPrice]);
 
     return (
-        <main className="min-h-screen bg-white pb-20">
+        <main className="min-h-screen bg-white pb-20 pt-40">
             {/* Search & Categories Sticky Header */}
-            <div className="sticky top-0 z-40 bg-white pt-4 pb-2 border-b border-gray-100/50 shadow-sm">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-white pt-6 pb-2 border-b border-gray-100/50 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="mb-4 mt-2 relative z-30">
+                    <div className="mb-4 relative z-30">
                         <div className="flex items-center gap-3 w-full">
-                            <div className="flex-1 bg-white rounded-full shadow-[0_4px_16px_rgb(0,0,0,0.08)] border border-gray-100 h-14 flex items-center px-4 hover:shadow-[0_4px_20px_rgb(0,0,0,0.12)] transition-shadow">
-                                <Search className="w-5 h-5 text-gray-800 shrink-0 ml-1" strokeWidth={2.5} />
+                            <div className="flex-1 bg-white rounded-full shadow-[0_4px_16px_rgb(0,0,0,0.08)] border border-gray-100 h-14 flex items-center px-2 hover:shadow-[0_4px_20px_rgb(0,0,0,0.12)] transition-shadow">
+                                <Link href="/" className="shrink-0 p-2 hover:bg-gray-50 rounded-full transition-colors flex items-center justify-center">
+                                    <ArrowLeft className="w-5 h-5 text-gray-800" strokeWidth={2.5} />
+                                </Link>
                                 <div className="flex flex-col ml-4">
                                     <span className="text-[13px] font-bold text-gray-900 leading-tight">Where to? Search treatments...</span>
                                     <span className="text-[11px] text-gray-500 font-medium">Ubud • Any date • Add guests</span>
@@ -177,21 +179,21 @@ export default function Explore() {
                     <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                         {filteredAndSortedTreatments.map((item) => (
                             <Link href={`/rituals/${createSlug(item.title)}`} key={item.id} className="w-full block group outline-none">
-                                <div className={`rounded-2xl bg-gradient-to-br ${item.bgPattern} flex flex-col h-full relative overflow-hidden p-3 aspect-[4/5] shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-black/5 group-hover:-translate-y-1 duration-300`}>
-                                    <div className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"></div>
+                                <div className="rounded-2xl bg-white border border-gray-100 flex flex-col h-full relative overflow-hidden p-4 aspect-[4/5] shadow-[0_2px_12px_rgb(0,0,0,0.04)] hover:shadow-md transition-all cursor-pointer group-hover:-translate-y-1 duration-300">
                                     <div className="relative z-10 flex flex-col h-full">
-                                        <div className="bg-white/60 backdrop-blur-sm text-primary px-2 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase self-start mb-2 shadow-sm border border-white/50">
+                                        <div className="bg-white text-gray-800 border border-gray-200 px-2.5 py-1 rounded-full text-[8px] font-bold tracking-widest uppercase self-start mb-3 shadow-sm">
                                             {item.category}
                                         </div>
-                                        <h4 className="font-bold text-gray-900 text-[14px] leading-tight mb-auto line-clamp-3">{item.title}</h4>
+                                        <h4 className="font-bold text-gray-900 text-[13px] leading-snug mb-1.5 line-clamp-2">{item.title}</h4>
+                                        <p className="text-[10px] text-gray-500 line-clamp-2 mb-auto leading-relaxed font-medium">{item.desc}</p>
                                         
-                                        <div className="mt-auto pt-2 border-t border-black/10">
-                                            <div className="flex items-center gap-1 text-[10px] font-bold text-gray-800 mb-2 uppercase tracking-widest">
-                                                <Clock className="w-3.5 h-3.5" /> {item.options[0]?.duration} MINS
+                                        <div className="mt-auto pt-3 border-t border-gray-100">
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-800 mb-2 uppercase tracking-widest">
+                                                <Clock className="w-3.5 h-3.5 text-gray-500" /> {item.options[0]?.duration} MINS
                                             </div>
-                                            <div className="flex items-center justify-between bg-white/70 backdrop-blur-sm rounded-full p-1 pl-2.5 border border-white/50">
-                                                <span className="font-semibold text-gray-900 text-[11px]">IDR {parseInt(item.options[0]?.price.replace(/,/g, '') || '0').toLocaleString('en-US')}</span>
-                                                <div className="w-6 h-6 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center shrink-0">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-semibold text-gray-900 text-[12px]">IDR {parseInt(item.options[0]?.price.replace(/,/g, '') || '0').toLocaleString('en-US')}</span>
+                                                <div className="w-7 h-7 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center shrink-0 shadow-sm hover:scale-105 transition-transform">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                                                 </div>
                                             </div>
