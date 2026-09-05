@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import ServiceAreas from '@/components/ServiceAreas';
+import FaqSection from '@/components/FaqSection';
 import { createSlug } from '@/utils/slugify';
 
 // Dummy data for redesign structure
@@ -669,6 +670,11 @@ export default function Home() {
                 {/* Service Areas Section */}
                 <div className="mb-24 mt-8 px-6 md:px-0">
                     <ServiceAreas />
+                </div>
+
+                {/* FAQ Section */}
+                <div className="mb-24 px-6 md:px-0">
+                    <FaqSection />
                 </div>
 
                 {/* The Elexoir Boutique Section */}

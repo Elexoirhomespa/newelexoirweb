@@ -9,27 +9,35 @@ export default function FaqSection() {
   const faqs = [
     {
       q: "What is the best home spa in Bali?",
-      a: "We are highly rated as one of the best luxury mobile spas in Bali. We specialize in bringing 5-star professional spa treatments, premium organic oils, and certified therapists directly to your private villa or hotel."
+      a: "We are highly rated as one of the best luxury mobile spas in Bali. We specialize in bringing 5-star professional spa treatments, premium organic oils, and certified therapists directly to your private villa or hotel across the island."
     },
     {
-      q: "Do you provide massage in villas?",
-      a: "Yes, we specialize exclusively in in-villa massages and home spa services. Our therapists arrive fully equipped to transform your living space into a tranquil wellness sanctuary across Ubud, Canggu, Seminyak, Uluwatu, and beyond."
+      q: "Do you provide massage services in Canggu and Seminyak?",
+      a: "Yes, we offer premium mobile massage and spa services directly to your villa or hotel in Canggu, Seminyak, Umalas, and surrounding areas. Skip the Bali traffic and let our therapists bring the luxury spa experience to your doorstep."
+    },
+    {
+      q: "Is in-villa massage available in Ubud?",
+      a: "Absolutely! Ubud is our home base. Whether you are staying in a jungle resort or a private villa in the cultural heart of Bali, our mobile spa service delivers profound relaxation with authentic Balinese techniques."
     },
     {
       q: "Do you offer couples massage?",
-      a: "Absolutely. Our couples massage packages are our most popular service, perfect for honeymooners and partners wanting to share a deeply relaxing, synchronized wellness experience in the comfort of their accommodation."
+      a: "Our couples massage packages are our most popular service. Perfect for honeymooners and partners wanting to share a deeply relaxing, synchronized wellness experience without leaving the comfort of their accommodation."
     },
     {
-      q: "Which massage is best after hiking Mount Batur?",
-      a: "We highly recommend our Deep Tissue Massage or our specialized Back & Shoulder Massage. These treatments specifically target muscle tension, lactic acid buildup, and fatigue, ensuring a rapid and relaxing recovery after your trek."
+      q: "Which massage is best after hiking Mount Batur or surfing?",
+      a: "We highly recommend our Deep Tissue Massage or our specialized Back & Shoulder Massage. These treatments specifically target muscle tension, lactic acid buildup, and fatigue, ensuring a rapid and relaxing recovery after your Bali adventures."
     },
     {
-      q: "Can therapists come to hotels?",
-      a: "Yes, our certified professional therapists can provide mobile massage services directly to your hotel room. We operate seamlessly within Bali's top resorts to ensure you receive the utmost privacy and luxury."
+      q: "Can therapists come to hotels and resorts in Nusa Dua or Uluwatu?",
+      a: "Yes, our certified professional therapists can provide mobile massage services directly to your hotel room or private estate in Nusa Dua, Jimbaran, and Uluwatu. We operate seamlessly within Bali's top resorts to ensure utmost privacy."
+    },
+    {
+      q: "What makes your mobile spa luxury?",
+      a: "We recreate a premium spa environment in your space. We use luxurious 100% natural massage oils, bring fresh high-quality linens, soothing aromatherapy, and our therapists are rigorously trained in 5-star hospitality and advanced massage techniques."
     },
     {
       q: "How do I book a home spa treatment?",
-      a: "Booking is simple and fast. You can browse our treatments, select your duration and group size, and securely confirm your appointment instantly via WhatsApp with our concierge team. We even offer same-day booking depending on availability."
+      a: "Booking is simple and fast. Browse our treatments, select your duration and group size, and securely confirm your appointment instantly via WhatsApp with our concierge team. We even offer same-day booking depending on availability."
     }
   ];
 

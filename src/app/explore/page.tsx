@@ -23,7 +23,7 @@ function ExploreContent() {
     const locationQuery = searchParams.get('location') || '';
 
     const [activeCategory, setActiveCategory] = useState('all');
-    const [searchQuery, setSearchQuery] = useState(locationQuery);
+    const [searchQuery, setSearchQuery] = useState('');
     const [maxPrice, setMaxPrice] = useState(1500000);
     const [isPriceFilterOpen, setIsPriceFilterOpen] = useState(false);
 
@@ -68,7 +68,7 @@ function ExploreContent() {
                                 </Link>
                                 <div className="flex flex-col ml-4">
                                     <span className="text-[13px] font-bold text-gray-900 leading-tight">Where to? Search treatments...</span>
-                                    <span className="text-[11px] text-gray-500 font-medium">Ubud • Any date • Add guests</span>
+                                    <span className="text-[11px] text-gray-500 font-medium">{locationQuery || 'Ubud'} • Any date • Add guests</span>
                                 </div>
                             </div>
                             <button 
