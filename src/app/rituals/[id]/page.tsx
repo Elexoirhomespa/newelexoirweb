@@ -419,11 +419,11 @@ export default function RitualsDetails() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white rounded-none md:rounded-[32px] p-6 md:p-8 w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-md shadow-2xl relative overflow-y-auto no-scrollbar"
+                            className="bg-[#F8F9FA] w-full max-w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:my-auto sm:rounded-[28px] rounded-none p-5 sm:p-7 md:p-8 shadow-2xl relative flex flex-col box-border overflow-x-hidden"
                         >
                             <button 
                                 onClick={() => setIsModalOpen(false)}
-                                className="absolute top-6 right-6 w-8 h-8 rounded-full bg-surface flex items-center justify-center text-text-muted hover:bg-border transition-colors z-10"
+                                className="absolute top-6 right-6 w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center text-text-muted hover:bg-border transition-colors z-10 shadow-sm"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -431,7 +431,7 @@ export default function RitualsDetails() {
                             {isSelectingMore ? (
                                 <div className="animate-in fade-in slide-in-from-right-4 duration-300 pb-4">
                                     <div className="flex items-center gap-4 mb-6">
-                                        <button onClick={() => setIsSelectingMore(false)} className="w-8 h-8 rounded-full bg-surface flex items-center justify-center hover:bg-border transition-colors shrink-0">
+                                        <button onClick={() => setIsSelectingMore(false)} className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center hover:bg-border transition-colors shrink-0 shadow-sm">
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
                                         <h2 className="font-serif text-2xl text-primary">Select Treatment</h2>
@@ -441,7 +441,7 @@ export default function RitualsDetails() {
                                         {treatments.map(t => (
                                             <div 
                                                 key={t.id} 
-                                                className={`bg-surface border ${expandedTreatmentId === t.id ? 'border-primary' : 'border-border/50'} rounded-2xl overflow-hidden shadow-sm transition-all`}
+                                                className={`bg-white border ${expandedTreatmentId === t.id ? 'border-primary' : 'border-border/80'} rounded-2xl overflow-hidden shadow-sm transition-all`}
                                             >
                                                 <div 
                                                     onClick={() => setExpandedTreatmentId(expandedTreatmentId === t.id ? null : t.id)}
@@ -515,7 +515,7 @@ export default function RitualsDetails() {
                                     {/* Cart Items List */}
                                     <div className="space-y-3 mb-4 max-h-[40vh] overflow-y-auto pr-1 no-scrollbar">
                                         {cartItems.map(item => (
-                                            <div key={item.id} className="bg-surface border border-border/50 rounded-2xl p-4 shadow-sm relative">
+                                            <div key={item.id} className="bg-white border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm relative">
                                                 {cartItems.length > 1 && (
                                                     <button 
                                                         onClick={() => setCartItems(cartItems.filter(i => i.id !== item.id))}
@@ -575,35 +575,35 @@ export default function RitualsDetails() {
                                     <button 
                                         type="button"
                                         onClick={() => setIsSelectingMore(true)}
-                                        className="w-full bg-transparent text-primary border border-border/50 px-6 py-3 rounded-xl text-xs font-bold hover:bg-surface transition-colors mb-6 tracking-widest"
+                                        className="w-full bg-white text-primary border border-border/80 px-6 py-3.5 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 transition-colors mb-6 tracking-widest uppercase"
                                     >
                                         + ADD ANOTHER TREATMENT
                                     </button>
 
                             <form className="space-y-5 pb-8 md:pb-0">
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 w-full">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Guest Name</label>
                                     <input 
                                         type="text" required placeholder="John Doe"
                                         value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                                        className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     />
                                 </div>
-                                <div className="flex flex-col space-y-5">
-                                    <div className="space-y-1.5">
+                                <div className="flex flex-col space-y-5 w-full">
+                                    <div className="space-y-1.5 w-full">
                                         <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Date</label>
                                         <input 
                                             type="date" required 
                                             value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}
-                                            className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                            className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1.5 w-full">
                                         <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Time</label>
                                         <input 
                                             type="time" required 
                                             value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})}
-                                            className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                            className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
                                 </div>
@@ -612,7 +612,7 @@ export default function RitualsDetails() {
                                     <input 
                                         type="text" required placeholder="e.g. Four Seasons Sayan"
                                         value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}
-                                        className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
@@ -620,18 +620,18 @@ export default function RitualsDetails() {
                                     <input 
                                         type="text" placeholder="e.g. Villa 12"
                                         value={formData.room} onChange={e => setFormData({...formData, room: e.target.value})}
-                                        className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     />
                                 </div>
 
-                                <div className="space-y-1.5 pt-2">
+                                <div className="space-y-1.5 pt-2 w-full">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Promo Code</label>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full">
                                         <input 
                                             type="text" placeholder="Enter code"
                                             value={promoCodeInput} onChange={e => setPromoCodeInput(e.target.value.toUpperCase())}
                                             disabled={!!appliedPromo || isPromoLoading}
-                                            className="w-full bg-surface border border-border/50 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all uppercase"
+                                            className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all uppercase"
                                         />
                                         {appliedPromo ? (
                                             <button type="button" onClick={handleRemovePromo} className="px-5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors uppercase tracking-wider whitespace-nowrap">
