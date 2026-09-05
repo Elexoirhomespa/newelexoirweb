@@ -61,7 +61,6 @@ export default function Explore() {
                     <Link href="/" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-900 hover:bg-gray-100 transition-colors border border-gray-100">
                         <ArrowLeft size={20} />
                     </Link>
-                    <h1 className="ml-4 font-serif text-xl font-bold text-gray-900">Explore Treatments</h1>
                 </div>
 
                 {/* Search Bar & Filter (Airbnb Style) */}
