@@ -7,12 +7,13 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useSpa } from '@/context/SpaContext';
 import { supabase } from '@/lib/supabase';
+import { createSlug } from '@/utils/slugify';
 
 export default function RitualsDetails() {
     const params = useParams();
     const id = params?.id as string;
     const { treatments } = useSpa();
-    const treatment = treatments.find(t => t.id === id);
+    const treatment = treatments.find(t => t.id === id || createSlug(t.title) === id);
 
     const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
     const [cartItems, setCartItems] = useState<{
@@ -368,7 +369,7 @@ export default function RitualsDetails() {
                     
                     <div className="flex overflow-x-auto pb-6 -mx-6 px-6 md:mx-0 md:px-0 gap-4 no-scrollbar">
                         {relatedTreatments.map((item, idx) => (
-                            <Link href={`/rituals/${item.id}`} key={idx} className="w-72 shrink-0 block group outline-none">
+                            <Link href={`/rituals/${createSlug(item.title)}`} key={idx} className="w-72 shrink-0 block group outline-none">
                                 <div className={`rounded-[32px] bg-gradient-to-br ${item.bgPattern || 'from-secondary/80 to-highlight/40'} border border-border/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-700 flex flex-col h-full relative overflow-hidden group-hover:-translate-y-2 p-6`}>
                                     
                                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/60 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>

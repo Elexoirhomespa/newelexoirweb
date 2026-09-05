@@ -9,6 +9,7 @@ import SeoExpandedContent from '@/components/SeoExpandedContent';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import ServiceAreas from '@/components/ServiceAreas';
 import FaqSection from '@/components/FaqSection';
+import { createSlug } from '@/utils/slugify';
 
 // Dummy data for redesign structure
 const CATEGORIES = [
@@ -357,7 +358,7 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                     ) : (
                     <div ref={scrollContainerRef} className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar scroll-smooth">
                         {filteredAndSortedTreatments.map((item, idx) => (
-                            <Link href={`/rituals/${item.id}`} key={item.id} className="w-72 md:w-80 shrink-0 block group outline-none">
+                            <Link href={`/rituals/${createSlug(item.title)}`} key={item.id} className="w-72 md:w-80 shrink-0 block group outline-none">
                                 <div className={`rounded-[32px] md:rounded-[40px] bg-gradient-to-br ${item.bgPattern} border border-border/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-700 flex flex-col h-full relative overflow-hidden group-hover:-translate-y-2 p-6 md:p-8`}>
                                     
                                     {/* Subtle glowing orb for spa ambiance */}
