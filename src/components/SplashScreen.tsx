@@ -1,15 +1,21 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function SplashScreen({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin');
+
   // A completely Zero-React-Dependency splash screen!
   // This executes instantly during the HTML parsing phase, 
   // making it completely immune to slow network connections or JS bundle sizes.
   
-  const [isReactDismissed, setIsReactDismissed] = useState(false);
+  const [isReactDismissed, setIsReactDismissed] = useState(isAdminRoute);
 
   useEffect(() => {
+    if (isAdminRoute) return;
+
     // If it's already done before React hydrates, dismiss instantly
     if (sessionStorage.getItem("splashDone") === "1" && document.documentElement.classList.contains("skip-splash")) {
       setIsReactDismissed(true);
@@ -21,7 +27,11 @@ export default function SplashScreen({ children }: { children: React.ReactNode }
 
     window.addEventListener("splashComplete", handleSplashComplete);
     return () => window.removeEventListener("splashComplete", handleSplashComplete);
-  }, []);
+  }, [isAdminRoute]);
+
+  if (isAdminRoute) {
+    return <>{children}</>;
+  }
 
   const vanillaScript = `
     (function() {
