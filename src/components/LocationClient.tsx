@@ -732,8 +732,8 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                 className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                             />
                                         </div>
-                                        <div className="flex flex-col space-y-5 w-full">
-                                            <div className="space-y-1.5 w-full">
+                                        <div className="grid grid-cols-2 gap-4 w-full">
+                                            <div className="space-y-1.5">
                                                 <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Date</label>
                                                 <input 
                                                     type="date" required 
@@ -741,7 +741,7 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                     className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                                 />
                                             </div>
-                                            <div className="space-y-1.5 w-full">
+                                            <div className="space-y-1.5">
                                                 <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Time</label>
                                                 <input 
                                                     type="time" required 

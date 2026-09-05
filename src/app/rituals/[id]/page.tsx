@@ -419,7 +419,7 @@ export default function RitualsDetails() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-[#F8F9FA] w-full max-w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:my-auto sm:rounded-[28px] rounded-none p-5 sm:p-7 md:p-8 shadow-2xl relative flex flex-col box-border overflow-x-hidden"
+                            className="bg-[#F8F9FA] w-full max-w-full sm:max-w-lg h-[100dvh] sm:h-auto sm:max-h-[90vh] sm:my-auto sm:rounded-[28px] rounded-none p-5 sm:p-7 md:p-8 shadow-2xl relative flex flex-col box-border overflow-y-auto overflow-x-hidden no-scrollbar"
                         >
                             <button 
                                 onClick={() => setIsModalOpen(false)}
@@ -589,8 +589,8 @@ export default function RitualsDetails() {
                                         className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     />
                                 </div>
-                                <div className="flex flex-col space-y-5 w-full">
-                                    <div className="space-y-1.5 w-full">
+                                <div className="grid grid-cols-2 gap-4 w-full">
+                                    <div className="space-y-1.5">
                                         <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Date</label>
                                         <input 
                                             type="date" required 
@@ -598,7 +598,7 @@ export default function RitualsDetails() {
                                             className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
-                                    <div className="space-y-1.5 w-full">
+                                    <div className="space-y-1.5">
                                         <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Time</label>
                                         <input 
                                             type="time" required 
