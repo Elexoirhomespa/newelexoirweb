@@ -520,7 +520,7 @@ export default function Home() {
                                         </div>
                                         <div className="flex flex-col flex-grow px-2 pt-3 pb-2">
                                             <p className="text-gray-400 text-[10px] font-bold mb-1 line-clamp-1 uppercase tracking-widest">{treatment.category}</p>
-                                            <h4 className="font-bold text-gray-900 text-[13px] line-clamp-1 mb-3">{treatment.title}</h4>
+                                            <h4 className="font-bold text-gray-900 text-[13px] mb-3">{treatment.title}</h4>
                                             <div className="flex items-center justify-between bg-gray-50 rounded-full p-1 pl-3 mt-auto border border-gray-100">
                                                 <span className="font-semibold text-gray-900 text-[12px]">
                                                     IDR {parseInt((treatment.options[0]?.price || '0').replace(/,/g, '')).toLocaleString('en-US')}

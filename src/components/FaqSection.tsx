@@ -102,9 +102,9 @@ export default function FaqSection() {
             >
               <button 
                 onClick={() => setOpenIdx(openIdx === idx ? null : idx)}
-                className="w-full flex items-center justify-between p-5 md:p-8 text-left focus:outline-none"
+                className="w-full flex items-center justify-between p-6 md:p-10 text-left focus:outline-none"
               >
-                <h3 className="font-bold text-sm md:text-base text-primary pr-6 md:pr-8">{faq.q}</h3>
+                <h3 className="font-bold text-base md:text-lg text-primary pr-6 md:pr-8">{faq.q}</h3>
                 <div className={`w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-colors duration-300 ${openIdx === idx ? 'bg-primary text-white border-primary' : 'bg-surface text-primary border-border'}`}>
                   {openIdx === idx ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </div>
@@ -118,8 +118,8 @@ export default function FaqSection() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <div className="px-5 md:px-8 pb-5 md:pb-8 pt-0">
-                      <p className="text-sm md:text-base text-text-muted font-light leading-relaxed">
+                    <div className="px-6 md:px-10 pb-6 md:pb-10 pt-0">
+                      <p className="text-base md:text-lg text-text-muted font-normal leading-relaxed">
                         {faq.a}
                       </p>
                     </div>

@@ -44,7 +44,7 @@ export default function ServiceAreas({ hideHeader = false }: { hideHeader?: bool
       )}
 
       {/* Map Integration */}
-      <div className={`w-full ${hideHeader ? 'h-[320px] sm:h-[350px] mb-8 mt-2' : 'h-[260px] sm:h-[320px] md:h-[400px] mb-6 md:mb-8'} md:h-[400px] rounded-[24px] md:rounded-[36px] overflow-hidden shadow-soft border border-border/50`}>
+      <div className={`w-full ${hideHeader ? 'h-[360px] sm:h-[400px] mb-8 mt-2' : 'h-[320px] sm:h-[380px] md:h-[450px] mb-6 md:mb-8'} md:h-[450px] rounded-[24px] md:rounded-[36px] overflow-hidden shadow-soft border border-border/50`}>
         <ServiceMap />
       </div>
 
@@ -52,17 +52,17 @@ export default function ServiceAreas({ hideHeader = false }: { hideHeader?: bool
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {areas.map((area, idx) => (
           <Link href={`/explore?location=${encodeURIComponent(area.name)}`} key={idx} className="group block outline-none">
-            <div className="bg-white/80 backdrop-blur-sm border border-border/50 rounded-[20px] md:rounded-3xl p-4 md:p-6 transition-all duration-300 hover:shadow-[0_12px_30px_rgb(0,0,0,0.06)] hover:border-primary/30 hover:-translate-y-1 h-full flex flex-col justify-between">
+            <div className="bg-white/80 backdrop-blur-sm border border-border/50 rounded-[20px] md:rounded-3xl p-5 md:p-8 transition-all duration-300 hover:shadow-[0_12px_30px_rgb(0,0,0,0.06)] hover:border-primary/30 hover:-translate-y-1 h-full flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-2 md:mb-3">
-                  <h3 className="font-serif text-base sm:text-lg md:text-xl text-primary font-medium">{area.name}</h3>
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface border border-border/50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300 shrink-0">
-                    <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <h3 className="font-serif text-lg sm:text-xl md:text-2xl text-primary font-medium">{area.name}</h3>
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface border border-border/50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300 shrink-0">
+                    <MapPin className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                 </div>
-                <p className="text-[11px] md:text-xs text-text-muted leading-relaxed font-light line-clamp-2 md:line-clamp-none">{area.desc}</p>
+                <p className="text-xs md:text-sm text-text-muted leading-relaxed font-light line-clamp-3 md:line-clamp-none mb-4 md:mb-6">{area.desc}</p>
               </div>
-              <div className="mt-3 pt-2 md:pt-3 border-t border-border/40 flex items-center justify-between text-[10px] md:text-[11px] font-bold text-primary/70 uppercase tracking-wider group-hover:text-primary transition-colors">
+              <div className="mt-auto pt-3 md:pt-4 border-t border-border/40 flex items-center justify-between text-[11px] md:text-xs font-bold text-primary/70 uppercase tracking-wider group-hover:text-primary transition-colors">
                 <span>View Treatments</span>
                 <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
