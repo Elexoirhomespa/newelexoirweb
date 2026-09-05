@@ -490,41 +490,107 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* Pinned / Most Booked Treatments */}
+                {/* Search Bar & Filter (Airbnb Style) */}
+                <div className="mb-4 mt-2 px-1 relative z-30">
+                    <div className="flex items-center gap-3 w-full">
+                        <div className="flex-1 bg-white rounded-full shadow-[0_4px_16px_rgb(0,0,0,0.08)] border border-gray-100 h-14 flex items-center px-4 hover:shadow-[0_4px_20px_rgb(0,0,0,0.12)] transition-shadow">
+                            <Search className="w-5 h-5 text-gray-800 shrink-0 ml-1" strokeWidth={2.5} />
+                            <div className="flex flex-col ml-4">
+                                <span className="text-[13px] font-bold text-gray-900 leading-tight">Where to? Search treatments...</span>
+                                <span className="text-[11px] text-gray-500 font-medium">Ubud • Any date • Add guests</span>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
+                            className="w-14 h-14 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center shrink-0 hover:bg-gray-50 transition-colors"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-800"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                    </div>
+
+                    {/* Price Filter Dropdown */}
+                    <AnimatePresence>
+                        {isPriceFilterOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute top-full right-0 mt-3 w-[calc(100%-8px)] mx-1 md:w-72 bg-white rounded-2xl p-5 shadow-[0_20px_40px_rgb(0,0,0,0.12)] border border-gray-100 z-30"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Max Price</span>
+                                    <span className="text-sm font-serif text-primary font-medium">Rp {maxPrice.toLocaleString('en-US')}</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="150000" 
+                                    max="1500000" 
+                                    step="50000"
+                                    value={maxPrice}
+                                    onChange={(e) => setMaxPrice(parseInt(e.target.value))}
+                                    className="w-full accent-primary h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
+                                />
+                                <div className="flex justify-between text-[10px] text-text-muted mt-2 font-medium tracking-wider">
+                                    <span>150k</span>
+                                    <span>1.5m</span>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* Categories Row (Airbnb Style) */}
+                <div className="mb-6 relative z-20 bg-[#F8F9FA] sticky top-0 py-2 border-b border-gray-100/50">
+                    <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0">
+                        {CATEGORIES.map((cat) => {
+                            const isActive = activeCategory === cat.id;
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setActiveCategory(cat.id)}
+                                    className={`flex items-center justify-center px-4 py-2 rounded-full whitespace-nowrap transition-colors border shrink-0 ${
+                                        isActive 
+                                            ? 'bg-gray-900 text-white border-gray-900 shadow-sm' 
+                                            : 'bg-transparent text-gray-500 border-transparent hover:border-gray-200 hover:text-gray-900'
+                                    }`}
+                                >
+                                    <span className={`text-[13px] ${isActive ? 'font-bold' : 'font-medium'}`}>{cat.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Pinned / Most Booked Treatments (Small Cards) */}
                 {showPinnedTreatments && (
-                    <div className="mb-8 w-full relative z-20">
-                        <h3 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Most Booked</h3>
+                    <div className="mb-10 w-full relative z-20">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-gray-900 tracking-tight">Most Booked</h3>
+                        </div>
                         <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 pb-4 snap-x snap-mandatory">
                             {treatments.filter(t => t.is_pinned).map(treatment => (
-                                <Link href={`/rituals/${createSlug(treatment.title)}`} key={treatment.id} className="w-[65vw] sm:w-[220px] md:w-[280px] shrink-0 snap-center md:snap-align-none outline-none">
-                                    <div className="bg-white border border-[#E5E7EB] rounded-[24px] p-2 flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group">
-                                        <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-[16px]">
+                                <Link href={`/rituals/${createSlug(treatment.title)}`} key={treatment.id} className="w-[180px] sm:w-[220px] shrink-0 snap-center md:snap-align-none outline-none">
+                                    <div className="flex flex-col gap-2 group cursor-pointer">
+                                        <div className="aspect-[4/3] relative bg-[#F5F5F7] overflow-hidden rounded-2xl shadow-[0_2px_12px_rgb(0,0,0,0.06)] group-hover:shadow-[0_8px_24px_rgb(0,0,0,0.12)] transition-shadow">
                                             {treatment.pinned_image ? (
                                                 <Image 
                                                     src={treatment.pinned_image} 
                                                     alt={treatment.title} 
-                                                    width={400} 
-                                                    height={300} 
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                    unoptimized={true}
-                                                    sizes="(max-width: 640px) 65vw, (max-width: 768px) 220px, 280px"
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                    fill
+                                                    sizes="(max-width: 640px) 180px, 220px"
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-500" 
                                                 />
                                             ) : (
-                                                <div className={`w-full h-full bg-gradient-to-br ${treatment.bgPattern} opacity-30 group-hover:opacity-50 transition-opacity duration-500`}></div>
+                                                <div className={`w-full h-full bg-gradient-to-br ${treatment.bgPattern} opacity-50`}></div>
                                             )}
                                         </div>
-                                        <div className="flex flex-col flex-grow px-2 pt-3 pb-2">
-                                            <p className="text-gray-400 text-[10px] font-bold mb-1 line-clamp-1 uppercase tracking-widest">{treatment.category}</p>
-                                            <h4 className="font-bold text-gray-900 text-[13px] line-clamp-1 mb-3">{treatment.title}</h4>
-                                            <div className="flex items-center justify-between bg-gray-50 rounded-full p-1 pl-3 mt-auto border border-gray-100">
-                                                <span className="font-semibold text-gray-900 text-[12px]">
+                                        <div className="flex flex-col px-1 pt-1">
+                                            <p className="text-gray-900 text-[14px] font-bold line-clamp-1">{treatment.title}</p>
+                                            <p className="text-gray-500 text-[12px] font-medium mt-0.5"><Clock className="inline w-3 h-3 mr-1 mb-0.5 text-gray-400"/>{treatment.options[0]?.duration} MINS</p>
+                                            <div className="mt-1 flex items-center">
+                                                <span className="font-semibold text-gray-900 text-[13px]">
                                                     IDR {parseInt((treatment.options[0]?.price || '0').replace(/,/g, '')).toLocaleString('en-US')}
                                                 </span>
-                                                <div className="w-7 h-7 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center hover:bg-black transition-colors shrink-0 shadow-sm">
-                                                    <Plus size={14} strokeWidth={2.5} />
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -534,126 +600,26 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* Search & Categories Row */}
-                <div className="mb-6 flex flex-col md:flex-row md:items-end justify-start gap-6 md:gap-4 relative z-20">
-                    <div className="max-w-full overflow-hidden">
-                        <h3 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Popular Category</h3>
-                        <div className="flex overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0 gap-3 no-scrollbar">
-                            {CATEGORIES.map((cat) => {
-                                const isActive = activeCategory === cat.id;
-                                return (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => setActiveCategory(cat.id)}
-                                        className={`flex items-center justify-center px-6 py-3 rounded-full whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                                            isActive 
-                                                ? 'bg-primary text-white shadow-[0_8px_20px_rgb(0,0,0,0.12)] scale-[1.02] border border-primary' 
-                                                : 'bg-white/40 backdrop-blur-md text-primary border border-white/60 hover:bg-white/80 hover:scale-[1.02]'
-                                        }`}
-                                    >
-                                        <span className="text-sm font-semibold tracking-wide">{cat.label}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Search Bar (Desktop Only - Next to Categories) */}
-                    <div className="hidden md:block relative w-full md:w-80 shrink-0 md:mb-4">
-                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none h-[54px]">
-                            <Search className="h-5 w-5 text-text-muted" />
-                        </div>
-                        <input 
-                            type="text" 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search your favourite treatment..." 
-                            className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl h-[54px] pl-12 pr-12 text-sm text-primary shadow-soft focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-text-muted"
-                        />
-                        <button 
-                            onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
-                            title="Filter by price"
-                            className={`absolute top-2 right-2 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isPriceFilterOpen ? 'bg-primary text-white shadow-md' : 'bg-secondary/30 text-primary hover:bg-secondary/50'}`}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        </button>
-
-                        {/* Price Filter Dropdown */}
-                        <AnimatePresence>
-                            {isPriceFilterOpen && (
-                                <motion.div 
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="absolute top-full right-0 mt-3 w-64 md:w-72 bg-white/95 backdrop-blur-xl border border-white/50 rounded-2xl p-5 shadow-[0_20px_40px_rgb(0,0,0,0.12)] z-30"
-                                >
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Max Price</span>
-                                        <span className="text-sm font-serif text-primary font-medium">Rp {maxPrice.toLocaleString('en-US')}</span>
-                                    </div>
-                                    <input 
-                                        type="range" 
-                                        min="150000" 
-                                        max="1500000" 
-                                        step="50000"
-                                        value={maxPrice}
-                                        onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                                        className="w-full accent-primary h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
-                                    />
-                                    <div className="flex justify-between text-[10px] text-text-muted mt-2 font-medium tracking-wider">
-                                        <span>150k</span>
-                                        <span>1.5m</span>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-
-                {/* Popular Treatments Scroll */}
+                {/* Popular Treatments (2-Column Grid) */}
                 <div className="mb-24 relative group">
-                    {/* Navigation Buttons (Desktop only) */}
-                    <button 
-                        onClick={scrollLeft}
-                        className="hidden md:flex absolute left-[-20px] lg:left-[-40px] top-[40%] -translate-y-1/2 w-12 h-12 bg-white border border-border/50 rounded-full shadow-lg items-center justify-center z-20 text-primary hover:scale-105 transition-transform"
-                    >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-                    <button 
-                        onClick={scrollRight}
-                        className="hidden md:flex absolute right-[-20px] lg:right-[-40px] top-[40%] -translate-y-1/2 w-12 h-12 bg-white border border-border/50 rounded-full shadow-lg items-center justify-center z-20 text-primary hover:scale-105 transition-transform"
-                    >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 tracking-tight">Popular Category</h3>
+                        <Link href="/rituals" className="text-[13px] font-semibold text-gray-900 underline hover:text-gray-600 transition-colors">See More</Link>
+                    </div>
 
-                    <div ref={scrollContainerRef} className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar scroll-smooth">
-                        {filteredAndSortedTreatments.map((item, idx) => (
-                            <Link href={`/rituals/${createSlug(item.title)}`} key={item.id} className="w-72 md:w-80 shrink-0 block group outline-none">
-                                <div className={`rounded-[32px] md:rounded-[40px] bg-gradient-to-br ${item.bgPattern} border border-border/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-700 flex flex-col h-full relative overflow-hidden group-hover:-translate-y-2 p-6 md:p-8`}>
-                                    
-                                    {/* Subtle glowing orb for spa ambiance */}
-                                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/60 blur-[30px] rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-150"></div>
-
-                                    <div className="mb-8 flex items-start justify-between relative z-10">
-                                        <div className="bg-white/60 backdrop-blur-sm border border-primary/10 text-primary px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm">
-                                            {item.category}
-                                        </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-8">
+                        {filteredAndSortedTreatments.map((item) => (
+                            <Link href={`/rituals/${createSlug(item.title)}`} key={item.id} className="w-full block group outline-none">
+                                <div className="flex flex-col gap-2 h-full cursor-pointer">
+                                    <div className={`aspect-square relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.bgPattern} shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)] shadow-sm group-hover:shadow-[0_8px_24px_rgb(0,0,0,0.12)] transition-shadow`}>
+                                        <div className="absolute inset-0 opacity-40 mix-blend-overlay"></div>
+                                        {/* Optional image could go here, currently using gradient patterns */}
                                     </div>
-
-                                    <div className="relative z-10 flex-grow flex flex-col">
-                                        <h4 className="font-serif text-xl font-medium text-primary mb-3 leading-tight">{item.title}</h4>
-                                        <p className="text-xs text-text-muted leading-relaxed font-light mb-6 flex-grow line-clamp-4">{item.desc.charAt(0).toUpperCase() + item.desc.slice(1).toLowerCase()}</p>
-                                        
-                                        <div className="mt-auto pt-5 border-t border-border/50">
-                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-text-muted mb-3 uppercase tracking-widest">
-                                                <Clock className="w-3.5 h-3.5" /> {item.options[0]?.duration} MINS
-                                            </div>
-                                            <div className="flex items-center justify-between bg-gray-50/80 backdrop-blur-sm rounded-full p-1 pl-4 border border-gray-100">
-                                                <span className="font-semibold text-gray-900 text-[14px]">IDR {parseInt(item.options[0]?.price.replace(/,/g, '') || '0').toLocaleString('en-US')}</span>
-                                                <button className="w-10 h-10 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center hover:bg-black transition-colors shrink-0 shadow-sm">
-                                                    <Plus size={20} strokeWidth={2.5} />
-                                                </button>
-                                            </div>
+                                    <div className="flex flex-col flex-grow px-1 pt-1">
+                                        <h4 className="font-bold text-gray-900 text-[14px] line-clamp-2 leading-tight">{item.title}</h4>
+                                        <p className="text-gray-500 text-[12px] font-medium mt-1"><Clock className="inline w-3 h-3 mr-1 mb-0.5 text-gray-400"/>{item.options[0]?.duration} MINS</p>
+                                        <div className="mt-1 flex items-center mt-auto pt-1">
+                                            <span className="font-semibold text-gray-900 text-[13px]">IDR {parseInt(item.options[0]?.price.replace(/,/g, '') || '0').toLocaleString('en-US')}</span>
                                         </div>
                                     </div>
                                 </div>
