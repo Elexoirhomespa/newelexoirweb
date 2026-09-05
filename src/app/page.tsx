@@ -10,6 +10,7 @@ import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext
 import SeoExpandedContent from '@/components/SeoExpandedContent';
 import ServiceAreas from '@/components/ServiceAreas';
 import FaqSection from '@/components/FaqSection';
+import Footer from '@/components/Footer';
 import { createSlug } from '@/utils/slugify';
 
 // Dummy data for redesign structure
@@ -539,7 +540,7 @@ export default function Home() {
                 {/* Search & Categories Row */}
                 <div className="mb-6 flex flex-col md:flex-row md:items-end justify-start gap-6 md:gap-4 relative z-20">
                     <div className="max-w-full overflow-hidden w-full">
-                        <div className="flex items-center justify-between mb-4 w-full pr-6 md:pr-0">
+                        <div className="flex items-center justify-between mb-4 w-full md:pr-0">
                             <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Popular Category</h3>
                             <Link href="/explore" className="inline-flex items-center justify-center bg-white border border-border/80 text-primary px-4 py-2 rounded-full text-[11px] font-bold tracking-wide hover:bg-gray-50 hover:shadow-sm transition-all whitespace-nowrap ml-2">
                                 View All Treatments
@@ -678,6 +679,9 @@ export default function Home() {
                 <div className="mb-24 max-w-7xl mx-auto px-6">
                     <FaqSection />
                 </div>
+                
+                {/* Footer Section */}
+                <Footer />
 
                 {/* The Elexoir Boutique Section */}
                 {products.length > 0 && (
