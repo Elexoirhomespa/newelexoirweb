@@ -49,7 +49,7 @@ export default function ServiceAreas({ hideHeader = false }: { hideHeader?: bool
       </div>
 
       {/* Responsive Grid Cards (Visible on both Mobile & Desktop) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {areas.map((area, idx) => (
           <Link href={`/explore?location=${encodeURIComponent(area.name)}`} key={idx} className="group block outline-none">
             <div className="bg-white/80 backdrop-blur-sm border border-border/50 rounded-[20px] md:rounded-3xl p-4 md:p-6 transition-all duration-300 hover:shadow-[0_12px_30px_rgb(0,0,0,0.06)] hover:border-primary/30 hover:-translate-y-1 h-full flex flex-col justify-between">

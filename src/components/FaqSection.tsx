@@ -5,6 +5,7 @@ import { Plus, Minus } from 'lucide-react';
 
 export default function FaqSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const faqs = [
     {
@@ -94,7 +95,7 @@ export default function FaqSection() {
         </div>
 
         <div className="space-y-3 md:space-y-4">
-          {faqs.map((faq, idx) => (
+          {faqs.slice(0, showAll ? faqs.length : 5).map((faq, idx) => (
             <div 
               key={idx} 
               className={`bg-white border ${openIdx === idx ? 'border-primary/30 shadow-[0_10px_30px_rgb(0,0,0,0.04)]' : 'border-border/50'} rounded-3xl overflow-hidden transition-all duration-300`}
@@ -128,6 +129,17 @@ export default function FaqSection() {
             </div>
           ))}
         </div>
+
+        {!showAll && faqs.length > 5 && (
+          <div className="mt-8 md:mt-12 flex justify-center">
+            <button 
+              onClick={() => setShowAll(true)}
+              className="inline-flex items-center justify-center bg-white border border-border/80 text-primary px-8 py-3.5 rounded-full text-sm font-bold tracking-wider hover:bg-gray-50 hover:shadow-md transition-all duration-300"
+            >
+              SEE MORE FAQS
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
