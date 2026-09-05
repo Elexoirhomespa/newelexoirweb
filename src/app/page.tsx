@@ -539,9 +539,11 @@ export default function Home() {
                 {/* Search & Categories Row */}
                 <div className="mb-6 flex flex-col md:flex-row md:items-end justify-start gap-6 md:gap-4 relative z-20">
                     <div className="max-w-full overflow-hidden w-full">
-                        <div className="flex items-center justify-between mb-3 w-full pr-6 md:pr-0">
+                        <div className="flex items-center justify-between mb-4 w-full pr-6 md:pr-0">
                             <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Popular Category</h3>
-                            <Link href="/explore" className="text-[11px] font-semibold text-gray-900 underline hover:text-gray-600 transition-colors whitespace-nowrap ml-2">View All Treatments</Link>
+                            <Link href="/explore" className="inline-flex items-center justify-center bg-white border border-border/80 text-primary px-4 py-2 rounded-full text-[11px] font-bold tracking-wide hover:bg-gray-50 hover:shadow-sm transition-all whitespace-nowrap ml-2">
+                                View All Treatments
+                            </Link>
                         </div>
                         <div className="flex overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0 gap-3 no-scrollbar">
                             {CATEGORIES.map((cat) => {
@@ -668,12 +670,12 @@ export default function Home() {
                 </div>
 
                 {/* Service Areas Section */}
-                <div className="mb-24 mt-8 px-6 md:px-0">
+                <div className="mb-24 mt-8 max-w-7xl mx-auto px-6">
                     <ServiceAreas />
                 </div>
 
                 {/* FAQ Section */}
-                <div className="mb-24 px-6 md:px-0">
+                <div className="mb-24 max-w-7xl mx-auto px-6">
                     <FaqSection />
                 </div>
 
