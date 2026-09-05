@@ -36,12 +36,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = headersList.get("host") || "www.elexoirhomespaubud.com";
   const isBaliDomain = (host.includes("homespaubud") || host.includes("ubudhomespa")) && !host.includes("elexoir");
 
-  const name = isBaliDomain ? "Home Spa Ubud" : "Elexoir Home Spa";
+  const name = isBaliDomain ? "Ubud Home Spa" : "Elexoir Home Spa Ubud";
   const url = isBaliDomain ? "https://www.homespaubud.com" : "https://www.elexoirhomespaubud.com";
-  const title = isBaliDomain ? "Home Spa Ubud | Luxury Mobile Spa" : "Elexoir Home Spa | Premium Mobile Spa & In-Villa Massage Ubud";
+  const title = isBaliDomain ? "Ubud Home Spa | Luxury Mobile Spa" : "Elexoir Home Spa Ubud | Premium Mobile Spa & In-Villa Massage";
   const description = isBaliDomain
     ? "Looking for the best massage in Bali? We deliver premium, 5-star professional spa treatments directly to your private villa or hotel. Serving Seminyak, Canggu, Kuta, and Nusa Dua. Book now for ultimate relaxation!"
     : "Experience the top-rated luxury mobile spa in Bali. Professional in-villa massages, couples treatments & holistic rituals delivered directly to your hotel or villa in Ubud. Book your 5-star sanctuary today!";
+  const iconUrl = isBaliDomain ? '/homespa.png' : '/elexoir.png';
 
   return {
     metadataBase: new URL(url),
@@ -65,9 +66,15 @@ export async function generateMetadata(): Promise<Metadata> {
       telephone: false,
     },
     icons: {
-      icon: isBaliDomain ? '/bali-logo.png' : '/logo.png',
-      shortcut: isBaliDomain ? '/bali-logo.png' : '/logo.png',
-      apple: isBaliDomain ? '/bali-logo.png' : '/logo.png',
+      icon: [
+        { url: iconUrl, type: 'image/png' }
+      ],
+      shortcut: [
+        { url: iconUrl, type: 'image/png' }
+      ],
+      apple: [
+        { url: iconUrl, type: 'image/png' }
+      ]
     },
     openGraph: {
       title: title,
@@ -183,6 +190,17 @@ export default async function RootLayout({
             gtag('config', 'G-9CFBSVYEY9');
           `}
         </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": name,
+              "url": url,
+            })
+          }}
+        />
       </head>
 
       <body
