@@ -159,7 +159,7 @@ function ExploreContent() {
                                             )}
                                         </div>
                                         <div className="flex flex-col px-1 pt-1">
-                                            <p className="text-gray-900 text-[14px] font-bold line-clamp-1">{treatment.title}</p>
+                                            <p className="text-gray-900 text-[14px] font-bold">{treatment.title}</p>
                                             <p className="text-gray-500 text-[12px] font-medium mt-0.5"><Clock className="inline w-3 h-3 mr-1 mb-0.5 text-gray-400"/>{treatment.options[0]?.duration} MINS</p>
                                             <div className="mt-1 flex items-center">
                                                 <span className="font-semibold text-gray-900 text-[13px]">

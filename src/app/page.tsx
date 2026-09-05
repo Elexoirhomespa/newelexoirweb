@@ -671,17 +671,14 @@ export default function Home() {
                 </div>
 
                 {/* Service Areas Section */}
-                <div className="mb-24 mt-8 max-w-7xl mx-auto px-6">
+                <div className="mb-24 mt-8 px-6 md:px-0">
                     <ServiceAreas />
                 </div>
 
                 {/* FAQ Section */}
-                <div className="mb-24 max-w-7xl mx-auto px-6">
+                <div className="mb-24 px-6 md:px-0">
                     <FaqSection />
                 </div>
-                
-                {/* Footer Section */}
-                <Footer />
 
                 {/* The Elexoir Boutique Section */}
                 {products.length > 0 && (
