@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Clock, ArrowLeft } from 'lucide-react';
+import { Search, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSpa } from '@/context/SpaContext';
@@ -54,67 +54,59 @@ export default function Explore() {
 
     return (
         <main className="min-h-screen bg-white pb-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                
-                {/* Header Back Button */}
-                <div className="mb-6 flex items-center">
-                    <Link href="/" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-900 hover:bg-gray-100 transition-colors border border-gray-100">
-                        <ArrowLeft size={20} />
-                    </Link>
-                </div>
-
-                {/* Search Bar & Filter (Airbnb Style) */}
-                <div className="mb-4 mt-2 px-1 relative z-30">
-                    <div className="flex items-center gap-3 w-full">
-                        <div className="flex-1 bg-white rounded-full shadow-[0_4px_16px_rgb(0,0,0,0.08)] border border-gray-100 h-14 flex items-center px-4 hover:shadow-[0_4px_20px_rgb(0,0,0,0.12)] transition-shadow">
-                            <Search className="w-5 h-5 text-gray-800 shrink-0 ml-1" strokeWidth={2.5} />
-                            <div className="flex flex-col ml-4">
-                                <span className="text-[13px] font-bold text-gray-900 leading-tight">Where to? Search treatments...</span>
-                                <span className="text-[11px] text-gray-500 font-medium">Ubud • Any date • Add guests</span>
+            {/* Search & Categories Sticky Header */}
+            <div className="sticky top-0 z-40 bg-white pt-4 pb-2 border-b border-gray-100/50 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="mb-4 mt-2 relative z-30">
+                        <div className="flex items-center gap-3 w-full">
+                            <div className="flex-1 bg-white rounded-full shadow-[0_4px_16px_rgb(0,0,0,0.08)] border border-gray-100 h-14 flex items-center px-4 hover:shadow-[0_4px_20px_rgb(0,0,0,0.12)] transition-shadow">
+                                <Search className="w-5 h-5 text-gray-800 shrink-0 ml-1" strokeWidth={2.5} />
+                                <div className="flex flex-col ml-4">
+                                    <span className="text-[13px] font-bold text-gray-900 leading-tight">Where to? Search treatments...</span>
+                                    <span className="text-[11px] text-gray-500 font-medium">Ubud • Any date • Add guests</span>
+                                </div>
                             </div>
+                            <button 
+                                onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
+                                className="w-14 h-14 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center shrink-0 hover:bg-gray-50 transition-colors"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-800"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            </button>
                         </div>
-                        <button 
-                            onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
-                            className="w-14 h-14 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center shrink-0 hover:bg-gray-50 transition-colors"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-800"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        </button>
+
+                        {/* Price Filter Dropdown */}
+                        <AnimatePresence>
+                            {isPriceFilterOpen && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute top-full right-0 mt-3 w-[calc(100%-8px)] mx-1 md:w-72 bg-white rounded-2xl p-5 shadow-[0_20px_40px_rgb(0,0,0,0.12)] border border-gray-100 z-30"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Max Price</span>
+                                        <span className="text-sm font-serif text-primary font-medium">Rp {maxPrice.toLocaleString('en-US')}</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="150000" 
+                                        max="1500000" 
+                                        step="50000"
+                                        value={maxPrice}
+                                        onChange={(e) => setMaxPrice(parseInt(e.target.value))}
+                                        className="w-full accent-primary h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <div className="flex justify-between text-[10px] text-text-muted mt-2 font-medium tracking-wider">
+                                        <span>150k</span>
+                                        <span>1.5m</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Price Filter Dropdown */}
-                    <AnimatePresence>
-                        {isPriceFilterOpen && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="absolute top-full right-0 mt-3 w-[calc(100%-8px)] mx-1 md:w-72 bg-white rounded-2xl p-5 shadow-[0_20px_40px_rgb(0,0,0,0.12)] border border-gray-100 z-30"
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Max Price</span>
-                                    <span className="text-sm font-serif text-primary font-medium">Rp {maxPrice.toLocaleString('en-US')}</span>
-                                </div>
-                                <input 
-                                    type="range" 
-                                    min="150000" 
-                                    max="1500000" 
-                                    step="50000"
-                                    value={maxPrice}
-                                    onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                                    className="w-full accent-primary h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
-                                />
-                                <div className="flex justify-between text-[10px] text-text-muted mt-2 font-medium tracking-wider">
-                                    <span>150k</span>
-                                    <span>1.5m</span>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* Categories Row (Airbnb Style) */}
-                <div className="mb-6 relative z-20 bg-white sticky top-0 py-2 border-b border-gray-100/50">
-                    <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+                    {/* Categories Row */}
+                    <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 pt-2 pb-1">
                         {CATEGORIES.map((cat) => {
                             const isActive = activeCategory === cat.id;
                             return (
@@ -133,14 +125,17 @@ export default function Explore() {
                         })}
                     </div>
                 </div>
+            </div>
 
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                
                 {/* Pinned / Most Booked Treatments (Small Cards) */}
                 {showPinnedTreatments && (
                     <div className="mb-10 w-full relative z-20">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-900 tracking-tight">Most Booked</h3>
                         </div>
-                        <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 pb-4 snap-x snap-mandatory">
+                        <div className="flex overflow-x-auto gap-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 pb-4 snap-x snap-mandatory">
                             {treatments.filter(t => t.is_pinned).map(treatment => (
                                 <Link href={`/rituals/${createSlug(treatment.title)}`} key={treatment.id} className="w-[180px] sm:w-[220px] shrink-0 snap-center md:snap-align-none outline-none">
                                     <div className="flex flex-col gap-2 group cursor-pointer">
@@ -182,15 +177,24 @@ export default function Explore() {
                     <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                         {filteredAndSortedTreatments.map((item) => (
                             <Link href={`/rituals/${createSlug(item.title)}`} key={item.id} className="w-full block group outline-none">
-                                <div className="flex flex-col gap-2 h-full cursor-pointer">
-                                    <div className={`aspect-square relative overflow-hidden rounded-2xl bg-gradient-to-br ${item.bgPattern} shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)] shadow-sm group-hover:shadow-[0_8px_24px_rgb(0,0,0,0.12)] transition-shadow`}>
-                                        <div className="absolute inset-0 opacity-40 mix-blend-overlay"></div>
-                                    </div>
-                                    <div className="flex flex-col flex-grow px-1 pt-1">
-                                        <h4 className="font-bold text-gray-900 text-[14px] line-clamp-2 leading-tight">{item.title}</h4>
-                                        <p className="text-gray-500 text-[12px] font-medium mt-1"><Clock className="inline w-3 h-3 mr-1 mb-0.5 text-gray-400"/>{item.options[0]?.duration} MINS</p>
-                                        <div className="mt-1 flex items-center mt-auto pt-1">
-                                            <span className="font-semibold text-gray-900 text-[13px]">IDR {parseInt(item.options[0]?.price.replace(/,/g, '') || '0').toLocaleString('en-US')}</span>
+                                <div className={`rounded-2xl bg-gradient-to-br ${item.bgPattern} flex flex-col h-full relative overflow-hidden p-3 aspect-[4/5] shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-black/5 group-hover:-translate-y-1 duration-300`}>
+                                    <div className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"></div>
+                                    <div className="relative z-10 flex flex-col h-full">
+                                        <div className="bg-white/60 backdrop-blur-sm text-primary px-2 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase self-start mb-2 shadow-sm border border-white/50">
+                                            {item.category}
+                                        </div>
+                                        <h4 className="font-bold text-gray-900 text-[14px] leading-tight mb-auto line-clamp-3">{item.title}</h4>
+                                        
+                                        <div className="mt-auto pt-2 border-t border-black/10">
+                                            <div className="flex items-center gap-1 text-[10px] font-bold text-gray-800 mb-2 uppercase tracking-widest">
+                                                <Clock className="w-3.5 h-3.5" /> {item.options[0]?.duration} MINS
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/70 backdrop-blur-sm rounded-full p-1 pl-2.5 border border-white/50">
+                                                <span className="font-semibold text-gray-900 text-[11px]">IDR {parseInt(item.options[0]?.price.replace(/,/g, '') || '0').toLocaleString('en-US')}</span>
+                                                <div className="w-6 h-6 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center shrink-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
