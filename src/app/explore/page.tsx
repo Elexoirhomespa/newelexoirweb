@@ -147,6 +147,7 @@ export default function Explore() {
                                                     src={treatment.pinned_image} 
                                                     alt={treatment.title} 
                                                     fill
+                                                    unoptimized={true}
                                                     sizes="(max-width: 640px) 180px, 220px"
                                                     className="object-cover group-hover:scale-105 transition-transform duration-500" 
                                                 />
