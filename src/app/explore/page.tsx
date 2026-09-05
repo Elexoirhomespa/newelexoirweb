@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import { Search, Clock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,11 +17,13 @@ const CATEGORIES = [
     { id: 'treatment', label: 'Treatment' },
 ];
 
-export default function Explore() {
+function ExploreContent() {
     const { treatments } = useSpa();
+    const searchParams = useSearchParams();
+    const locationQuery = searchParams.get('location') || '';
 
     const [activeCategory, setActiveCategory] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(locationQuery);
     const [maxPrice, setMaxPrice] = useState(1500000);
     const [isPriceFilterOpen, setIsPriceFilterOpen] = useState(false);
 
@@ -208,5 +211,13 @@ export default function Explore() {
 
             </div>
         </main>
+    );
+}
+
+export default function Explore() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white pb-20 pt-40 flex items-center justify-center"><div className="w-8 h-8 rounded-full border-4 border-gray-200 border-t-primary animate-spin"></div></div>}>
+            <ExploreContent />
+        </Suspense>
     );
 }
