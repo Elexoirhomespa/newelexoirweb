@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { useSpa, Campaign, Treatment, sortCampaigns } from '@/context/SpaContext';
 import SeoExpandedContent from '@/components/SeoExpandedContent';
+import ServiceAreas from '@/components/ServiceAreas';
 import { createSlug } from '@/utils/slugify';
 
 // Dummy data for redesign structure
@@ -539,7 +540,7 @@ export default function Home() {
                     <div className="max-w-full overflow-hidden w-full">
                         <div className="flex items-center justify-between mb-3 w-full pr-6 md:pr-0">
                             <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Popular Category</h3>
-                            <Link href="/explore" className="text-[13px] font-semibold text-gray-900 underline hover:text-gray-600 transition-colors">See More</Link>
+                            <Link href="/explore" className="text-[11px] font-semibold text-gray-900 underline hover:text-gray-600 transition-colors whitespace-nowrap ml-2">View All Treatments</Link>
                         </div>
                         <div className="flex overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0 gap-3 no-scrollbar">
                             {CATEGORIES.map((cat) => {
@@ -663,6 +664,11 @@ export default function Home() {
                             </Link>
                         ))}
                     </div>
+                </div>
+
+                {/* Service Areas Section */}
+                <div className="mb-24 mt-8 px-6 md:px-0">
+                    <ServiceAreas />
                 </div>
 
                 {/* The Elexoir Boutique Section */}
