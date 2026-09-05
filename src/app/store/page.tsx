@@ -120,9 +120,9 @@ export default function StorePage() {
             <div className="max-w-[1400px] mx-auto px-6 md:px-8">
                 {/* Header Nav */}
                 <div className="flex items-center justify-between mb-8">
-                    <a href="/" className="w-10 h-10 flex items-center justify-start text-[#2B2B2B]">
+                    <Link href="/" className="w-10 h-10 flex items-center justify-start text-[#2B2B2B]">
                         <Home size={24} strokeWidth={1.5} />
-                    </a>
+                    </Link>
                     <div className="flex items-center gap-5">
                         <button className="text-[#2B2B2B] hover:opacity-70"><Search size={22} strokeWidth={1.5} /></button>
                         <div className="relative">

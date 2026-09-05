@@ -401,15 +401,15 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                             <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-primary/50 mb-1 block">Take the Spa Home</span>
                             <h3 className="font-serif text-2xl md:text-3xl text-primary font-medium leading-tight">Spa Boutique</h3>
                         </div>
-                        <a href="/store" className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-xs font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap shrink-0">
+                        <Link href="/store" className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-xs font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap shrink-0">
                             Shop Now
-                        </a>
+                        </Link>
                     </div>
                     
                     {/* Swipeable Products */}
                     <div className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar">
                         {products.map((product) => (
-                            <a href="/store" key={product.id} className="w-48 md:w-52 shrink-0 block outline-none">
+                            <Link href="/store" key={product.id} className="w-48 md:w-52 shrink-0 block outline-none">
                                 <div className="bg-white border border-[#E5E7EB] rounded-[24px] flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group p-2">
                                     
                                     {/* Image */}
@@ -431,7 +431,7 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                         </div>
                                     </div>
                                 </div>
-                            </a>
+                            </Link>
                         ))}
                     </div>
                 </div>

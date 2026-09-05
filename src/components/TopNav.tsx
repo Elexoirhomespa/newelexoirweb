@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Store, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 export default function TopNav() {
     const pathname = usePathname();
@@ -66,18 +67,18 @@ export default function TopNav() {
             >
                 
                 {/* Brand / Store (Left) */}
-                <a href="/store" className="flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 shadow-sm rounded-full pl-3 pr-4 h-9 transition-colors hover:bg-white/30 text-primary shrink-0">
+                <Link href="/store" className="flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 shadow-sm rounded-full pl-3 pr-4 h-9 transition-colors hover:bg-white/30 text-primary shrink-0">
                     <Store size={16} strokeWidth={2.5} />
                     <span className="text-[10px] md:text-[11px] font-bold tracking-widest uppercase mt-0.5">
                         STORE
                     </span>
-                </a>
+                </Link>
 
                 {/* Location Title (Center) */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-full">
-                    <a href="/" className="flex flex-col items-center justify-center leading-none">
+                    <Link href="/" className="flex flex-col items-center justify-center leading-none">
                         <span className="text-[12px] md:text-[14px] font-serif text-primary tracking-widest font-bold uppercase mt-0.5">BALI, INDONESIA</span>
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Desktop Inline Links (Always visible on desktop) */}
@@ -85,7 +86,7 @@ export default function TopNav() {
                     {desktopNavItems.map((item) => {
                         const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
                         return (
-                            <a 
+                            <Link 
                                 key={item.href}
                                 href={item.href} 
                                 className={`text-[11px] md:text-[13px] font-semibold tracking-wider transition-colors whitespace-nowrap ${
@@ -93,7 +94,7 @@ export default function TopNav() {
                                 }`}
                             >
                                 {item.label}
-                            </a>
+                            </Link>
                         );
                     })}
                 </nav>
@@ -120,7 +121,7 @@ export default function TopNav() {
                             {mobileNavItems.map((item) => {
                                 const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
                                 return (
-                                    <a 
+                                    <Link 
                                         key={item.href}
                                         href={item.href}
                                         onClick={() => setIsOpen(false)}
@@ -131,7 +132,7 @@ export default function TopNav() {
                                         }`}
                                     >
                                         {item.label}
-                                    </a>
+                                    </Link>
                                 );
                             })}
                         </motion.div>

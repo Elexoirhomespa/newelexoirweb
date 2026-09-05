@@ -696,7 +696,7 @@ export default function Home() {
                     {/* Swipeable Products */}
                     <div className="flex overflow-x-auto pb-10 -mx-6 px-6 md:mx-0 md:px-0 gap-6 no-scrollbar">
                         {products.map((product) => (
-                            <a href="/store" key={product.id} className="w-48 md:w-52 shrink-0 block outline-none">
+                            <Link href="/store" key={product.id} className="w-48 md:w-52 shrink-0 block outline-none">
                                 <div className="bg-white border border-[#E5E7EB] rounded-[24px] flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 relative group p-2">
                                     
                                     {/* Image */}
@@ -718,7 +718,7 @@ export default function Home() {
                                         </div>
                                     </div>
                                 </div>
-                            </a>
+                            </Link>
                         ))}
                     </div>
                 </div>
