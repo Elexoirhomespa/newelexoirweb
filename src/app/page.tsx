@@ -668,7 +668,7 @@ export default function Home() {
 
                 {/* Service Areas Section */}
                 <div className="mb-24 mt-8 px-6 md:px-0">
-                    <ServiceAreas />
+                    <ServiceAreas hideHeader={true} />
                 </div>
 
                 {/* The Elexoir Boutique Section */}

@@ -14,7 +14,7 @@ const ServiceMap = dynamic(() => import('./ServiceMap'), {
   )
 });
 
-export default function ServiceAreas() {
+export default function ServiceAreas({ hideHeader = false }: { hideHeader?: boolean }) {
   const areas = [
     { name: "Ubud", slug: "ubud", desc: "Premium mobile spa in the cultural heart of Bali." },
     { name: "Canggu", slug: "canggu", desc: "Luxury home massage for the vibrant coastal lifestyle." },
@@ -28,21 +28,23 @@ export default function ServiceAreas() {
 
   return (
     <section className="relative">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-10">
-        <div className="max-w-2xl">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2 md:mb-3 block">Service Areas</span>
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary leading-tight mb-3 md:mb-4">We Come to Your Sanctuary</h2>
-          <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-light domain-ubud-only">
-            Elexoir Home Spa provides luxury mobile massage and wellness services directly to private villas, estates, and hotels across Bali's most prestigious locations.
-          </p>
-          <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-light domain-bali-only">
-            We provide luxury mobile massage and wellness services directly to private villas, estates, and hotels across Bali's most prestigious locations.
-          </p>
+      {!hideHeader && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-10">
+          <div className="max-w-2xl">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2 md:mb-3 block">Service Areas</span>
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary leading-tight mb-3 md:mb-4">We Come to Your Sanctuary</h2>
+            <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-light domain-ubud-only">
+              Elexoir Home Spa provides luxury mobile massage and wellness services directly to private villas, estates, and hotels across Bali's most prestigious locations.
+            </p>
+            <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-light domain-bali-only">
+              We provide luxury mobile massage and wellness services directly to private villas, estates, and hotels across Bali's most prestigious locations.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Map Integration */}
-      <div className="w-full h-[260px] sm:h-[320px] md:h-[400px] mb-6 md:mb-8 rounded-[24px] md:rounded-[36px] overflow-hidden shadow-soft border border-border/50">
+      <div className={`w-full ${hideHeader ? 'h-[320px] sm:h-[350px] mb-8 mt-2' : 'h-[260px] sm:h-[320px] md:h-[400px] mb-6 md:mb-8'} md:h-[400px] rounded-[24px] md:rounded-[36px] overflow-hidden shadow-soft border border-border/50`}>
         <ServiceMap />
       </div>
 
