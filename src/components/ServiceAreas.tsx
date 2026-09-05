@@ -2,17 +2,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { MapPin, ArrowUpRight } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import the map to avoid SSR issues with Leaflet
-const ServiceMap = dynamic(() => import('./ServiceMap'), { 
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-surface/50 rounded-[28px] border border-border/40 flex items-center justify-center animate-pulse">
-      <span className="text-xs font-bold uppercase tracking-widest text-primary/40">Loading Map...</span>
-    </div>
-  )
-});
 
 export default function ServiceAreas({ hideHeader = false }: { hideHeader?: boolean }) {
   const areas = [
@@ -43,20 +32,15 @@ export default function ServiceAreas({ hideHeader = false }: { hideHeader?: bool
         </div>
       )}
 
-      {/* Map Integration */}
-      <div className={`w-full ${hideHeader ? 'h-[360px] sm:h-[400px] mb-8 mt-2' : 'h-[320px] sm:h-[380px] md:h-[450px] mb-6 md:mb-8'} md:h-[450px] rounded-[24px] md:rounded-[36px] overflow-hidden shadow-soft border border-border/50`}>
-        <ServiceMap />
-      </div>
-
       {/* Responsive Grid Cards (Visible on both Mobile & Desktop) */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 -mx-6 px-6 md:mx-0 md:px-0">
         {areas.map((area, idx) => (
           <Link href={`/explore?location=${encodeURIComponent(area.name)}`} key={idx} className="group block outline-none">
-            <div className="bg-white/80 backdrop-blur-sm border border-border/50 rounded-[20px] md:rounded-3xl p-5 md:p-8 transition-all duration-300 hover:shadow-[0_12px_30px_rgb(0,0,0,0.06)] hover:border-primary/30 hover:-translate-y-1 h-full flex flex-col justify-between">
+            <div className="bg-white/80 backdrop-blur-sm border border-border/50 rounded-[16px] md:rounded-3xl p-4 md:p-8 transition-all duration-300 hover:shadow-[0_12px_30px_rgb(0,0,0,0.06)] hover:border-primary/30 hover:-translate-y-1 h-full flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-3 md:mb-4">
-                  <h3 className="font-serif text-lg sm:text-xl md:text-2xl text-primary font-medium">{area.name}</h3>
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface border border-border/50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300 shrink-0">
+                <div className="flex items-center justify-between mb-2 md:mb-4">
+                  <h3 className="font-serif text-base sm:text-xl md:text-2xl text-primary font-medium">{area.name}</h3>
+                  <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-surface border border-border/50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300 shrink-0">
                     <MapPin className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                 </div>
