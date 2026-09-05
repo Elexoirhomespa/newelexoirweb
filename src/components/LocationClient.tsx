@@ -732,21 +732,21 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                 className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                             />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 w-full">
-                                            <div className="space-y-1.5">
+                                        <div className="flex flex-row gap-4 w-full">
+                                            <div className="space-y-1.5 flex-1 min-w-0">
                                                 <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Date</label>
                                                 <input 
                                                     type="date" required 
                                                     value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}
-                                                    className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                                    className="w-full min-w-0 appearance-none bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                                 />
                                             </div>
-                                            <div className="space-y-1.5">
+                                            <div className="space-y-1.5 flex-1 min-w-0">
                                                 <label className="text-[10px] font-bold uppercase tracking-widest text-primary/80 ml-1">Time</label>
                                                 <input 
                                                     type="time" required 
                                                     value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})}
-                                                    className="w-full bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                                    className="w-full min-w-0 appearance-none bg-white border border-border/80 rounded-xl px-4 py-3.5 text-sm text-primary placeholder:text-text-muted/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                                 />
                                             </div>
                                         </div>
