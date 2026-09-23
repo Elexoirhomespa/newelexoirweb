@@ -205,7 +205,7 @@ export default async function RootLayout({
 
       <body
         data-domain={isBaliDomain ? "bali" : "ubud"}
-        className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white pb-20`}
+        className={`${jakarta.variable} ${newsreader.variable} font-sans bg-transparent text-text min-h-screen selection:bg-primary selection:text-white`}
       >
         <SpaProvider brand={brand} initialData={initialData}>
           <div className="flex flex-col min-h-screen w-full relative">
