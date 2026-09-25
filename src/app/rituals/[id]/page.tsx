@@ -112,11 +112,7 @@ export default function RitualsDetails() {
                     }
                 }
 
-                const guestText = isCouple 
-                    ? (item.guests === 2 ? '1 COUPLE (2 PERSONS)' : `${item.guests / 2} COUPLES (${item.guests} PERSONS)`)
-                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''}`;
-
-                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText} IDR ${price}${whatsIncludedText}`;
+                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${item.guests} PERSON IDR ${price}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
             
             const rawHost = typeof window !== 'undefined' ? window.location.hostname : 'elexoirhomespaubud.com';
@@ -539,7 +535,7 @@ export default function RitualsDetails() {
                                                     <span className="font-serif text-primary font-medium text-right flex flex-col shrink-0">
                                                         IDR {item.price.toLocaleString('en-US')}
                                                         <span className="text-[9px] font-sans text-text-muted font-normal uppercase tracking-wider">
-                                                            {['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
+                                                            {['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
                                                         </span>
                                                     </span>
                                                 </div>
@@ -550,7 +546,7 @@ export default function RitualsDetails() {
                                                             type="button"
                                                             onClick={() => setCartItems(cartItems.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
+                                                                const isCouple = ['couple', 'four hand'].some(k => i.title.toLowerCase().includes(k));
                                                                 const step = isCouple ? 2 : 1;
                                                                 return { ...i, guests: Math.max(step, i.guests - step) };
                                                             }))}
@@ -563,7 +559,7 @@ export default function RitualsDetails() {
                                                             type="button"
                                                             onClick={() => setCartItems(cartItems.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
+                                                                const isCouple = ['couple', 'four hand'].some(k => i.title.toLowerCase().includes(k));
                                                                 const step = isCouple ? 2 : 1;
                                                                 return { ...i, guests: i.guests + step };
                                                             }))}
