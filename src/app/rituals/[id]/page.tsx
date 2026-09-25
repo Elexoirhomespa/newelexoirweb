@@ -98,7 +98,7 @@ export default function RitualsDetails() {
 
             const waNumber = '6285174119423';
             const treatmentsList = cartItems.map(item => {
-                const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
                 const multiplier = isCouple ? (item.guests / 2) : item.guests;
                 const price = (item.price * multiplier).toLocaleString('en-US');
                 const itemTreatment = treatments.find(t => t.id === item.treatmentId);
@@ -514,7 +514,7 @@ export default function RitualsDetails() {
                                     <p className="text-xs text-text-muted mb-6">Your request will be sent securely via WhatsApp.</p>
 
                                     {/* Cart Items List */}
-                                    <div className="space-y-3 mb-4 max-h-[40vh] overflow-y-auto pr-1 no-scrollbar">
+                                    <div className="space-y-3 mb-4">
                                         {cartItems.map(item => (
                                             <div key={item.id} className="bg-white border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm relative">
                                                 {cartItems.length > 1 && (
@@ -535,7 +535,7 @@ export default function RitualsDetails() {
                                                     <span className="font-serif text-primary font-medium text-right flex flex-col shrink-0">
                                                         IDR {item.price.toLocaleString('en-US')}
                                                         <span className="text-[9px] font-sans text-text-muted font-normal uppercase tracking-wider">
-                                                            {['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
+                                                            {['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
                                                         </span>
                                                     </span>
                                                 </div>
@@ -546,7 +546,7 @@ export default function RitualsDetails() {
                                                             type="button"
                                                             onClick={() => setCartItems(cartItems.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const isCouple = ['couple', 'four hand'].some(k => i.title.toLowerCase().includes(k));
+                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
                                                                 const step = isCouple ? 2 : 1;
                                                                 return { ...i, guests: Math.max(step, i.guests - step) };
                                                             }))}
@@ -559,7 +559,7 @@ export default function RitualsDetails() {
                                                             type="button"
                                                             onClick={() => setCartItems(cartItems.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const isCouple = ['couple', 'four hand'].some(k => i.title.toLowerCase().includes(k));
+                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
                                                                 const step = isCouple ? 2 : 1;
                                                                 return { ...i, guests: i.guests + step };
                                                             }))}

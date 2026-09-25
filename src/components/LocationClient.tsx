@@ -99,14 +99,18 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
         setIsProcessing(true);
         
         try {
-            const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.guests), 0);
+            const totalPrice = cartItems.reduce((acc, item) => {
+                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
+                const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                return acc + (item.price * multiplier);
+            }, 0);
             
             const treatmentsListStr = cartItems.map(item => `${item.title} (${item.duration} MINS)`).join(', ');
 
             const waNumber = '6285174119423';
             
             const treatmentsList = cartItems.map(item => {
-                const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
                 const multiplier = isCouple ? (item.guests / 2) : item.guests;
                 const price = (item.price * multiplier).toLocaleString('en-US');
                 const itemTreatment = treatments.find(t => t.id === item.treatmentId);
@@ -625,15 +629,16 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                                             key={idx}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
-                                                                                setCartItems([...cartItems, {
-                                                                                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-                                                                                    treatmentId: t.id,
-                                                                                    title: t.title,
-                                                                                    duration: opt.duration,
-                                                                                    price: parseInt(opt.price.replace(/,/g, '') || '0'),
-                                                                                    guests: 1,
-                                                                                    isCampaign: false
-                                                                                }]);
+                                                                                    const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => t.title.toLowerCase().includes(k));
+                                                                                    setCartItems([...cartItems, {
+                                                                                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                                                                                        treatmentId: t.id,
+                                                                                        title: t.title,
+                                                                                        duration: opt.duration,
+                                                                                        price: parseInt(opt.price.replace(/,/g, '') || '0'),
+                                                                                        guests: isCouple ? 2 : 1,
+                                                                                        isCampaign: false
+                                                                                    }]);
                                                                                 setExpandedTreatmentId(null);
                                                                                 setIsSelectingMore(false);
                                                                             }}
@@ -663,7 +668,7 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                     <p className="text-xs text-text-muted mb-6">Your request will be sent securely via WhatsApp.</p>
 
                                     {/* Cart Items List */}
-                                    <div className="space-y-3 mb-4 max-h-[40vh] overflow-y-auto pr-1 no-scrollbar">
+                                    <div className="space-y-3 mb-4">
                                         {cartItems.map(item => (
                                             <div key={item.id} className="bg-white border border-border/80 rounded-2xl p-4 shadow-sm relative">
                                                 {cartItems.length > 1 && (
@@ -689,7 +694,9 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                     </div>
                                                     <span className="font-serif text-primary font-medium text-right flex flex-col shrink-0">
                                                         IDR {item.price.toLocaleString('en-US')}
-                                                        <span className="text-[9px] font-sans text-text-muted font-normal uppercase tracking-wider">Per Person</span>
+                                                        <span className="text-[9px] font-sans text-text-muted font-normal uppercase tracking-wider">
+                                                            {['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
+                                                        </span>
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between pt-3 border-t border-border/50">
@@ -697,7 +704,12 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                     <div className="flex items-center gap-3">
                                                         <button 
                                                             type="button"
-                                                            onClick={() => setCartItems(cartItems.map(i => i.id === item.id ? { ...i, guests: Math.max(1, i.guests - 1) } : i))}
+                                                            onClick={() => setCartItems(cartItems.map(i => {
+                                                                if (i.id !== item.id) return i;
+                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
+                                                                const step = isCouple ? 2 : 1;
+                                                                return { ...i, guests: Math.max(step, i.guests - step) };
+                                                            }))}
                                                             className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center text-primary hover:bg-border transition-colors shadow-sm"
                                                         >
                                                             <Minus className="w-3 h-3" />
@@ -705,7 +717,12 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                                         <span className="font-bold text-sm text-primary w-4 text-center">{item.guests}</span>
                                                         <button 
                                                             type="button"
-                                                            onClick={() => setCartItems(cartItems.map(i => i.id === item.id ? { ...i, guests: i.guests + 1 } : i))}
+                                                            onClick={() => setCartItems(cartItems.map(i => {
+                                                                if (i.id !== item.id) return i;
+                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
+                                                                const step = isCouple ? 2 : 1;
+                                                                return { ...i, guests: i.guests + step };
+                                                            }))}
                                                             className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center text-primary hover:bg-border transition-colors shadow-sm"
                                                         >
                                                             <Plus className="w-3 h-3" />
@@ -771,7 +788,11 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                                         <div className="mt-8 pt-6 border-t border-border/50">
                                             <div className="flex items-end justify-between mb-6">
                                                 <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Total Price</span>
-                                                <span className="text-2xl font-serif text-primary">IDR {cartItems.reduce((acc, item) => acc + (item.price * item.guests), 0).toLocaleString('en-US')}</span>
+                                                <span className="text-2xl font-serif text-primary">IDR {cartItems.reduce((acc, item) => {
+                                                    const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
+                                                    const multiplier = isCouple ? (item.guests / 2) : item.guests;
+                                                    return acc + (item.price * multiplier);
+                                                }, 0).toLocaleString('en-US')}</span>
                                             </div>
                                             <div className="flex flex-col gap-3">
                                                 <button 
