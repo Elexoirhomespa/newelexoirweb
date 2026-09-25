@@ -120,18 +120,18 @@ export default function LocationClient({ locationName, locationSlug }: { locatio
                     }
                 }
 
-                const guestText = isCouple 
-                    ? (item.guests === 2 ? '1 COUPLE (2 PERSONS)' : `${item.guests / 2} COUPLES (${item.guests} PERSONS)`)
-                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''}`;
+                const guestAndPriceText = isCouple 
+                    ? (item.guests === 2 ? `1 COUPLE\n2 PERSONS\nIDR ${price}` : `${item.guests / 2} COUPLES\n${item.guests} PERSONS\nIDR ${price}`)
+                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''} IDR ${price}`;
 
                 if (item.isCampaign && item.discountPercentage && Number(item.discountPercentage) > 0) {
                     const originalPriceNum = item.price / (1 - (item.discountPercentage / 100));
                     const originalPrice = (originalPriceNum * multiplier).toLocaleString('en-US');
-                    const priceText = `IDR ${price} ~IDR ${originalPrice}~ [${item.discountPercentage}% OFF SPA]`;
-                    return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText}\n${priceText}${whatsIncludedText}`;
+                    const priceText = `~IDR ${originalPrice}~ [${item.discountPercentage}% OFF SPA]`;
+                    return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestAndPriceText} ${priceText}${whatsIncludedText}`;
                 }
 
-                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText}\nIDR ${price}${whatsIncludedText}`;
+                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestAndPriceText}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
             
             const campaignItems = cartItems.filter(item => item.isCampaign);

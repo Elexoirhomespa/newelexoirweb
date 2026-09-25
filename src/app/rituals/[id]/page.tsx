@@ -112,11 +112,11 @@ export default function RitualsDetails() {
                     }
                 }
 
-                const guestText = isCouple 
-                    ? (item.guests === 2 ? '1 COUPLE (2 PERSONS)' : `${item.guests / 2} COUPLES (${item.guests} PERSONS)`)
-                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''}`;
+                const guestAndPriceText = isCouple 
+                    ? (item.guests === 2 ? `1 COUPLE\n2 PERSONS\nIDR ${price}` : `${item.guests / 2} COUPLES\n${item.guests} PERSONS\nIDR ${price}`)
+                    : `${item.guests} PERSON${item.guests > 1 ? 'S' : ''} IDR ${price}`;
 
-                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestText} IDR ${price}${whatsIncludedText}`;
+                return `*${item.title.toUpperCase()}*\nDURATION ${item.duration} MINS\n${guestAndPriceText}${whatsIncludedText}`;
             }).join('\n\n------------------------\n\n');
             
             const rawHost = typeof window !== 'undefined' ? window.location.hostname : 'elexoirhomespaubud.com';
