@@ -157,7 +157,7 @@ export default function Home() {
         
         try {
             const subtotalPrice = cartItems.reduce((acc, item) => {
-                const isCouple = ['couple', 'four hand'].some(k => item.title.toLowerCase().includes(k));
+                const isCouple = ['couple', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
                 const multiplier = isCouple ? (item.guests / 2) : item.guests;
                 return acc + (item.price * multiplier);
             }, 0);
@@ -175,7 +175,7 @@ export default function Home() {
             const waNumber = '6285174119423';
             
             const treatmentsList = cartItems.map(item => {
-                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
+                const isCouple = ['couple', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
                 const multiplier = isCouple ? (item.guests / 2) : item.guests;
                 const price = (item.price * multiplier).toLocaleString('en-US');
                 const itemTreatment = treatments.find(t => t.id === item.treatmentId);
@@ -839,7 +839,7 @@ export default function Home() {
                                                     ? Math.round(originalPriceNum * (1 - (discount / 100)))
                                                     : originalPriceNum;
 
-                                                const isCouple = ['couple', 'four hand'].some(k => treatment.title.toLowerCase().includes(k));
+                                                const isCouple = ['couple', 'honeymoon'].some(k => treatment.title.toLowerCase().includes(k));
                                                 const handleBookTreatment = () => {
                                                     setCartItems([{
                                                         id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
@@ -1023,7 +1023,7 @@ export default function Home() {
                                                                             key={idx}
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
-                                                                                    const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => t.title.toLowerCase().includes(k));
+                                                                                    const isCouple = ['couple', 'honeymoon'].some(k => t.title.toLowerCase().includes(k));
                                                                                     setCartItems([...cartItems, {
                                                                                         id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                                                                                         treatmentId: t.id,
@@ -1102,7 +1102,7 @@ export default function Home() {
                                                     <span className="font-serif text-primary font-medium text-right flex flex-col shrink-0">
                                                         IDR {item.price.toLocaleString('en-US')}
                                                         <span className="text-[10px] font-sans text-text-muted font-normal uppercase tracking-wider">
-                                                            {['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
+                                                            {['couple', 'honeymoon'].some(k => item.title.toLowerCase().includes(k)) ? 'For 2 Persons' : 'Per Person'}
                                                         </span>
                                                     </span>
                                                 </div>
@@ -1113,7 +1113,7 @@ export default function Home() {
                                                             type="button"
                                                             onClick={() => setCartItems(cartItems.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
+                                                                const isCouple = ['couple', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
                                                                 const step = isCouple ? 2 : 1;
                                                                 return { ...i, guests: Math.max(step, i.guests - step) };
                                                             }))}
@@ -1126,7 +1126,7 @@ export default function Home() {
                                                             type="button"
                                                             onClick={() => setCartItems(cartItems.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
+                                                                const isCouple = ['couple', 'honeymoon'].some(k => i.title.toLowerCase().includes(k));
                                                                 const step = isCouple ? 2 : 1;
                                                                 return { ...i, guests: i.guests + step };
                                                             }))}
@@ -1221,7 +1221,7 @@ export default function Home() {
                                                     <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Subtotal</span>
                                                     <span className="text-sm font-serif text-text-muted line-through">
                                                         IDR {cartItems.reduce((acc, item) => {
-                                                            const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
+                                                            const isCouple = ['couple', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
                                                             const multiplier = isCouple ? (item.guests / 2) : item.guests;
                                                             return acc + (item.price * multiplier);
                                                         }, 0).toLocaleString('en-US')}
@@ -1233,7 +1233,7 @@ export default function Home() {
                                                 <span className="text-2xl font-serif text-primary">
                                                     IDR {(() => {
                                                         let sub = cartItems.reduce((acc, item) => {
-                                                            const isCouple = ['couple', 'four hand', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
+                                                            const isCouple = ['couple', 'honeymoon'].some(k => item.title.toLowerCase().includes(k));
                                                             const multiplier = isCouple ? (item.guests / 2) : item.guests;
                                                             return acc + (item.price * multiplier);
                                                         }, 0);
